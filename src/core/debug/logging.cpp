@@ -1,9 +1,10 @@
 #include "core/debug/logging.h"
 
+#include "platform/lean_mean_windows.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
-#include <windows.h>
 
 #pragma warning(disable: 4005) // consoleapi2.h from windows.h has conflicting macros
 
