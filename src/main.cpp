@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
 	GameLibrary game_library = load_library(library_copy_name);
 
 	/* State */
-	Game game_state = { 0 };
+	Game game_state = {};
 	game_library.initialize(&game_state, argc, argv);
 
 	/* Run program */
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
 
 		/* Run game */
 		game_library.update(&game_state);
-		game_library.render(&game_state);
+		game_library.render(game_state);
 	}
 
 	/* Shutdown */

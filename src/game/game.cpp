@@ -10,7 +10,7 @@ constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
 constexpr char SCREEN_TITLE[] = "Program";
 
-void Game_initialize(Game* game, int argc, char** argv) {
+void Game_initialize(Game* /*game*/, int argc, char** argv) {
 	/* Initialize systems */
 	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
 	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
@@ -37,7 +37,7 @@ void Game_update(Game* game) {
 	}
 }
 
-void Game_render(const Game* game) {
+void Game_render(const Game& /*game*/) {
 	Raylib_BeginDrawing();
 	{
 		Raylib_ClearBackground(Color { 0, 127, 127, 255 });
@@ -45,7 +45,7 @@ void Game_render(const Game* game) {
 	Raylib_EndDrawing();
 }
 
-void Game_shutdown(Game* game) {
+void Game_shutdown(Game* /*game*/) {
 	Raylib_CloseWindow();
 	LOG_INFO("Game shutdown");
 }
