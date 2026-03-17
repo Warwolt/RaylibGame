@@ -5,6 +5,9 @@
 #include "game/game.h"
 #include "platform/lean_mean_windows.h"
 
+#include <format>
+#include <string>
+
 struct GameLibrary {
 	HMODULE handle;
 	decltype(&Game_initialize) initialize;
@@ -13,11 +16,11 @@ struct GameLibrary {
 	decltype(&Game_render) render;
 };
 
-static GameLibrary load_library(const char* library_path) {
-	HMODULE handle = LoadLibraryA(library_path);
+static GameLibrary load_library(const std::string& library_path) {
+	HMODULE handle = LoadLibraryA(library_path.c_str());
 	if (!handle) {
 		char message[256] = { 0 };
-		snprintf(message, 256, "Couldn't load %s\n", library_path);
+		snprintf(message, 256, "Couldn't load %s\n", library_path.c_str());
 		Win32_show_error_message_box(message);
 		exit(1);
 	}
@@ -42,26 +45,22 @@ int main(int argc, char** argv) {
 	Win32_set_process_dpi_aware();
 
 	/* Get executable directory */
-	char executable_directory[MAX_PATH] = { 0 };
-	Win32_get_executable_directory(executable_directory);
+	std::string executable_directory = Win32_get_executable_directory();
 
 	/* Get library path */
-	const char* library_name = "GameLib.dll";
-	char library_path[MAX_PATH] = { 0 };
-	snprintf(library_path, MAX_PATH, "%s\\%s", executable_directory, library_name);
+	std::string library_name = "GameLib.dll";
+	std::string library_path = executable_directory + "\\" + library_name;
 
 	/* Check library exists */
 	if (!Win32_file_exists(library_path)) {
-		char message[256] = { 0 };
-		snprintf(message, 256, "Can't find %s\n", library_name);
+		std::string message = std::format("Can't find {}", library_name);
 		Win32_show_error_message_box(message);
 		exit(1);
 	}
 
 	/* Copy library */
-	const char* library_copy_name = "GameLib-hot-reload.dll";
-	char library_copy_path[MAX_PATH] = { 0 };
-	snprintf(library_copy_path, MAX_PATH, "%s\\%s", executable_directory, library_copy_name);
+	std::string library_copy_name = "GameLib-hot-reload.dll";
+	std::string library_copy_path = executable_directory + "\\" + library_copy_name;
 	Win32_copy_file(library_path, library_copy_path);
 
 	/* Load copy */

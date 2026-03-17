@@ -31,6 +31,7 @@ void Game_initialize(Game* game, int argc, char** argv) {
 }
 
 void Game_shutdown(Game* game) {
+	Raylib_CloseWindow();
 	LOG_INFO("Game shutdown");
 }
 

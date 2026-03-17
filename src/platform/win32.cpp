@@ -92,27 +92,29 @@ void Win32_set_process_dpi_aware(void) {
 	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 }
 
-void Win32_show_error_message_box(const char* text) {
+void Win32_show_error_message_box(const std::string& text) {
 	HWND handle = (HWND)Raylib_GetWindowHandle();
-	MessageBoxA(handle, text, "Error", MB_OK | MB_ICONERROR);
+	MessageBoxA(handle, text.c_str(), "Error", MB_OK | MB_ICONERROR);
 }
 
-void Win32_get_executable_directory(char* buffer) {
+std::string Win32_get_executable_directory() {
+	char buffer[MAX_PATH];
 	GetModuleFileNameA(NULL, buffer, MAX_PATH);
 	PathRemoveFileSpecA(buffer);
+	return buffer;
 }
 
-bool Win32_file_exists(const char* full_path) {
-	return PathFileExistsA(full_path);
+bool Win32_file_exists(const std::string& full_path) {
+	return PathFileExistsA(full_path.c_str());
 }
 
-bool Win32_copy_file(const char* src_path, const char* dst_path) {
-	return CopyFileA(src_path, dst_path, false) != 0;
+bool Win32_copy_file(const std::string& src_path, const std::string& dst_path) {
+	return CopyFileA(src_path.c_str(), dst_path.c_str(), false) != 0;
 }
 
-uint64_t Win32_get_file_last_modified(const char* file_path) {
+uint64_t Win32_get_file_last_modified(const std::string& file_path) {
 	WIN32_FILE_ATTRIBUTE_DATA file_info;
-	if (!GetFileAttributesExA(file_path, GetFileExInfoStandard, &file_info)) {
+	if (!GetFileAttributesExA(file_path.c_str(), GetFileExInfoStandard, &file_info)) {
 		return 0;
 	}
 
@@ -123,10 +125,10 @@ uint64_t Win32_get_file_last_modified(const char* file_path) {
 	return ull.QuadPart;
 }
 
-void Win32_run_command(const char* command, void (*on_command_done)(int exit_code)) {
+void Win32_run_command(const std::string& command, void (*on_command_done)(int exit_code)) {
 	RunCommandThreadArgs* thread_args = (RunCommandThreadArgs*)malloc(sizeof(RunCommandThreadArgs));
 	*thread_args = RunCommandThreadArgs {
-		.command = _strdup(command),
+		.command = _strdup(command.c_str()),
 		.on_command_done = on_command_done,
 	};
 	CreateThread(NULL, 0, run_command_thread, thread_args, 0, NULL);
