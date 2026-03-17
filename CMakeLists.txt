@@ -48,6 +48,12 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT E
 set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 
 # Tests
+add_executable(Tests
+    $<TARGET_OBJECTS:Source>
+    test/main.cpp
+)
+target_include_directories(Tests PUBLIC src lib)
+target_link_libraries(Tests PUBLIC ${LIB} gtest gmock)
 
 
 # Set compilation options

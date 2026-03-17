@@ -30,12 +30,8 @@ void Game_initialize(Game* game, int argc, char** argv) {
 	LOG_INFO("Game initialized");
 }
 
-void Game_shutdown(Game* game) {
-	Raylib_CloseWindow();
-	LOG_INFO("Game shutdown");
-}
-
 void Game_update(Game* game) {
+	game->should_quit = Raylib_WindowShouldClose();
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
 		game->should_quit = true;
 	}
@@ -47,4 +43,9 @@ void Game_render(const Game* game) {
 		Raylib_ClearBackground(Color { 0, 127, 127, 255 });
 	}
 	Raylib_EndDrawing();
+}
+
+void Game_shutdown(Game* game) {
+	Raylib_CloseWindow();
+	LOG_INFO("Game shutdown");
 }
