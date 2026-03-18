@@ -34,6 +34,7 @@ private:
 class SceneManager {
 public:
 	SceneManager(SceneID start_scene_id);
+	~SceneManager();
 
 	void push_scene(Game* game, SceneID scene_id);
 	void pop_scene(Game* game);
@@ -42,5 +43,6 @@ public:
 	void render_current_scene(const Game& game) const;
 
 private:
-	std::vector<Scene> m_scenes;
+	struct Impl;
+	std::unique_ptr<Impl> m_impl;
 };

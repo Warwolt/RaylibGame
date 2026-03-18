@@ -64,28 +64,35 @@ void Scene::render(const Game& game) const {
 	}
 }
 
+struct SceneManager::Impl {
+	std::vector<Scene> scenes;
+};
+
 SceneManager::SceneManager(SceneID start_scene_id) {
-	m_scenes.push_back(Scene(start_scene_id));
+	m_impl = std::make_unique<SceneManager::Impl>();
+	m_impl->scenes.push_back(Scene(start_scene_id));
 }
 
+SceneManager::~SceneManager() = default;
+
 void SceneManager::push_scene(Game* game, SceneID scene_id) {
-	m_scenes.push_back(scene_id);
-	m_scenes.back().initialize(game);
+	m_impl->scenes.push_back(scene_id);
+	m_impl->scenes.back().initialize(game);
 }
 
 void SceneManager::pop_scene(Game* game) {
-	m_scenes.back().deinitialize(game);
-	if (m_scenes.size() == 1) {
+	m_impl->scenes.back().deinitialize(game);
+	if (m_impl->scenes.size() == 1) {
 		game->should_quit = true;
 	} else {
-		m_scenes.pop_back();
+		m_impl->scenes.pop_back();
 	}
 }
 
 void SceneManager::update_current_scene(Game* game) {
-	m_scenes.back().update(game);
+	m_impl->scenes.back().update(game);
 }
 
 void SceneManager::render_current_scene(const Game& game) const {
-	m_scenes.back().render(game);
+	m_impl->scenes.back().render(game);
 }
