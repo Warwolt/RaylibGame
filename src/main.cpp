@@ -68,11 +68,10 @@ int main(int argc, char** argv) {
 	GameLibrary game_library = load_library(library_copy_name);
 
 	/* State */
-	Game game_state = {};
-	game_library.initialize(&game_state, argc, argv);
+	Game* game_state = game_library.initialize(argc, argv);
 
 	/* Run program */
-	while (!game_state.should_quit) {
+	while (!game_state->should_quit) {
 		/* Check hot reload */
 		{
 			/* Trigger library build */
@@ -97,12 +96,12 @@ int main(int argc, char** argv) {
 		}
 
 		/* Run game */
-		game_library.update(&game_state);
-		game_library.render(game_state);
+		game_library.update(game_state);
+		game_library.render(*game_state);
 	}
 
 	/* Shutdown */
-	game_library.shutdown(&game_state);
+	game_library.shutdown(game_state);
 	FreeLibrary(game_library.handle);
 	return 0;
 }
