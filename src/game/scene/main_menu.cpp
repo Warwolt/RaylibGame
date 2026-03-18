@@ -12,10 +12,10 @@ void MainMenuScene::deinitialize(Game* /*game*/) {
 
 void MainMenuScene::update(Game* game) {
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
-		game->scene_manager.pop_scene(game);
+		game->scenes.pop_scene(game);
 	}
 	if (Raylib_IsKeyPressed(KEY_ENTER)) {
-		game->scene_manager.push_scene(game, SceneID::Gameplay);
+		game->scenes.push_scene(game, SceneID::Gameplay);
 	}
 }
 
