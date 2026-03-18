@@ -9,7 +9,7 @@ enum class SceneID {
 	Gameplay,
 };
 
-struct Scene;
+class Scene;
 
 class SceneManager {
 public:

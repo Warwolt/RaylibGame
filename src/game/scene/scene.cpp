@@ -8,38 +8,40 @@
 
 using SceneState = std::variant<MainMenuScene, GameplayScene>;
 
-struct Scene {
-	SceneID id;
-	SceneState state;
-
+class Scene {
+public:
 	Scene(SceneID id) {
-		this->id = id;
+		m_id = id;
 		switch (id) {
 			case SceneID::MainMenu:
-				this->state = MainMenuScene();
+				m_state = MainMenuScene();
 				break;
 
 			case SceneID::Gameplay:
-				this->state = GameplayScene();
+				m_state = GameplayScene();
 				break;
 		}
 	}
 
 	void initialize(Game* game) {
-		std::visit([game](auto& scene) { scene.initialize(game); }, this->state);
+		std::visit([game](auto& scene) { scene.initialize(game); }, m_state);
 	}
 
 	void deinitialize(Game* game) {
-		std::visit([game](auto& scene) { scene.deinitialize(game); }, this->state);
+		std::visit([game](auto& scene) { scene.deinitialize(game); }, m_state);
 	}
 
 	void update(Game* game) {
-		std::visit([game](auto& scene) { scene.update(game); }, this->state);
+		std::visit([game](auto& scene) { scene.update(game); }, m_state);
 	}
 
 	void render(const Game& game) const {
-		std::visit([&game](auto& scene) { scene.render(game); }, this->state);
+		std::visit([&game](auto& scene) { scene.render(game); }, m_state);
 	}
+
+private:
+	SceneID m_id;
+	SceneState m_state;
 };
 
 SceneManager::SceneManager(SceneID start_scene_id) {
