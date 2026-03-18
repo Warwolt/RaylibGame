@@ -21,6 +21,7 @@ endif()
 # Source files
 set(SRC
     src/core/debug/logging.cpp
+    src/platform/window.cpp
     src/game/game.cpp
 )
 set(LIB
