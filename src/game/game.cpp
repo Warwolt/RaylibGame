@@ -30,7 +30,7 @@ Game* Game_initialize(int argc, char** argv) {
 
 	/* Initialize game */
 	Game* game = new Game {
-		.scene = Scene(SceneID::MainMenu),
+		.scene_manager = SceneManager(SceneID::MainMenu),
 		.window = Window::initialize(SCREEN_WIDTH, SCREEN_HEIGHT),
 	};
 	if (start_fullscreen) {
@@ -54,7 +54,7 @@ void Game_update(Game* game) {
 	game->window.update();
 
 	/* Update scene */
-	game->scene.update(game);
+	game->scene_manager.current_scene().update(game);
 }
 
 void Game_render(const Game& game) {
@@ -62,7 +62,7 @@ void Game_render(const Game& game) {
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
-		game.scene.render(game);
+		game.scene_manager.current_scene().render(game);
 	}
 	Raylib_EndTextureMode();
 

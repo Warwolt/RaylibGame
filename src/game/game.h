@@ -5,7 +5,7 @@
 
 struct Game {
 	bool should_quit = false;
-	Scene scene; // FIXME: replace with SceneManager
+	SceneManager scene_manager;
 	Window window;
 };
 

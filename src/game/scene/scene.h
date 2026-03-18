@@ -4,8 +4,10 @@
 #include "game/scene/main_menu.h"
 
 #include <variant>
+#include <vector>
 
 struct Game;
+struct Foo;
 
 enum class SceneID {
 	MainMenu,
@@ -14,12 +16,27 @@ enum class SceneID {
 
 using SceneState = std::variant<MainMenuScene, GameplayScene>;
 
-struct Scene {
+class Scene {
+public:
 	Scene(SceneID id);
 	void update(Game* game);
 	void render(const Game& game) const;
 
-	// private:
-	SceneID id;
-	SceneState state;
+private:
+	SceneID m_id;
+	SceneState m_state;
+};
+
+class SceneManager {
+public:
+	SceneManager(SceneID start_scene_id);
+
+	void push_scene(Game* game, SceneID scene_id);
+	void pop_scene(Game* game);
+
+	Scene& current_scene();
+	const Scene& current_scene() const;
+
+private:
+	std::vector<Scene> m_scenes;
 };

@@ -2,40 +2,64 @@
 
 #include "game/game.h"
 
-#include <raylib.h>
-
 Scene::Scene(SceneID id) {
-	this->id = id;
+	m_id = id;
 	switch (id) {
 		case SceneID::MainMenu:
-			this->state = MainMenuScene();
+			m_state = MainMenuScene();
 			break;
 		case SceneID::Gameplay:
-			this->state = GameplayScene();
+			m_state = GameplayScene();
 			break;
 	}
 }
 
 void Scene::update(Game* game) {
-	switch (this->id) {
+	switch (m_id) {
 		case SceneID::MainMenu:
-			std::get_if<MainMenuScene>(&this->state)->update(game);
+			std::get_if<MainMenuScene>(&m_state)->update(game);
 			break;
 
 		case SceneID::Gameplay:
-			std::get_if<GameplayScene>(&this->state)->update(game);
+			std::get_if<GameplayScene>(&m_state)->update(game);
 			break;
 	}
 }
 
 void Scene::render(const Game& game) const {
-	switch (this->id) {
+	switch (m_id) {
 		case SceneID::MainMenu:
-			std::get_if<MainMenuScene>(&this->state)->render(game);
+			std::get_if<MainMenuScene>(&m_state)->render(game);
 			break;
 
 		case SceneID::Gameplay:
-			std::get_if<GameplayScene>(&this->state)->render(game);
+			std::get_if<GameplayScene>(&m_state)->render(game);
 			break;
 	}
+}
+
+SceneManager::SceneManager(SceneID start_scene_id) {
+	m_scenes.push_back(Scene(start_scene_id));
+}
+
+void SceneManager::push_scene(Game* /*game*/, SceneID scene_id) {
+	m_scenes.push_back(scene_id);
+	// FIXME: initialize the scene
+}
+
+void SceneManager::pop_scene(Game* game) {
+	m_scenes.pop_back();
+	if (m_scenes.empty()) {
+		game->should_quit = true;
+	}
+}
+
+Scene& SceneManager::current_scene() {
+	// FIXME: assert m_scenes non-empty
+	return m_scenes.back();
+}
+
+const Scene& SceneManager::current_scene() const {
+	// FIXME: assert m_scenes non-empty
+	return m_scenes.back();
 }
