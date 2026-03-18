@@ -61,7 +61,7 @@ void Game_render(const Game& game) {
 		const int text_width = Raylib_MeasureText(text, font_size);
 		const int pos_x = (window_width - text_width) / 2;
 		const int pos_y = (window_height - font_size) / 2;
-		Raylib_DrawText("Hello world", pos_x, pos_y, font_size, WHITE);
+		Raylib_DrawText(text, pos_x, pos_y, font_size, WHITE);
 	}
 	Raylib_EndTextureMode();
 
@@ -70,12 +70,7 @@ void Game_render(const Game& game) {
 	{
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		RenderTexture viewport = game.window.viewport();
-		Rectangle viewport_rect = {
-			.x = 0,
-			.y = 0,
-			.width = (float)viewport.texture.width,
-			.height = (float)-viewport.texture.height,
-		};
+		Rectangle viewport_rect = { .width = (float)viewport.texture.width, .height = (float)-viewport.texture.height };
 		Rectangle letterbox = game.window.letterbox();
 		DrawTexturePro(viewport.texture, viewport_rect, letterbox, Vector2Zero(), 0, WHITE);
 	}
