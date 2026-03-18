@@ -54,13 +54,11 @@ void Game_render(const Game& game) {
 	{
 		Raylib_ClearBackground(Color { 0, 127, 127, 255 });
 
-		const int window_width = game.window.width();
-		const int window_height = game.window.height();
 		const int font_size = 32;
 		const char* text = "Hello world";
 		const int text_width = Raylib_MeasureText(text, font_size);
-		const int pos_x = (window_width - text_width) / 2;
-		const int pos_y = (window_height - font_size) / 2;
+		const int pos_x = (game.window.width() - text_width) / 2;
+		const int pos_y = (game.window.height() - font_size) / 2;
 		Raylib_DrawText(text, pos_x, pos_y, font_size, WHITE);
 	}
 	Raylib_EndTextureMode();
