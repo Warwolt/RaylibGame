@@ -11,13 +11,7 @@ constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
 constexpr char SCREEN_TITLE[] = "Program";
 
-void Game_initialize(Game* game, int argc, char** argv) {
-	/* Initialize systems */
-	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
-	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
-	Raylib_SetExitKey(KEY_NULL);
-	Raylib_SetTargetFPS(120);
-
+Game* Game_initialize(int argc, char** argv) {
 	/* Parse command line */
 	bool start_fullscreen = false;
 	for (int i = 1; i < argc; i++) {
@@ -28,24 +22,40 @@ void Game_initialize(Game* game, int argc, char** argv) {
 		}
 	}
 
-	/* Initialize state */
+	/* Initialize Raylib */
+	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
+	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
+	Raylib_SetExitKey(KEY_NULL);
+	Raylib_SetTargetFPS(120);
+
+	/* Initialize game */
+	Game* game = new Game();
 	game->window = Window::initialize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (start_fullscreen) {
 		game->window.toggle_fullscreen();
 	}
 
 	LOG_INFO("Game initialized");
+
+	return game;
 }
 
 void Game_update(Game* game) {
+	/* Check input */
 	game->should_quit = Raylib_WindowShouldClose();
+
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
 		game->should_quit = true;
 	}
+
 	if (Raylib_IsKeyPressed(KEY_F11)) {
 		game->window.toggle_fullscreen();
 	}
+
+	/* Update systems */
 	game->window.update();
+
+	/* Update scene */
 }
 
 void Game_render(const Game& game) {
@@ -79,4 +89,5 @@ void Game_shutdown(Game* game) {
 	game->window.deinitialize();
 	Raylib_CloseWindow();
 	LOG_INFO("Game shutdown");
+	delete game;
 }
