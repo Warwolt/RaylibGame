@@ -54,7 +54,7 @@ void Game_update(Game* game) {
 	game->window.update();
 
 	/* Update scene */
-	game->scene_manager.current_scene().update(game);
+	game->scene_manager.update_current_scene(game);
 }
 
 void Game_render(const Game& game) {
@@ -62,7 +62,7 @@ void Game_render(const Game& game) {
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
-		game.scene_manager.current_scene().render(game);
+		game.scene_manager.render_current_scene(game);
 	}
 	Raylib_EndTextureMode();
 

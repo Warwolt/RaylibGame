@@ -82,10 +82,10 @@ void SceneManager::pop_scene(Game* game) {
 	}
 }
 
-Scene& SceneManager::current_scene() {
-	return m_scenes.back();
+void SceneManager::update_current_scene(Game* game) {
+	m_scenes.back().update(game);
 }
 
-const Scene& SceneManager::current_scene() const {
-	return m_scenes.back();
+void SceneManager::render_current_scene(const Game& game) const {
+	m_scenes.back().render(game);
 }
