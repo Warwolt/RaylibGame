@@ -6,7 +6,10 @@
 
 void MainMenuScene::update(Game* game) {
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
-		game->should_quit = true;
+		game->scene_manager.pop_scene(game);
+	}
+	if (Raylib_IsKeyPressed(KEY_ENTER)) {
+		game->scene_manager.push_scene(game, SceneID::Gameplay);
 	}
 }
 

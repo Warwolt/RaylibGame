@@ -48,9 +48,10 @@ void SceneManager::push_scene(Game* /*game*/, SceneID scene_id) {
 }
 
 void SceneManager::pop_scene(Game* game) {
-	m_scenes.pop_back();
-	if (m_scenes.empty()) {
+	if (m_scenes.size() == 1) {
 		game->should_quit = true;
+	} else {
+		m_scenes.pop_back();
 	}
 }
 
