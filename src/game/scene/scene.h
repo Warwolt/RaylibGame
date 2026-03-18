@@ -1,12 +1,6 @@
 #pragma once
 
-#include "game/scene/gameplay.h"
-#include "game/scene/main_menu.h"
-
-#include <variant>
 #include <vector>
-
-#include <memory>
 
 struct Game;
 
@@ -15,21 +9,7 @@ enum class SceneID {
 	Gameplay,
 };
 
-using SceneState = std::variant<MainMenuScene, GameplayScene>;
-
-class Scene {
-public:
-	Scene(SceneID id);
-	void initialize(Game* game);
-	void deinitialize(Game* game);
-
-	void update(Game* game);
-	void render(const Game& game) const;
-
-private:
-	SceneID m_id;
-	SceneState m_state;
-};
+struct Scene;
 
 class SceneManager {
 public:
@@ -43,6 +23,5 @@ public:
 	void render_current_scene(const Game& game) const;
 
 private:
-	struct Impl;
-	std::unique_ptr<Impl> m_impl;
+	std::vector<Scene> m_scenes;
 };
