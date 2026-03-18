@@ -26,11 +26,13 @@ enum class SceneID {
 using SceneState = std::variant<MainMenuScene, GameplayScene>;
 
 struct Scene {
+	Scene(SceneID id);
+	void update(Game* game);
+	void render(const Game& game) const;
+
+	// private:
 	SceneID id;
 	SceneState state;
-
-	void update(Game* game);
-	void render(const Game& game);
 };
 
 struct Game {
