@@ -6,6 +6,21 @@
 #include <raylib.h>
 #include <raymath.h>
 
+void MainMenuScene::update(Game* game) {
+	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
+		game->should_quit = true;
+	}
+}
+
+void MainMenuScene::render(const Game& game) const {
+	const int font_size = 32;
+	const char* text = "Main Menu";
+	const int text_width = Raylib_MeasureText(text, font_size);
+	const int pos_x = (game.window.width() - text_width) / 2;
+	const int pos_y = (game.window.height() - font_size) / 2;
+	Raylib_DrawText(text, pos_x, pos_y, font_size, WHITE);
+}
+
 // low resolution 16:9
 constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
@@ -44,10 +59,6 @@ void Game_update(Game* game) {
 	/* Check input */
 	game->should_quit = Raylib_WindowShouldClose();
 
-	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
-		game->should_quit = true;
-	}
-
 	if (Raylib_IsKeyPressed(KEY_F11)) {
 		game->window.toggle_fullscreen();
 	}
@@ -56,6 +67,15 @@ void Game_update(Game* game) {
 	game->window.update();
 
 	/* Update scene */
+	switch (game->scene.id) {
+		case SceneID::MainMenu: {
+			MainMenuScene* scene = std::get_if<MainMenuScene>(&game->scene.state);
+			scene->update(game);
+		} break;
+
+		case SceneID::Gameplay: {
+		} break;
+	}
 }
 
 void Game_render(const Game& game) {
@@ -64,12 +84,16 @@ void Game_render(const Game& game) {
 	{
 		Raylib_ClearBackground(Color { 0, 127, 127, 255 });
 
-		const int font_size = 32;
-		const char* text = "Hello world";
-		const int text_width = Raylib_MeasureText(text, font_size);
-		const int pos_x = (game.window.width() - text_width) / 2;
-		const int pos_y = (game.window.height() - font_size) / 2;
-		Raylib_DrawText(text, pos_x, pos_y, font_size, WHITE);
+		// render scene
+		switch (game.scene.id) {
+			case SceneID::MainMenu: {
+				const MainMenuScene& scene = std::get<MainMenuScene>(game.scene.state);
+				scene.render(game);
+			} break;
+
+			case SceneID::Gameplay: {
+			} break;
+		}
 	}
 	Raylib_EndTextureMode();
 
