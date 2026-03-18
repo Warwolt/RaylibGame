@@ -1,14 +1,10 @@
 #pragma once
 
+#include "game/scene/main_menu.h"
+
 #include <variant>
 
 struct Game;
-
-class MainMenuScene {
-public:
-	void update(Game* game);
-	void render(const Game& game) const;
-};
 
 class GameplayScene {
 public:
