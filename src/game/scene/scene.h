@@ -1,16 +1,11 @@
 #pragma once
 
+#include "game/scene/gameplay.h"
 #include "game/scene/main_menu.h"
 
 #include <variant>
 
 struct Game;
-
-class GameplayScene {
-public:
-	void update(Game* game);
-	void render(const Game& game) const;
-};
 
 enum class SceneID {
 	MainMenu,

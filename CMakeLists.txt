@@ -24,6 +24,7 @@ set(SRC
     src/game/game.cpp
     src/game/scene/scene.cpp
     src/game/scene/main_menu.cpp
+    src/game/scene/gameplay.cpp
     src/platform/window.cpp
 )
 set(LIB
