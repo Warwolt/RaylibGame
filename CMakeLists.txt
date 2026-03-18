@@ -51,6 +51,7 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 # Tests
 add_executable(Tests
     $<TARGET_OBJECTS:Source>
+    test/dummy_tests.cpp
     test/main.cpp
 )
 target_include_directories(Tests PUBLIC src lib)
