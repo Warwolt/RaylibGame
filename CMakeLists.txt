@@ -21,8 +21,9 @@ endif()
 # Source files
 set(SRC
     src/core/debug/logging.cpp
-    src/platform/window.cpp
     src/game/game.cpp
+    src/game/scene/scene.cpp
+    src/platform/window.cpp
 )
 set(LIB
     raylib
