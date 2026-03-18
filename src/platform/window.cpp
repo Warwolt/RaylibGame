@@ -42,8 +42,8 @@ void Window::update() {
 	/* Update the letterbox for the viewport */
 	// The "letterbox" is the rectangle in the application window where the
 	// viewport is being rendered. The viewport is upscaled as much as possible
-	// to fit the window size with maintained aspect ratio, with black matte to
-	// the sides if needed.
+	// to fit the window size with maintained aspect ratio, with black matte
+	// added to the sides if needed.
 	m_scale = min(screen_width / viewport_width, screen_height / viewport_height);
 	float scaled_width = (float)(m_scale * viewport_width);
 	float scaled_height = (float)(m_scale * viewport_height);
