@@ -19,6 +19,9 @@ using SceneState = std::variant<MainMenuScene, GameplayScene>;
 class Scene {
 public:
 	Scene(SceneID id);
+	void initialize(Game* game);
+	void deinitialize(Game* game);
+
 	void update(Game* game);
 	void render(const Game& game) const;
 

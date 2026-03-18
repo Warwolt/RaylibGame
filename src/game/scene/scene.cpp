@@ -2,6 +2,8 @@
 
 #include "game/game.h"
 
+#include <functional>
+
 Scene::Scene(SceneID id) {
 	m_id = id;
 	switch (id) {
@@ -10,6 +12,30 @@ Scene::Scene(SceneID id) {
 			break;
 		case SceneID::Gameplay:
 			m_state = GameplayScene();
+			break;
+	}
+}
+
+void Scene::initialize(Game* game) {
+	switch (m_id) {
+		case SceneID::MainMenu:
+			std::get_if<MainMenuScene>(&m_state)->initialize(game);
+			break;
+
+		case SceneID::Gameplay:
+			std::get_if<GameplayScene>(&m_state)->initialize(game);
+			break;
+	}
+}
+
+void Scene::deinitialize(Game* game) {
+	switch (m_id) {
+		case SceneID::MainMenu:
+			std::get_if<MainMenuScene>(&m_state)->deinitialize(game);
+			break;
+
+		case SceneID::Gameplay:
+			std::get_if<GameplayScene>(&m_state)->deinitialize(game);
 			break;
 	}
 }
@@ -42,12 +68,13 @@ SceneManager::SceneManager(SceneID start_scene_id) {
 	m_scenes.push_back(Scene(start_scene_id));
 }
 
-void SceneManager::push_scene(Game* /*game*/, SceneID scene_id) {
+void SceneManager::push_scene(Game* game, SceneID scene_id) {
 	m_scenes.push_back(scene_id);
-	// FIXME: initialize the scene
+	m_scenes.back().initialize(game);
 }
 
 void SceneManager::pop_scene(Game* game) {
+	m_scenes.back().deinitialize(game);
 	if (m_scenes.size() == 1) {
 		game->should_quit = true;
 	} else {
@@ -56,11 +83,9 @@ void SceneManager::pop_scene(Game* game) {
 }
 
 Scene& SceneManager::current_scene() {
-	// FIXME: assert m_scenes non-empty
 	return m_scenes.back();
 }
 
 const Scene& SceneManager::current_scene() const {
-	// FIXME: assert m_scenes non-empty
 	return m_scenes.back();
 }

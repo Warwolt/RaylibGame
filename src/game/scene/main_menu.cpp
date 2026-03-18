@@ -4,6 +4,12 @@
 
 #include <raylib.h>
 
+void MainMenuScene::initialize(Game* /*game*/) {
+}
+
+void MainMenuScene::deinitialize(Game* /*game*/) {
+}
+
 void MainMenuScene::update(Game* game) {
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
 		game->scene_manager.pop_scene(game);
