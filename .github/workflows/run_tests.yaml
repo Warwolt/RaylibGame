@@ -1,0 +1,20 @@
+name: run_tests
+on:
+  pull_request:
+jobs:
+  run_tests:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          submodules: recursive
+
+      - name: Setup CMake
+        uses: threeal/cmake-action@v2.1.0
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        run: ./build/Debug/Tests.exe
