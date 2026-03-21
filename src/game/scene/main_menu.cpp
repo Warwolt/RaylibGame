@@ -42,9 +42,24 @@ void MainMenuScene::update(Game* game) {
 
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
-	const Margin margin = { .top = 10, .bottom = 10, .left = 10, .right = 10 };
-	const Border border = { .top = 10, .bottom = 10, .left = 10, .right = 10 };
-	const Padding padding = { .top = 10, .bottom = 10, .left = 10, .right = 10 };
+	const Margin margin = {
+		.top = 30,
+		.bottom = 10,
+		.left = 20,
+		.right = 10,
+	};
+	const Border border = {
+		.top = 10,
+		.bottom = 10,
+		.left = 10,
+		.right = 10,
+	};
+	const Padding padding = {
+		.top = 10,
+		.bottom = 10,
+		.left = 10,
+		.right = 10,
+	};
 
 	/* Text content */
 	const Font& font = game.resources.default_font();
@@ -64,21 +79,21 @@ void MainMenuScene::render(const Game& game) const {
 	const float margin_height = border_height + margin.top + margin.bottom;
 
 	/* Box position */
-	const Vector2 box_position = {
-		.x = (float)(game.window.width() - border_width) / 2.0f,
-		.y = (float)(game.window.height() - border_height) / 2.0f,
+	const Vector2 margin_box_position = {
+		.x = (float)(game.window.width() - margin_width) / 2.0f,
+		.y = (float)(game.window.height() - margin_height) / 2.0f,
 	};
 
 	/* Box rectangles */
 	const Rectangle margin_box = {
-		.x = box_position.x - margin.left,
-		.y = box_position.y - margin.top,
+		.x = margin_box_position.x,
+		.y = margin_box_position.y,
 		.width = margin_width,
 		.height = margin_height,
 	};
 	const Rectangle border_box = {
-		.x = box_position.x,
-		.y = box_position.y,
+		.x = margin_box.x + margin.left,
+		.y = margin_box.y + margin.top,
 		.width = border_width,
 		.height = border_height,
 	};
@@ -104,4 +119,5 @@ void MainMenuScene::render(const Game& game) const {
 	Raylib_DrawRectangleRec(border_box, border_color);
 	Raylib_DrawRectangleRec(padding_box, padding_color);
 	Raylib_DrawRectangleRec(content_box, content_color);
+	Raylib_DrawTextEx(font, text, Vector2 { content_box.x, content_box.y }, font_size, 0.0f, WHITE);
 }
