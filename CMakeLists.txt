@@ -71,6 +71,7 @@ foreach(TARGET IN ITEMS ${TARGETS})
         /w44062 # enable warning on unhandled switch case
         /wd4996 # ignore MSVC insisting on _s functions
         /wd4244 # ignore conversion from 'type1' to 'type2', possible loss of data
+        /wd4838 # ignore conversion from 'type_1' to 'type_2' requires a narrowing conversion
     )
     set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 23)
     if (WARNINGS_AS_ERRORS)
