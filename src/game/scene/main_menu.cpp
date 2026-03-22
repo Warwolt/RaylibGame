@@ -43,19 +43,22 @@ namespace ui {
 		}
 	};
 
+	struct Element;
+
 	struct TextContent {
 		FontID font_id;
 		int font_size;
 		std::string text;
 	};
 
-	struct Element;
 	struct BoxContent {
 		std::vector<Element> children;
 	};
 
-	using Content = std::variant<BoxContent, TextContent>;
+	using ElementContent = std::variant<BoxContent, TextContent>;
 
+	// FIXME: should this be renamed? Merged into something else?
+	// It has to do with layout and computing the layout for some given elements.
 	struct ElementBoxes {
 		Rectangle margin_box;
 		Rectangle border_box;
@@ -63,12 +66,19 @@ namespace ui {
 		Rectangle content_box;
 	};
 
-	// FIXME: move margin etc. into "Style" struct?
-	struct Element {
+	struct ElementStyle {
 		Margin margin;
 		Border border;
 		Padding padding;
-		Content content;
+	};
+
+	struct ElementLayout {
+		// move boxes here?
+	};
+
+	struct Element {
+		ElementContent content;
+		ElementStyle style;
 	};
 
 	inline ElementBoxes operator+(const ElementBoxes& lhs, const Vector2& rhs) {
@@ -80,7 +90,7 @@ namespace ui {
 		};
 	}
 
-	Vector2 compute_content_size(const ResourceManager& resources, const Content& content) {
+	Vector2 compute_content_size(const ResourceManager& resources, const ElementContent& content) {
 		if (const BoxContent* box_content = std::get_if<BoxContent>(&content)) {
 			// FIXME: Computing the size isn't particularly meaningful for a Box
 			// We need to be computing the entire layout, since we're recursing into the children
@@ -95,16 +105,17 @@ namespace ui {
 	}
 
 	ElementBoxes compute_element_boxes(const ResourceManager& resources, const Element& element) {
+		const ElementStyle& style = element.style;
 		/* Box widths */
 		const Vector2 content_size = compute_content_size(resources, element.content);
 		const float content_width = content_size.x;
 		const float content_height = content_size.y;
-		const float padding_width = content_width + element.padding.left + element.padding.right;
-		const float padding_height = content_height + element.padding.top + element.padding.bottom;
-		const float border_width = padding_width + element.border.left + element.border.right;
-		const float border_height = padding_height + element.border.top + element.border.bottom;
-		const float margin_width = border_width + element.margin.left + element.margin.right;
-		const float margin_height = border_height + element.margin.top + element.margin.bottom;
+		const float padding_width = content_width + style.padding.left + style.padding.right;
+		const float padding_height = content_height + style.padding.top + style.padding.bottom;
+		const float border_width = padding_width + style.border.left + style.border.right;
+		const float border_height = padding_height + style.border.top + style.border.bottom;
+		const float margin_width = border_width + style.margin.left + style.margin.right;
+		const float margin_height = border_height + style.margin.top + style.margin.bottom;
 
 		/* Box positions */
 		ElementBoxes element_boxes = {};
@@ -115,20 +126,20 @@ namespace ui {
 			.height = margin_height,
 		};
 		element_boxes.border_box = {
-			.x = element_boxes.margin_box.x + element.margin.left,
-			.y = element_boxes.margin_box.y + element.margin.top,
+			.x = element_boxes.margin_box.x + style.margin.left,
+			.y = element_boxes.margin_box.y + style.margin.top,
 			.width = border_width,
 			.height = border_height,
 		};
 		element_boxes.padding_box = {
-			.x = element_boxes.border_box.x + element.border.left,
-			.y = element_boxes.border_box.y + element.border.top,
+			.x = element_boxes.border_box.x + style.border.left,
+			.y = element_boxes.border_box.y + style.border.top,
 			.width = padding_width,
 			.height = padding_height,
 		};
 		element_boxes.content_box = {
-			.x = element_boxes.padding_box.x + element.padding.left,
-			.y = element_boxes.padding_box.y + element.padding.top,
+			.x = element_boxes.padding_box.x + style.padding.left,
+			.y = element_boxes.padding_box.y + style.padding.top,
 			.width = content_width,
 			.height = content_height,
 		};
@@ -136,7 +147,7 @@ namespace ui {
 		return element_boxes;
 	}
 
-	void draw_element(const ResourceManager& resources, const ElementBoxes& element_boxes, const Content& content) {
+	void draw_element(const ResourceManager& resources, const ElementBoxes& element_boxes, const ElementContent& content) {
 		Raylib_DrawRectangleRec(element_boxes.border_box, GRAY);
 		Raylib_DrawRectangleRec(element_boxes.padding_box, LIGHTGRAY);
 		Raylib_DrawRectangleLinesEx(element_boxes.margin_box, 1, GREEN); // debug
@@ -178,14 +189,17 @@ void MainMenuScene::update(Game* game) {
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
 	const ui::Element text_element = {
-		.margin = ui::Margin::with_size(4),
-		.border = ui::Border::with_size(4),
-		.padding = ui::Padding::with_size(10),
 		.content =
 			ui::TextContent {
 				.font_id = FontID::default_font(),
 				.font_size = 16,
 				.text = "Sphinx of black quarts, judge my vow!",
+			},
+		.style =
+			ui::ElementStyle {
+				.margin = ui::Margin::with_size(4),
+				.border = ui::Border::with_size(4),
+				.padding = ui::Padding::with_size(10),
 			},
 	};
 
