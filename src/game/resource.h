@@ -4,6 +4,14 @@
 #include <string>
 #include <unordered_map>
 
+struct FontID {
+	static FontID default_font() {
+		return FontID { 0 };
+	};
+
+	int value = 0;
+};
+
 class ResourceManager {
 public:
 	ResourceManager() = default;
