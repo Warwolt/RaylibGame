@@ -56,7 +56,7 @@ namespace ui {
 	}
 
 	Vector2 compute_content_size(const ResourceManager& resources, const TextElement& element) {
-		const Font& font = resources.default_font(); // FIXME: get the font with element.font_id
+		const Font& font = resources.get_font(element.font_id);
 		const float font_spacing = 0.0f;
 		return Raylib_MeasureTextEx(font, element.text.c_str(), element.font_size, font_spacing);
 	}
@@ -156,7 +156,7 @@ void MainMenuScene::render(const Game& game) const {
 	element_boxes = element_boxes + centered_box_pos;
 
 	/* Render boxes */
-	const Font& font = game.resources.default_font(); // FIXME: get the font with element.font_id
+	const Font& font = game.resources.get_font(element.font_id);
 	const Vector2 content_pos = { element_boxes.content_box.x, element_boxes.content_box.y };
 	const Color margin_color = { 240, 206, 163, 255 };
 	const Color border_color = { 246, 221, 161, 255 };
