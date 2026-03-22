@@ -2,13 +2,20 @@
 
 #include "game/game.h"
 
-#include <memory>
 #include <raylib.h>
 #include <raymath.h>
+
+#include <memory>
 #include <variant>
 #include <vector>
 
 namespace ui {
+
+	enum class Alignment {
+		Start,
+		Center,
+		End,
+	};
 
 	struct Margin {
 		float top;
@@ -61,6 +68,8 @@ namespace ui {
 		Margin margin;
 		Border border;
 		Padding padding;
+		Alignment h_alignment = Alignment::Start;
+		Alignment v_alignment = Alignment::Start;
 	};
 
 	struct ElementLayout {
@@ -105,13 +114,26 @@ namespace ui {
 		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
 
-	void compute_element_positions(Vector2 available_space, Element* element) {
+	float aligned_position(float element_size, float parent_size, Alignment alignment) {
+		switch (alignment) {
+			case Alignment::Start:
+				return 0;
+
+			case Alignment::Center:
+				return (parent_size - element_size) / 2.0f;
+
+			case Alignment::End:
+				return parent_size - element_size;
+		}
+		return 0;
+	}
+
+	void compute_element_positions(Vector2 parent_size, Element* element) {
 		const ElementStyle style = element->style;
 		ElementLayout* layout = &element->layout;
 
-		// FIXME: position things based on the layout rules in `style`
-		layout->margin_box.x = (available_space.x - layout->margin_box.width) / 2.0f;
-		layout->margin_box.y = (available_space.y - layout->margin_box.height) / 2.0f;
+		layout->margin_box.x = aligned_position(layout->margin_box.width, parent_size.x, style.h_alignment);
+		layout->margin_box.y = aligned_position(layout->margin_box.height, parent_size.y, style.v_alignment);
 		layout->border_box.x = layout->margin_box.x + style.margin.left;
 		layout->border_box.y = layout->margin_box.y + style.margin.top;
 		layout->padding_box.x = layout->border_box.x + style.border.left;
@@ -120,9 +142,9 @@ namespace ui {
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
 	}
 
-	void compute_element_layout(const ResourceManager& resources, Vector2 available_space, Element* element) {
+	void compute_element_layout(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		compute_element_sizes(resources, element);
-		compute_element_positions(available_space, element);
+		compute_element_positions(parent_size, element);
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
@@ -177,6 +199,8 @@ void MainMenuScene::render(const Game& game) const {
 				.margin = ui::Margin::with_size(4),
 				.border = ui::Border::with_size(4),
 				.padding = ui::Padding::with_size(10),
+				.h_alignment = ui::Alignment::Center,
+				.v_alignment = ui::Alignment::Center,
 			},
 	};
 
