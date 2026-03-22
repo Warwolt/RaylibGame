@@ -12,6 +12,10 @@ namespace ui {
 		float bottom;
 		float left;
 		float right;
+
+		static Margin with_size(float size) {
+			return { size, size, size, size };
+		}
 	};
 
 	struct Border {
@@ -19,6 +23,10 @@ namespace ui {
 		float bottom;
 		float left;
 		float right;
+
+		static Border with_size(float size) {
+			return { size, size, size, size };
+		}
 	};
 
 	struct Padding {
@@ -26,6 +34,10 @@ namespace ui {
 		float bottom;
 		float left;
 		float right;
+
+		static Padding with_size(float size) {
+			return { size, size, size, size };
+		}
 	};
 
 	struct TextElement {
@@ -135,26 +147,11 @@ void MainMenuScene::update(Game* game) {
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
 	const ui::TextElement element = {
-		.margin = {
-			.top = 10,
-			.bottom = 10,
-			.left = 10,
-			.right = 10,
-		},
-		.border = {
-			.top = 10,
-			.bottom = 10,
-			.left = 10,
-			.right = 10,
-		},
-		.padding = {
-			.top = 10,
-			.bottom = 10,
-			.left = 10,
-			.right = 10,
-		},
+		.margin = ui::Margin::with_size(4),
+		.border = ui::Border::with_size(4),
+		.padding = ui::Padding::with_size(10),
 		.font_id = FontID::default_font(),
-		.font_size = 32,
+		.font_size = 16,
 		.text = "Sphinx of black quarts, judge my vow!",
 	};
 
@@ -169,6 +166,8 @@ void MainMenuScene::render(const Game& game) const {
 	/* Render boxes */
 	const Font& font = game.resources.get_font(element.font_id);
 	const Vector2 content_pos = { element_boxes.content_box.x, element_boxes.content_box.y };
-	ui::debug_render_element_boxes(element_boxes);
-	Raylib_DrawTextEx(font, element.text.c_str(), content_pos, element.font_size, 0.0f, WHITE);
+	Raylib_DrawRectangleRec(element_boxes.border_box, GRAY);
+	Raylib_DrawRectangleRec(element_boxes.padding_box, LIGHTGRAY);
+	Raylib_DrawRectangleLinesEx(element_boxes.margin_box, 1, GREEN); // debug
+	Raylib_DrawTextEx(font, element.text.c_str(), content_pos, element.font_size, 0.0f, BLACK);
 }
