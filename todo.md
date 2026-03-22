@@ -3,6 +3,7 @@
 - Gameplay scene with basic camera + character movement
 - Collision detection test screen
 - Collision resolution test screen
+- Make hot reload library copy have a unique name to workaround windows file locking blocking reload
 
 # Done
 - Basic Scene system
