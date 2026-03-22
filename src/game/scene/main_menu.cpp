@@ -104,6 +104,17 @@ namespace ui {
 		return element_boxes;
 	}
 
+	void debug_render_element_boxes(const ElementBoxes& element_boxes) {
+		const Color margin_color = { 240, 206, 163, 255 };
+		const Color border_color = { 246, 221, 161, 255 };
+		const Color padding_color = { 198, 207, 145, 255 };
+		const Color content_color = { 152, 181, 192, 255 };
+		Raylib_DrawRectangleRec(element_boxes.margin_box, margin_color);
+		Raylib_DrawRectangleRec(element_boxes.border_box, border_color);
+		Raylib_DrawRectangleRec(element_boxes.padding_box, padding_color);
+		Raylib_DrawRectangleRec(element_boxes.content_box, content_color);
+	}
+
 }
 
 void MainMenuScene::initialize(Game* /*game*/) {
@@ -158,13 +169,6 @@ void MainMenuScene::render(const Game& game) const {
 	/* Render boxes */
 	const Font& font = game.resources.get_font(element.font_id);
 	const Vector2 content_pos = { element_boxes.content_box.x, element_boxes.content_box.y };
-	const Color margin_color = { 240, 206, 163, 255 };
-	const Color border_color = { 246, 221, 161, 255 };
-	const Color padding_color = { 198, 207, 145, 255 };
-	const Color content_color = { 152, 181, 192, 255 };
-	Raylib_DrawRectangleRec(element_boxes.margin_box, margin_color);
-	Raylib_DrawRectangleRec(element_boxes.border_box, border_color);
-	Raylib_DrawRectangleRec(element_boxes.padding_box, padding_color);
-	Raylib_DrawRectangleRec(element_boxes.content_box, content_color);
+	ui::debug_render_element_boxes(element_boxes);
 	Raylib_DrawTextEx(font, element.text.c_str(), content_pos, element.font_size, 0.0f, WHITE);
 }
