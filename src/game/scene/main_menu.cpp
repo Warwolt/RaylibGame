@@ -4,6 +4,7 @@
 
 #include <raylib.h>
 #include <raymath.h>
+#include <variant>
 
 namespace ui {
 
@@ -40,16 +41,20 @@ namespace ui {
 		}
 	};
 
-	struct TextElement {
-		Margin margin;
-		Border border;
-		Padding padding;
+	struct TextContent {
 		FontID font_id;
 		int font_size;
 		std::string text;
 	};
 
-	// using Element = std::variant<BoxElement, TextElement, ImageElement, ...>
+	using Content = std::variant<TextContent>;
+
+	struct Element {
+		Margin margin;
+		Border border;
+		Padding padding;
+		Content content;
+	};
 
 	struct ElementBoxes {
 		Rectangle margin_box;
@@ -67,16 +72,18 @@ namespace ui {
 		};
 	}
 
-	Vector2 compute_content_size(const ResourceManager& resources, const TextElement& element) {
-		const Font& font = resources.get_font(element.font_id);
-		const float font_spacing = 0.0f;
-		return Raylib_MeasureTextEx(font, element.text.c_str(), element.font_size, font_spacing);
+	Vector2 compute_content_size(const ResourceManager& resources, const Content& content) {
+		if (const TextContent* text_content = std::get_if<TextContent>(&content)) {
+			const Font& font = resources.get_font(text_content->font_id);
+			const float font_spacing = 0.0f;
+			return Raylib_MeasureTextEx(font, text_content->text.c_str(), text_content->font_size, font_spacing);
+		}
+		return { 0, 0 };
 	}
 
-	ElementBoxes compute_element_boxes(const ResourceManager& resources, const TextElement& element) {
+	ElementBoxes compute_element_boxes(const ResourceManager& resources, const Element& element) {
 		/* Box widths */
-		// FIXME: can this be const auto& [content_width, content_height] = compute_content_size(resources, element); ?
-		const Vector2 content_size = compute_content_size(resources, element);
+		const Vector2 content_size = compute_content_size(resources, element.content);
 		const float content_width = content_size.x;
 		const float content_height = content_size.y;
 		const float padding_width = content_width + element.padding.left + element.padding.right;
@@ -116,7 +123,18 @@ namespace ui {
 		return element_boxes;
 	}
 
-	void debug_render_element_boxes(const ElementBoxes& element_boxes) {
+	void draw_element(const ResourceManager& resources, const ElementBoxes& element_boxes, const Content& content) {
+		Raylib_DrawRectangleRec(element_boxes.border_box, GRAY);
+		Raylib_DrawRectangleRec(element_boxes.padding_box, LIGHTGRAY);
+		Raylib_DrawRectangleLinesEx(element_boxes.margin_box, 1, GREEN); // debug
+		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&content)) {
+			const Font& font = resources.get_font(text_content->font_id);
+			const Vector2 content_pos = { element_boxes.content_box.x, element_boxes.content_box.y };
+			Raylib_DrawTextEx(font, text_content->text.c_str(), content_pos, text_content->font_size, 0.0f, BLACK);
+		}
+	}
+
+	void debug_draw_element_boxes(const ElementBoxes& element_boxes) {
 		const Color margin_color = { 240, 206, 163, 255 };
 		const Color border_color = { 246, 221, 161, 255 };
 		const Color padding_color = { 198, 207, 145, 255 };
@@ -146,13 +164,17 @@ void MainMenuScene::update(Game* game) {
 
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
-	const ui::TextElement element = {
+	const ui::Element element = {
 		.margin = ui::Margin::with_size(4),
 		.border = ui::Border::with_size(4),
 		.padding = ui::Padding::with_size(10),
-		.font_id = FontID::default_font(),
-		.font_size = 16,
-		.text = "Sphinx of black quarts, judge my vow!",
+		.content =
+			ui::TextContent {
+				.font_id = FontID::default_font(),
+				.font_size = 16,
+				.text = "Sphinx of black quarts, judge my vow!",
+
+			},
 	};
 
 	/* Compute layout */
@@ -164,10 +186,5 @@ void MainMenuScene::render(const Game& game) const {
 	element_boxes = element_boxes + centered_box_pos;
 
 	/* Render boxes */
-	const Font& font = game.resources.get_font(element.font_id);
-	const Vector2 content_pos = { element_boxes.content_box.x, element_boxes.content_box.y };
-	Raylib_DrawRectangleRec(element_boxes.border_box, GRAY);
-	Raylib_DrawRectangleRec(element_boxes.padding_box, LIGHTGRAY);
-	Raylib_DrawRectangleLinesEx(element_boxes.margin_box, 1, GREEN); // debug
-	Raylib_DrawTextEx(font, element.text.c_str(), content_pos, element.font_size, 0.0f, BLACK);
+	ui::draw_element(game.resources, element_boxes, element.content);
 }
