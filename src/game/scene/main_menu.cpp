@@ -2,9 +2,11 @@
 
 #include "game/game.h"
 
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include <variant>
+#include <vector>
 
 namespace ui {
 
@@ -47,20 +49,25 @@ namespace ui {
 		std::string text;
 	};
 
-	using Content = std::variant<TextContent>;
-
-	struct Element {
-		Margin margin;
-		Border border;
-		Padding padding;
-		Content content;
+	struct Element;
+	struct BoxContent {
+		std::vector<std::unique_ptr<Element>> children;
 	};
+
+	using Content = std::variant<TextContent>;
 
 	struct ElementBoxes {
 		Rectangle margin_box;
 		Rectangle border_box;
 		Rectangle padding_box;
 		Rectangle content_box;
+	};
+
+	struct Element {
+		Margin margin;
+		Border border;
+		Padding padding;
+		Content content;
 	};
 
 	inline ElementBoxes operator+(const ElementBoxes& lhs, const Vector2& rhs) {
@@ -164,7 +171,10 @@ void MainMenuScene::update(Game* game) {
 
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
-	const ui::Element element = {
+	// FIXME:
+	// Box Elements that have "children" with more elements
+	// Put two text elements inside a box element
+	const ui::Element text_element = {
 		.margin = ui::Margin::with_size(4),
 		.border = ui::Border::with_size(4),
 		.padding = ui::Padding::with_size(10),
@@ -178,7 +188,19 @@ void MainMenuScene::render(const Game& game) const {
 	};
 
 	/* Compute layout */
-	ui::ElementBoxes element_boxes = ui::compute_element_boxes(game.resources, element);
+	// FIXME:
+	// How to deal with layout and rendering once we have child elements?
+	// We need the element boxes both for determining the layout and for rendering.
+	// It be nice to be able to save the element boxes in a "Layout" data structure.
+	// We'd need to be able to map Element -> ElementBoxes.
+	// Do we need some kind of ElementID in that case?
+	// Or uhhhh just make ElementBoxes a fucking member of Element? Easy
+	//
+	// Importantly:
+	// - Layout is needed for both rendering and interactivity
+	// - We have to know where an element is in order to know if it's mouse hovered
+	//
+	ui::ElementBoxes element_boxes = ui::compute_element_boxes(game.resources, text_element);
 	Vector2 centered_box_pos = Vector2 {
 		.x = (float)(game.window.width() - element_boxes.margin_box.width) / 2.0f,
 		.y = (float)(game.window.height() - element_boxes.margin_box.height) / 2.0f,
@@ -186,5 +208,5 @@ void MainMenuScene::render(const Game& game) const {
 	element_boxes = element_boxes + centered_box_pos;
 
 	/* Render boxes */
-	ui::draw_element(game.resources, element_boxes, element.content);
+	ui::draw_element(game.resources, element_boxes, text_element.content);
 }
