@@ -85,62 +85,44 @@ namespace ui {
 		};
 	}
 
-	Vector2 compute_content_size(const ResourceManager& resources, const ElementContent& content) {
-		if (const BoxContent* box_content = std::get_if<BoxContent>(&content)) {
-			// FIXME: Computing the size isn't particularly meaningful for a Box
-			// We need to be computing the entire layout, since we're recursing into the children
-		}
+	void compute_element_sizes(const ResourceManager& resources, Element* element) {
+		const ElementStyle& style = element->style;
+		ElementLayout* layout = &element->layout;
 
-		if (const TextContent* text_content = std::get_if<TextContent>(&content)) {
+		if (const TextContent* text_content = std::get_if<TextContent>(&element->content)) {
 			const Font& font = resources.get_font(text_content->font_id);
 			const float font_spacing = 0.0f;
-			return Raylib_MeasureTextEx(font, text_content->text.c_str(), text_content->font_size, font_spacing);
+			const Vector2 text_size = Raylib_MeasureTextEx(font, text_content->text.c_str(), text_content->font_size, font_spacing);
+			layout->content_box.width = text_size.x;
+			layout->content_box.height = text_size.y;
 		}
-		return { 0, 0 };
+
+		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
+		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
+		layout->border_box.width = layout->padding_box.width + style.border.left + style.border.right;
+		layout->border_box.height = layout->padding_box.height + style.border.top + style.border.bottom;
+		layout->margin_box.width = layout->border_box.width + style.margin.left + style.margin.right;
+		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
 
-	ElementLayout compute_layout(const ResourceManager& resources, const Element& element) {
-		const ElementStyle& style = element.style;
+	void compute_element_positions(Vector2 available_space, Element* element) {
+		const ElementStyle style = element->style;
+		ElementLayout* layout = &element->layout;
 
-		/* Box widths */
-		Vector2 content_size = compute_content_size(resources, element.content);
-		const float content_width = content_size.x;
-		const float content_height = content_size.y;
-		const float padding_width = content_width + style.padding.left + style.padding.right;
-		const float padding_height = content_height + style.padding.top + style.padding.bottom;
-		const float border_width = padding_width + style.border.left + style.border.right;
-		const float border_height = padding_height + style.border.top + style.border.bottom;
-		const float margin_width = border_width + style.margin.left + style.margin.right;
-		const float margin_height = border_height + style.margin.top + style.margin.bottom;
+		// FIXME: position things based on the layout rules in `style`
+		layout->margin_box.x = (available_space.x - layout->margin_box.width) / 2.0f;
+		layout->margin_box.y = (available_space.y - layout->margin_box.height) / 2.0f;
+		layout->border_box.x = layout->margin_box.x + style.margin.left;
+		layout->border_box.y = layout->margin_box.y + style.margin.top;
+		layout->padding_box.x = layout->border_box.x + style.border.left;
+		layout->padding_box.y = layout->border_box.y + style.border.top;
+		layout->content_box.x = layout->padding_box.x + style.padding.left;
+		layout->content_box.y = layout->padding_box.y + style.padding.top;
+	}
 
-		/* Box positions */
-		ElementLayout layout = {};
-		layout.margin_box = {
-			.x = 0,
-			.y = 0,
-			.width = margin_width,
-			.height = margin_height,
-		};
-		layout.border_box = {
-			.x = layout.margin_box.x + style.margin.left,
-			.y = layout.margin_box.y + style.margin.top,
-			.width = border_width,
-			.height = border_height,
-		};
-		layout.padding_box = {
-			.x = layout.border_box.x + style.border.left,
-			.y = layout.border_box.y + style.border.top,
-			.width = padding_width,
-			.height = padding_height,
-		};
-		layout.content_box = {
-			.x = layout.padding_box.x + style.padding.left,
-			.y = layout.padding_box.y + style.padding.top,
-			.width = content_width,
-			.height = content_height,
-		};
-
-		return layout;
+	void compute_element_layout(const ResourceManager& resources, Vector2 available_space, Element* element) {
+		compute_element_sizes(resources, element);
+		compute_element_positions(available_space, element);
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
@@ -164,7 +146,6 @@ namespace ui {
 		Raylib_DrawRectangleRec(element_boxes.padding_box, padding_color);
 		Raylib_DrawRectangleRec(element_boxes.content_box, content_color);
 	}
-
 }
 
 void MainMenuScene::initialize(Game* /*game*/) {
@@ -184,7 +165,7 @@ void MainMenuScene::update(Game* game) {
 
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
-	const ui::Element text_element = {
+	ui::Element text_element = {
 		.content =
 			ui::TextContent {
 				.font_id = FontID::default_font(),
@@ -200,16 +181,8 @@ void MainMenuScene::render(const Game& game) const {
 	};
 
 	/* Compute layout */
-	// FIXME: we're centering outside of compute_layout which doesn't make sense
-	// Should we pass in the available screen space as argument?
-	// ui::compute_layout(game.resources, &root_element);
-	ui::ElementLayout element_layout = ui::compute_layout(game.resources, text_element);
-	Vector2 centered_box_pos = Vector2 {
-		.x = (float)(game.window.width() - element_layout.margin_box.width) / 2.0f,
-		.y = (float)(game.window.height() - element_layout.margin_box.height) / 2.0f,
-	};
-	element_layout = element_layout + centered_box_pos;
+	ui::compute_element_layout(game.resources, game.window.size(), &text_element);
 
-	/* Render boxes */
+	/* Render elements */
 	ui::draw_element(game.resources, text_element);
 }
