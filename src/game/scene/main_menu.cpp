@@ -51,10 +51,10 @@ namespace ui {
 
 	struct Element;
 	struct BoxContent {
-		std::vector<std::unique_ptr<Element>> children;
+		std::vector<Element> children;
 	};
 
-	using Content = std::variant<TextContent>;
+	using Content = std::variant<BoxContent, TextContent>;
 
 	struct ElementBoxes {
 		Rectangle margin_box;
@@ -63,6 +63,7 @@ namespace ui {
 		Rectangle content_box;
 	};
 
+	// FIXME: move margin etc. into "Style" struct?
 	struct Element {
 		Margin margin;
 		Border border;
@@ -80,6 +81,11 @@ namespace ui {
 	}
 
 	Vector2 compute_content_size(const ResourceManager& resources, const Content& content) {
+		if (const BoxContent* box_content = std::get_if<BoxContent>(&content)) {
+			// FIXME: Computing the size isn't particularly meaningful for a Box
+			// We need to be computing the entire layout, since we're recursing into the children
+		}
+
 		if (const TextContent* text_content = std::get_if<TextContent>(&content)) {
 			const Font& font = resources.get_font(text_content->font_id);
 			const float font_spacing = 0.0f;
@@ -183,8 +189,27 @@ void MainMenuScene::render(const Game& game) const {
 				.font_id = FontID::default_font(),
 				.font_size = 16,
 				.text = "Sphinx of black quarts, judge my vow!",
-
 			},
+	};
+	const ui::Element box_element = {
+		.margin = ui::Margin::with_size(4),
+		.border = ui::Border::with_size(4),
+		.padding = ui::Padding::with_size(10),
+		.content = ui::BoxContent {
+			.children = {
+				ui::Element {
+					.margin = ui::Margin::with_size(4),
+					.border = ui::Border::with_size(4),
+					.padding = ui::Padding::with_size(10),
+					.content =
+						ui::TextContent {
+							.font_id = FontID::default_font(),
+							.font_size = 16,
+							.text = "Sphinx of black quarts, judge my vow!",
+						},
+				},
+			},
+		},
 	};
 
 	/* Compute layout */
