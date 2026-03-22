@@ -177,9 +177,6 @@ void MainMenuScene::update(Game* game) {
 
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
-	// FIXME:
-	// Box Elements that have "children" with more elements
-	// Put two text elements inside a box element
 	const ui::Element text_element = {
 		.margin = ui::Margin::with_size(4),
 		.border = ui::Border::with_size(4),
@@ -191,40 +188,8 @@ void MainMenuScene::render(const Game& game) const {
 				.text = "Sphinx of black quarts, judge my vow!",
 			},
 	};
-	const ui::Element box_element = {
-		.margin = ui::Margin::with_size(4),
-		.border = ui::Border::with_size(4),
-		.padding = ui::Padding::with_size(10),
-		.content = ui::BoxContent {
-			.children = {
-				ui::Element {
-					.margin = ui::Margin::with_size(4),
-					.border = ui::Border::with_size(4),
-					.padding = ui::Padding::with_size(10),
-					.content =
-						ui::TextContent {
-							.font_id = FontID::default_font(),
-							.font_size = 16,
-							.text = "Sphinx of black quarts, judge my vow!",
-						},
-				},
-			},
-		},
-	};
 
 	/* Compute layout */
-	// FIXME:
-	// How to deal with layout and rendering once we have child elements?
-	// We need the element boxes both for determining the layout and for rendering.
-	// It be nice to be able to save the element boxes in a "Layout" data structure.
-	// We'd need to be able to map Element -> ElementBoxes.
-	// Do we need some kind of ElementID in that case?
-	// Or uhhhh just make ElementBoxes a fucking member of Element? Easy
-	//
-	// Importantly:
-	// - Layout is needed for both rendering and interactivity
-	// - We have to know where an element is in order to know if it's mouse hovered
-	//
 	ui::ElementBoxes element_boxes = ui::compute_element_boxes(game.resources, text_element);
 	Vector2 centered_box_pos = Vector2 {
 		.x = (float)(game.window.width() - element_boxes.margin_box.width) / 2.0f,
