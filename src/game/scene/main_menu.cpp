@@ -3,16 +3,7 @@
 #include "game/game.h"
 
 #include <raylib.h>
-
-// FIXME: move this to Raymath.h
-inline Rectangle operator+(const Rectangle& lhs, const Vector2& rhs) {
-	return {
-		.x = lhs.x + rhs.x,
-		.y = lhs.y + rhs.y,
-		.width = lhs.width,
-		.height = lhs.height,
-	};
-}
+#include <raymath.h>
 
 namespace ui {
 
