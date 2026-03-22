@@ -5,24 +5,24 @@
 #include <raylib.h>
 
 struct Margin {
-	int top;
-	int bottom;
-	int left;
-	int right;
+	float top;
+	float bottom;
+	float left;
+	float right;
 };
 
 struct Border {
-	int top;
-	int bottom;
-	int left;
-	int right;
+	float top;
+	float bottom;
+	float left;
+	float right;
 };
 
 struct Padding {
-	int top;
-	int bottom;
-	int left;
-	int right;
+	float top;
+	float bottom;
+	float left;
+	float right;
 };
 
 struct TextElement {
@@ -43,8 +43,73 @@ struct ElementBoxes {
 	Rectangle content_box;
 };
 
-// ElementBoxes compute_element_boxes(const TextElement& element) {
-// }
+// FIXME: move this to Raymath.h
+inline Rectangle operator+(const Rectangle& lhs, const Vector2& rhs) {
+	return {
+		.x = lhs.x + rhs.x,
+		.y = lhs.y + rhs.y,
+		.width = lhs.width,
+		.height = lhs.height,
+	};
+}
+
+inline ElementBoxes operator+(const ElementBoxes& lhs, const Vector2& rhs) {
+	return {
+		.margin_box = lhs.margin_box + rhs,
+		.border_box = lhs.border_box + rhs,
+		.padding_box = lhs.padding_box + rhs,
+		.content_box = lhs.content_box + rhs,
+	};
+}
+
+Vector2 compute_content_size(const ResourceManager& resources, const TextElement& element) {
+	const Font& font = resources.default_font(); // FIXME: get the font with element.font_id
+	const float font_spacing = 0.0f;
+	return Raylib_MeasureTextEx(font, element.text.c_str(), element.font_size, font_spacing);
+}
+
+ElementBoxes compute_element_boxes(const ResourceManager& resources, const TextElement& element) {
+	/* Box widths */
+	// FIXME: can this be const auto& [content_width, content_height] = compute_content_size(resources, element); ?
+	const Vector2 content_size = compute_content_size(resources, element);
+	const float content_width = content_size.x;
+	const float content_height = content_size.y;
+	const float padding_width = content_width + element.padding.left + element.padding.right;
+	const float padding_height = content_height + element.padding.top + element.padding.bottom;
+	const float border_width = padding_width + element.border.left + element.border.right;
+	const float border_height = padding_height + element.border.top + element.border.bottom;
+	const float margin_width = border_width + element.margin.left + element.margin.right;
+	const float margin_height = border_height + element.margin.top + element.margin.bottom;
+
+	/* Box positions */
+	ElementBoxes element_boxes = {};
+	element_boxes.margin_box = {
+		.x = 0,
+		.y = 0,
+		.width = margin_width,
+		.height = margin_height,
+	};
+	element_boxes.border_box = {
+		.x = element_boxes.margin_box.x + element.margin.left,
+		.y = element_boxes.margin_box.y + element.margin.top,
+		.width = border_width,
+		.height = border_height,
+	};
+	element_boxes.padding_box = {
+		.x = element_boxes.border_box.x + element.border.left,
+		.y = element_boxes.border_box.y + element.border.top,
+		.width = padding_width,
+		.height = padding_height,
+	};
+	element_boxes.content_box = {
+		.x = element_boxes.padding_box.x + element.padding.left,
+		.y = element_boxes.padding_box.y + element.padding.top,
+		.width = content_width,
+		.height = content_height,
+	};
+
+	return element_boxes;
+}
 
 void MainMenuScene::initialize(Game* /*game*/) {
 }
@@ -84,65 +149,27 @@ void MainMenuScene::render(const Game& game) const {
 		},
 		.font_id = FontID::default_font(),
 		.font_size = 32,
-		.text = "New Game",
+		.text = "Sphinx of black quarts, judge my vow!",
 	};
 
-	/* Text content */
-	const Font& font = game.resources.default_font();
-	const float font_spacing = 0.0f;
-	const float text_width = Raylib_MeasureTextEx(font, element.text.c_str(), element.font_size, font_spacing).x;
-
-	/* Box widths */
-	const float content_width = text_width;
-	const float content_height = element.font_size;
-	const float padding_width = content_width + element.padding.left + element.padding.right;
-	const float padding_height = content_height + element.padding.top + element.padding.bottom;
-	const float border_width = padding_width + element.border.left + element.border.right;
-	const float border_height = padding_height + element.border.top + element.border.bottom;
-	const float margin_width = border_width + element.margin.left + element.margin.right;
-	const float margin_height = border_height + element.margin.top + element.margin.bottom;
-
-	/* Box position */
-	const Vector2 margin_box_position = {
-		.x = (float)(game.window.width() - margin_width) / 2.0f,
-		.y = (float)(game.window.height() - margin_height) / 2.0f,
+	/* Compute layout */
+	ElementBoxes element_boxes = compute_element_boxes(game.resources, element);
+	Vector2 centered_box_pos = Vector2 {
+		.x = (float)(game.window.width() - element_boxes.margin_box.width) / 2.0f,
+		.y = (float)(game.window.height() - element_boxes.margin_box.height) / 2.0f,
 	};
-
-	/* Box rectangles */
-	const Rectangle margin_box = {
-		.x = margin_box_position.x,
-		.y = margin_box_position.y,
-		.width = margin_width,
-		.height = margin_height,
-	};
-	const Rectangle border_box = {
-		.x = margin_box.x + element.margin.left,
-		.y = margin_box.y + element.margin.top,
-		.width = border_width,
-		.height = border_height,
-	};
-	const Rectangle padding_box = {
-		.x = border_box.x + element.border.left,
-		.y = border_box.y + element.border.top,
-		.width = padding_width,
-		.height = padding_height,
-	};
-	const Rectangle content_box = {
-		.x = padding_box.x + element.padding.left,
-		.y = padding_box.y + element.padding.right,
-		.width = content_width,
-		.height = content_height,
-	};
+	element_boxes = element_boxes + centered_box_pos;
 
 	/* Render boxes */
-	const Vector2 content_pos = { content_box.x, content_box.y };
+	const Font& font = game.resources.default_font(); // FIXME: get the font with element.font_id
+	const Vector2 content_pos = { element_boxes.content_box.x, element_boxes.content_box.y };
 	const Color margin_color = { 240, 206, 163, 255 };
 	const Color border_color = { 246, 221, 161, 255 };
 	const Color padding_color = { 198, 207, 145, 255 };
 	const Color content_color = { 152, 181, 192, 255 };
-	Raylib_DrawRectangleRec(margin_box, margin_color);
-	Raylib_DrawRectangleRec(border_box, border_color);
-	Raylib_DrawRectangleRec(padding_box, padding_color);
-	Raylib_DrawRectangleRec(content_box, content_color);
+	Raylib_DrawRectangleRec(element_boxes.margin_box, margin_color);
+	Raylib_DrawRectangleRec(element_boxes.border_box, border_color);
+	Raylib_DrawRectangleRec(element_boxes.padding_box, padding_color);
+	Raylib_DrawRectangleRec(element_boxes.content_box, content_color);
 	Raylib_DrawTextEx(font, element.text.c_str(), content_pos, element.font_size, 0.0f, WHITE);
 }
