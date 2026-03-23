@@ -77,6 +77,8 @@ namespace ui {
 		Margin margin;
 		Border border;
 		Padding padding;
+		Color border_color = { 0, 0, 0, 0 };
+		Color background_color = { 0, 0, 0, 0 };
 		Alignment h_alignment = Alignment::Start;
 		Alignment v_alignment = Alignment::Start;
 	};
@@ -175,9 +177,8 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
-		// FIXME: we need to move the colors into ElementStyle
-		Raylib_DrawRectangleRec(element.layout.border_box, GRAY);
-		Raylib_DrawRectangleRec(element.layout.padding_box, LIGHTGRAY);
+		Raylib_DrawRectangleRec(element.layout.border_box, element.style.border_color);
+		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
 		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(text_content->font_id);
@@ -236,6 +237,8 @@ void MainMenuScene::render(const Game& game) const {
 								.margin = ui::Margin::with_size(0),
 								.border = ui::Border::with_size(4),
 								.padding = ui::Padding::with_size(10),
+								.border_color = GRAY,
+								.background_color = LIGHTGRAY,
 								.h_alignment = ui::Alignment::Center,
 								.v_alignment = ui::Alignment::Center,
 							},
