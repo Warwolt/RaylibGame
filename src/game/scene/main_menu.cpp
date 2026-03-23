@@ -5,12 +5,35 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#include <algorithm>
 #include <memory>
 #include <variant>
 #include <vector>
 
 namespace ui {
 
+	/* Content */
+	struct Element;
+
+	enum class Direction {
+		Horizontal,
+		Vertical,
+	};
+
+	struct TextContent {
+		FontID font_id;
+		int font_size;
+		std::string text;
+	};
+
+	struct BoxContent {
+		Direction direction = Direction::Vertical;
+		std::vector<Element> children;
+	};
+
+	using ElementContent = std::variant<BoxContent, TextContent>;
+
+	/* Style */
 	enum class Alignment {
 		Start,
 		Center,
@@ -50,20 +73,6 @@ namespace ui {
 		}
 	};
 
-	struct Element;
-
-	struct TextContent {
-		FontID font_id;
-		int font_size;
-		std::string text;
-	};
-
-	struct BoxContent {
-		std::vector<Element> children;
-	};
-
-	using ElementContent = std::variant<BoxContent, TextContent>;
-
 	struct ElementStyle {
 		Margin margin;
 		Border border;
@@ -72,6 +81,7 @@ namespace ui {
 		Alignment v_alignment = Alignment::Start;
 	};
 
+	/* Layout */
 	struct ElementLayout {
 		Rectangle margin_box;
 		Rectangle border_box;
@@ -79,20 +89,12 @@ namespace ui {
 		Rectangle content_box;
 	};
 
+	/* Element */
 	struct Element {
 		ElementContent content;
 		ElementStyle style;
 		ElementLayout layout;
 	};
-
-	inline ElementLayout operator+(const ElementLayout& lhs, const Vector2& rhs) {
-		return {
-			.margin_box = lhs.margin_box + rhs,
-			.border_box = lhs.border_box + rhs,
-			.padding_box = lhs.padding_box + rhs,
-			.content_box = lhs.content_box + rhs,
-		};
-	}
 
 	void compute_element_sizes(const ResourceManager& resources, Element* element) {
 		const ElementStyle& style = element->style;
@@ -104,6 +106,31 @@ namespace ui {
 			const Vector2 text_size = Raylib_MeasureTextEx(font, text_content->text.c_str(), text_content->font_size, font_spacing);
 			layout->content_box.width = text_size.x;
 			layout->content_box.height = text_size.y;
+		}
+		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
+			for (Element& child : box_content->children) {
+				compute_element_sizes(resources, &child);
+			}
+
+			switch (box_content->direction) {
+				case Direction::Horizontal: {
+					float max_height = 0;
+					float total_width = 0;
+					for (const Element& child : box_content->children) {
+						total_width += child.layout.margin_box.width;
+						max_height = std::max(max_height, child.layout.margin_box.height);
+					}
+				} break;
+
+				case Direction::Vertical:
+					float total_height = 0;
+					float max_width = 0;
+					for (const Element& child : box_content->children) {
+						max_width = std::max(max_width, child.layout.margin_box.width);
+						total_height += child.layout.margin_box.height;
+					}
+					break;
+			}
 		}
 
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
@@ -148,6 +175,7 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
+		// FIXME: we need to move the colors into ElementStyle
 		Raylib_DrawRectangleRec(element.layout.border_box, GRAY);
 		Raylib_DrawRectangleRec(element.layout.padding_box, LIGHTGRAY);
 		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
@@ -155,6 +183,11 @@ namespace ui {
 			const Font& font = resources.get_font(text_content->font_id);
 			const Vector2 content_pos = { element.layout.content_box.x, element.layout.content_box.y };
 			Raylib_DrawTextEx(font, text_content->text.c_str(), content_pos, text_content->font_size, 0.0f, BLACK);
+		}
+		if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
+			for (const Element& child : box_content->children) {
+				draw_element(resources, child);
+			}
 		}
 	}
 
@@ -187,26 +220,38 @@ void MainMenuScene::update(Game* game) {
 
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
-	ui::Element text_element = {
+	ui::Element root_element = {
 		.content =
-			ui::TextContent {
-				.font_id = FontID::default_font(),
-				.font_size = 16,
-				.text = "Sphinx of black quarts, judge my vow!",
+			ui::BoxContent {
+				.children = {
+					ui::Element {
+						.content =
+							ui::TextContent {
+								.font_id = FontID::default_font(),
+								.font_size = 16,
+								.text = "Sphinx of black quarts, judge my vow!",
+							},
+						.style =
+							ui::ElementStyle {
+								.margin = ui::Margin::with_size(0),
+								.border = ui::Border::with_size(4),
+								.padding = ui::Padding::with_size(10),
+								.h_alignment = ui::Alignment::Center,
+								.v_alignment = ui::Alignment::Center,
+							},
+					},
+				},
 			},
 		.style =
 			ui::ElementStyle {
-				.margin = ui::Margin::with_size(4),
-				.border = ui::Border::with_size(4),
-				.padding = ui::Padding::with_size(10),
 				.h_alignment = ui::Alignment::Center,
 				.v_alignment = ui::Alignment::Center,
 			},
 	};
 
 	/* Compute layout */
-	ui::compute_element_layout(game.resources, game.window.size(), &text_element);
+	ui::compute_element_layout(game.resources, game.window.size(), &root_element);
 
 	/* Render elements */
-	ui::draw_element(game.resources, text_element);
+	ui::draw_element(game.resources, root_element);
 }

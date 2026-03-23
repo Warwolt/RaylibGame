@@ -3,7 +3,8 @@
 - Gameplay scene with basic camera + character movement
 - Collision detection test screen
 - Collision resolution test screen
-- Make hot reload library copy have a unique name to workaround windows file locking blocking reload
+- Bug: Make hot reload library copy have a unique name to workaround windows file locking blocking reload
+- Bug: Fix clang format not formatting nested designated initializers
 
 # Done
 - Basic Scene system

@@ -1,5 +1,7 @@
 #include "platform/window.h"
 
+#include <algorithm>
+
 Window Window::initialize(int width, int height) {
 	Window window;
 	window.m_viewport = Raylib_LoadRenderTexture(width, height);
@@ -44,7 +46,7 @@ void Window::update() {
 	// viewport is being rendered. The viewport is upscaled as much as possible
 	// to fit the window size with maintained aspect ratio, with black matte
 	// added to the sides if needed.
-	m_scale = min(screen_width / viewport_width, screen_height / viewport_height);
+	m_scale = std::min(screen_width / viewport_width, screen_height / viewport_height);
 	float scaled_width = (float)(m_scale * viewport_width);
 	float scaled_height = (float)(m_scale * viewport_height);
 	m_letterbox = Rectangle {
