@@ -79,8 +79,6 @@ namespace ui {
 		Padding padding;
 		Color border_color = { 0, 0, 0, 0 };
 		Color background_color = { 0, 0, 0, 0 };
-		Alignment h_alignment = Alignment::Start;
-		Alignment v_alignment = Alignment::Start;
 	};
 
 	/* Layout */
@@ -161,12 +159,13 @@ namespace ui {
 		return 0;
 	}
 
-	void compute_element_positions(Vector2 parent_size, Element* element) {
+	void compute_element_positions(Vector2 /*parent_size*/, Vector2 position, Element* element) {
 		const ElementStyle style = element->style;
 		ElementLayout* layout = &element->layout;
 
-		layout->margin_box.x = aligned_position(layout->margin_box.width, parent_size.x, style.h_alignment);
-		layout->margin_box.y = aligned_position(layout->margin_box.height, parent_size.y, style.v_alignment);
+		/* Position all boxes relative to each other */
+		layout->margin_box.x = position.x;
+		layout->margin_box.y = position.y;
 		layout->border_box.x = layout->margin_box.x + style.margin.left;
 		layout->border_box.y = layout->margin_box.y + style.margin.top;
 		layout->padding_box.x = layout->border_box.x + style.border.left;
@@ -174,46 +173,19 @@ namespace ui {
 		layout->content_box.x = layout->padding_box.x + style.padding.left;
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
 
-		// FIXME: Children should be spaced out equally
-		// This is some temporary robot written code that's not doing the right thing.
-		// We need flexbox style main axis and cross axis item distribution stuff.
-		// https://css-tricks.com/snippets/css/a-guide-to-flexbox/
-		if (ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element->content)) {
-			float cursor_x = layout->content_box.x;
-			float cursor_y = layout->content_box.y;
-
-			for (ui::Element& child : box_content->children) {
-				// First, position child relative to its own parent size
-				const Vector2 content_box_size = { layout->content_box.width, layout->content_box.height };
-				compute_element_positions(content_box_size, &child);
-
-				// Offset by current cursor
-				child.layout.margin_box.x += cursor_x;
-				child.layout.margin_box.y += cursor_y;
-				child.layout.border_box.x += cursor_x;
-				child.layout.border_box.y += cursor_y;
-				child.layout.padding_box.x += cursor_x;
-				child.layout.padding_box.y += cursor_y;
-				child.layout.content_box.x += cursor_x;
-				child.layout.content_box.y += cursor_y;
-
-				// Advance cursor based on layout direction
-				switch (box_content->direction) {
-					case ui::Direction::Horizontal:
-						cursor_x += child.layout.margin_box.width;
-						break;
-
-					case ui::Direction::Vertical:
-						cursor_y += child.layout.margin_box.height;
-						break;
-				}
+		/* Recurse into children */
+		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
+			for (Element& child : box_content->children) {
+				Vector2 element_size = { layout->margin_box.width, layout->margin_box.height };
+				Vector2 child_position = { layout->content_box.x, layout->content_box.y };
+				compute_element_positions(element_size, child_position, &child);
 			}
 		}
 	}
 
 	void compute_element_layout(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		compute_element_sizes(resources, element);
-		compute_element_positions(parent_size, element);
+		compute_element_positions(parent_size, Vector2 { 0, 0 }, element);
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
@@ -283,11 +255,9 @@ void MainMenuScene::render(const Game& game) const {
 					},
 				},
 			},
-		.style =
-			ui::ElementStyle {
-				.h_alignment = ui::Alignment::Center,
-				.v_alignment = ui::Alignment::Center,
-			},
+		.style = {
+			.margin = ui::Margin::with_size(10),
+		},
 	};
 
 	/* Compute layout */
