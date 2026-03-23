@@ -21,8 +21,6 @@ namespace ui {
 	};
 
 	struct TextContent {
-		FontID font_id;
-		int font_size;
 		std::string text;
 	};
 
@@ -31,7 +29,7 @@ namespace ui {
 		std::vector<Element> children;
 	};
 
-	using ElementContent = std::variant<BoxContent, TextContent>;
+	using Content = std::variant<BoxContent, TextContent>;
 
 	/* Style */
 	enum class Alignment {
@@ -73,16 +71,18 @@ namespace ui {
 		}
 	};
 
-	struct ElementStyle {
+	struct Style {
 		Margin margin;
 		Border border;
 		Padding padding;
 		Color border_color = { 0, 0, 0, 0 };
 		Color background_color = { 0, 0, 0, 0 };
+		FontID font_id;
+		int font_size;
 	};
 
 	/* Layout */
-	struct ElementLayout {
+	struct Layout {
 		Rectangle margin_box;
 		Rectangle border_box;
 		Rectangle padding_box;
@@ -91,19 +91,19 @@ namespace ui {
 
 	/* Element */
 	struct Element {
-		ElementContent content;
-		ElementStyle style;
-		ElementLayout layout;
+		Content content;
+		Style style;
+		Layout layout;
 	};
 
 	void compute_element_sizes(const ResourceManager& resources, Element* element) {
-		const ElementStyle& style = element->style;
-		ElementLayout* layout = &element->layout;
+		const Style& style = element->style;
+		Layout* layout = &element->layout;
 
 		if (const TextContent* text_content = std::get_if<TextContent>(&element->content)) {
-			const Font& font = resources.get_font(text_content->font_id);
+			const Font& font = resources.get_font(style.font_id);
 			const float font_spacing = 0.0f;
-			const Vector2 text_size = Raylib_MeasureTextEx(font, text_content->text.c_str(), text_content->font_size, font_spacing);
+			const Vector2 text_size = Raylib_MeasureTextEx(font, text_content->text.c_str(), style.font_size, font_spacing);
 			layout->content_box.width = text_size.x;
 			layout->content_box.height = text_size.y;
 		}
@@ -160,8 +160,8 @@ namespace ui {
 	}
 
 	void compute_element_positions(Vector2 /*parent_size*/, Vector2 position, Element* element) {
-		const ElementStyle style = element->style;
-		ElementLayout* layout = &element->layout;
+		const Style style = element->style;
+		Layout* layout = &element->layout;
 
 		/* Position all boxes relative to each other */
 		layout->margin_box.x = position.x;
@@ -189,13 +189,14 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
+		const Style& style = element.style;
 		Raylib_DrawRectangleRec(element.layout.border_box, element.style.border_color);
 		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
 		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
-			const Font& font = resources.get_font(text_content->font_id);
+			const Font& font = resources.get_font(style.font_id);
 			const Vector2 content_pos = { element.layout.content_box.x, element.layout.content_box.y };
-			Raylib_DrawTextEx(font, text_content->text.c_str(), content_pos, text_content->font_size, 0.0f, BLACK);
+			Raylib_DrawTextEx(font, text_content->text.c_str(), content_pos, style.font_size, 0.0f, BLACK);
 		}
 		if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
 			for (const Element& child : box_content->children) {
@@ -204,7 +205,7 @@ namespace ui {
 		}
 	}
 
-	void debug_draw_element_boxes(const ElementLayout& element_boxes) {
+	void debug_draw_element_boxes(const Layout& element_boxes) {
 		const Color margin_color = { 240, 206, 163, 255 };
 		const Color border_color = { 246, 221, 161, 255 };
 		const Color padding_color = { 198, 207, 145, 255 };
@@ -233,6 +234,15 @@ void MainMenuScene::update(Game* game) {
 
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
+	ui::Style text_style = {
+		.margin = ui::Margin::with_size(10),
+		.border = ui::Border::with_size(4),
+		.padding = ui::Padding::with_size(10),
+		.border_color = GRAY,
+		.background_color = LIGHTGRAY,
+		.font_id = FontID::default_font(),
+		.font_size = 16,
+	};
 	ui::Element root_element = {
 		.content =
 			ui::BoxContent {
@@ -240,18 +250,9 @@ void MainMenuScene::render(const Game& game) const {
 					ui::Element {
 						.content =
 							ui::TextContent {
-								.font_id = FontID::default_font(),
-								.font_size = 16,
 								.text = "Sphinx of black quarts, judge my vow!",
 							},
-						.style =
-							ui::ElementStyle {
-								.margin = ui::Margin::with_size(10),
-								.border = ui::Border::with_size(4),
-								.padding = ui::Padding::with_size(10),
-								.border_color = GRAY,
-								.background_color = LIGHTGRAY,
-							},
+						.style = text_style,
 					},
 				},
 			},
