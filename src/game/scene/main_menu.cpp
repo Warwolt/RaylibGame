@@ -91,8 +91,8 @@ namespace ui {
 
 	/* Element */
 	struct Element {
-		Content content;
 		Style style;
+		Content content;
 		Layout layout;
 	};
 
@@ -175,10 +175,22 @@ namespace ui {
 
 		/* Recurse into children */
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
+			Vector2 cursor = { layout->content_box.x, layout->content_box.y };
 			for (Element& child : box_content->children) {
+				/* Compute child position */
 				Vector2 element_size = { layout->margin_box.width, layout->margin_box.height };
-				Vector2 child_position = { layout->content_box.x, layout->content_box.y };
+				Vector2 child_position = cursor;
 				compute_element_positions(element_size, child_position, &child);
+
+				/* Move cursor */
+				switch (box_content->direction) {
+					case Direction::Horizontal:
+						cursor.x += child.layout.margin_box.width;
+						break;
+					case Direction::Vertical:
+						cursor.y += child.layout.margin_box.height;
+						break;
+				}
 			}
 		}
 	}
@@ -235,7 +247,7 @@ void MainMenuScene::update(Game* game) {
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
 	ui::Style text_style = {
-		.margin = ui::Margin::with_size(10),
+		.margin = ui::Margin::with_size(0),
 		.border = ui::Border::with_size(4),
 		.padding = ui::Padding::with_size(10),
 		.border_color = GRAY,
@@ -244,21 +256,29 @@ void MainMenuScene::render(const Game& game) const {
 		.font_size = 16,
 	};
 	ui::Element root_element = {
+		.style = {
+			.margin = ui::Margin::with_size(10),
+		},
 		.content =
 			ui::BoxContent {
+				.direction = ui::Direction::Horizontal,
 				.children = {
 					ui::Element {
+						.style = text_style,
 						.content =
 							ui::TextContent {
 								.text = "Sphinx of black quarts, judge my vow!",
 							},
+					},
+					ui::Element {
 						.style = text_style,
+						.content =
+							ui::TextContent {
+								.text = "The quick brown fox jumps over the lazy dog",
+							},
 					},
 				},
 			},
-		.style = {
-			.margin = ui::Margin::with_size(10),
-		},
 	};
 
 	/* Compute layout */
