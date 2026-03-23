@@ -122,6 +122,8 @@ namespace ui {
 						total_width += child.layout.margin_box.width;
 						max_height = std::max(max_height, child.layout.margin_box.height);
 					}
+					layout->content_box.width = total_width;
+					layout->content_box.height = max_height;
 				} break;
 
 				case Direction::Vertical:
@@ -131,6 +133,8 @@ namespace ui {
 						max_width = std::max(max_width, child.layout.margin_box.width);
 						total_height += child.layout.margin_box.height;
 					}
+					layout->content_box.width = max_width;
+					layout->content_box.height = total_height;
 					break;
 			}
 		}
@@ -169,6 +173,42 @@ namespace ui {
 		layout->padding_box.y = layout->border_box.y + style.border.top;
 		layout->content_box.x = layout->padding_box.x + style.padding.left;
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
+
+		// FIXME: Children should be spaced out equally
+		// This is some temporary robot written code that's not doing the right thing.
+		// We need flexbox style main axis and cross axis item distribution stuff.
+		// https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+		if (ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element->content)) {
+			float cursor_x = layout->content_box.x;
+			float cursor_y = layout->content_box.y;
+
+			for (ui::Element& child : box_content->children) {
+				// First, position child relative to its own parent size
+				const Vector2 content_box_size = { layout->content_box.width, layout->content_box.height };
+				compute_element_positions(content_box_size, &child);
+
+				// Offset by current cursor
+				child.layout.margin_box.x += cursor_x;
+				child.layout.margin_box.y += cursor_y;
+				child.layout.border_box.x += cursor_x;
+				child.layout.border_box.y += cursor_y;
+				child.layout.padding_box.x += cursor_x;
+				child.layout.padding_box.y += cursor_y;
+				child.layout.content_box.x += cursor_x;
+				child.layout.content_box.y += cursor_y;
+
+				// Advance cursor based on layout direction
+				switch (box_content->direction) {
+					case ui::Direction::Horizontal:
+						cursor_x += child.layout.margin_box.width;
+						break;
+
+					case ui::Direction::Vertical:
+						cursor_y += child.layout.margin_box.height;
+						break;
+				}
+			}
+		}
 	}
 
 	void compute_element_layout(const ResourceManager& resources, Vector2 parent_size, Element* element) {
@@ -234,13 +274,11 @@ void MainMenuScene::render(const Game& game) const {
 							},
 						.style =
 							ui::ElementStyle {
-								.margin = ui::Margin::with_size(0),
+								.margin = ui::Margin::with_size(10),
 								.border = ui::Border::with_size(4),
 								.padding = ui::Padding::with_size(10),
 								.border_color = GRAY,
 								.background_color = LIGHTGRAY,
-								.h_alignment = ui::Alignment::Center,
-								.v_alignment = ui::Alignment::Center,
 							},
 					},
 				},
