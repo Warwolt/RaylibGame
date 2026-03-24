@@ -38,47 +38,41 @@ namespace ui {
 		End,
 	};
 
-	struct Margin {
+	struct Spacing {
 		float top;
 		float bottom;
 		float left;
 		float right;
 
-		static Margin with_size(float size) {
-			return { size, size, size, size };
+		float horizontal() const {
+			return this->left + this->right;
 		}
-	};
 
-	struct Border {
-		float top;
-		float bottom;
-		float left;
-		float right;
-
-		static Border with_size(float size) {
-			return { size, size, size, size };
+		float vertical() const {
+			return this->top + this->bottom;
 		}
-	};
 
-	struct Padding {
-		float top;
-		float bottom;
-		float left;
-		float right;
-
-		static Padding with_size(float size) {
+		static Spacing with_size(float size) {
 			return { size, size, size, size };
 		}
 	};
 
 	struct Style {
-		Margin margin;
-		Border border;
-		Padding padding;
+		Spacing margin;
+		Spacing border;
+		Spacing padding;
 		Color border_color = { 0, 0, 0, 0 };
 		Color background_color = { 0, 0, 0, 0 };
 		FontID font_id;
 		int font_size;
+
+		float horizontal_spacing() const {
+			return margin.horizontal() + border.horizontal() + padding.horizontal();
+		}
+
+		float vertical_spacing() const {
+			return margin.vertical() + border.vertical() + padding.vertical();
+		}
 	};
 
 	/* Layout */
@@ -96,7 +90,7 @@ namespace ui {
 		Layout layout;
 	};
 
-	void compute_element_sizes(const ResourceManager& resources, Element* element) {
+	void compute_element_sizes(const ResourceManager& resources, Vector2 available_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
@@ -107,33 +101,13 @@ namespace ui {
 			layout->content_box.width = text_size.x;
 			layout->content_box.height = text_size.y;
 		}
+
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
+			layout->content_box.width = available_size.x - style.horizontal_spacing();
+			layout->content_box.height = available_size.y - style.vertical_spacing();
 			for (Element& child : box_content->children) {
-				compute_element_sizes(resources, &child);
-			}
-
-			switch (box_content->direction) {
-				case Direction::Horizontal: {
-					float max_height = 0;
-					float total_width = 0;
-					for (const Element& child : box_content->children) {
-						total_width += child.layout.margin_box.width;
-						max_height = std::max(max_height, child.layout.margin_box.height);
-					}
-					layout->content_box.width = total_width;
-					layout->content_box.height = max_height;
-				} break;
-
-				case Direction::Vertical:
-					float total_height = 0;
-					float max_width = 0;
-					for (const Element& child : box_content->children) {
-						max_width = std::max(max_width, child.layout.margin_box.width);
-						total_height += child.layout.margin_box.height;
-					}
-					layout->content_box.width = max_width;
-					layout->content_box.height = total_height;
-					break;
+				Vector2 available_child_size = available_size; // FIXME: compute actual
+				compute_element_sizes(resources, available_child_size, &child);
 			}
 		}
 
@@ -145,21 +119,7 @@ namespace ui {
 		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
 
-	float aligned_position(float element_size, float parent_size, Alignment alignment) {
-		switch (alignment) {
-			case Alignment::Start:
-				return 0;
-
-			case Alignment::Center:
-				return (parent_size - element_size) / 2.0f;
-
-			case Alignment::End:
-				return parent_size - element_size;
-		}
-		return 0;
-	}
-
-	void compute_element_positions(Vector2 /*parent_size*/, Vector2 position, Element* element) {
+	void compute_element_positions(Vector2 position, Element* element) {
 		const Style style = element->style;
 		Layout* layout = &element->layout;
 
@@ -180,7 +140,7 @@ namespace ui {
 				/* Compute child position */
 				Vector2 element_size = { layout->margin_box.width, layout->margin_box.height };
 				Vector2 child_position = cursor;
-				compute_element_positions(element_size, child_position, &child);
+				compute_element_positions(child_position, &child);
 
 				/* Move cursor */
 				switch (box_content->direction) {
@@ -195,9 +155,10 @@ namespace ui {
 		}
 	}
 
-	void compute_element_layout(const ResourceManager& resources, Vector2 parent_size, Element* element) {
-		compute_element_sizes(resources, element);
-		compute_element_positions(parent_size, Vector2 { 0, 0 }, element);
+	void compute_element_layout(const ResourceManager& resources, Vector2 window_size, Element* element) {
+		const Vector2 top_left = { 0, 0 };
+		compute_element_sizes(resources, window_size, element);
+		compute_element_positions(top_left, element);
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
@@ -247,18 +208,16 @@ void MainMenuScene::update(Game* game) {
 void MainMenuScene::render(const Game& game) const {
 	/* Input */
 	ui::Style text_style = {
-		.margin = ui::Margin::with_size(0),
-		.border = ui::Border::with_size(4),
-		.padding = ui::Padding::with_size(10),
+		.margin = ui::Spacing::with_size(0),
+		.border = ui::Spacing::with_size(4),
+		.padding = ui::Spacing::with_size(10),
 		.border_color = GRAY,
 		.background_color = LIGHTGRAY,
 		.font_id = FontID::default_font(),
 		.font_size = 16,
 	};
 	ui::Element root_element = {
-		.style = {
-			.margin = ui::Margin::with_size(10),
-		},
+		.style = {},
 		.content =
 			ui::BoxContent {
 				.direction = ui::Direction::Horizontal,
