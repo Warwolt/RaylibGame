@@ -38,6 +38,16 @@ namespace ui {
 		End,
 	};
 
+	struct Pixels {
+		int value;
+	};
+
+	struct Percentage {
+		int value;
+	};
+
+	using Size = std::variant<Pixels, Percentage>;
+
 	struct Spacing {
 		float top;
 		float bottom;
@@ -58,6 +68,8 @@ namespace ui {
 	};
 
 	struct Style {
+		Size width = Percentage(100);
+		Size height = Percentage(100);
 		Spacing margin;
 		Spacing border;
 		Spacing padding;
@@ -98,15 +110,41 @@ namespace ui {
 			const Font& font = resources.get_font(style.font_id);
 			const float font_spacing = 0.0f;
 			const Vector2 text_size = Raylib_MeasureTextEx(font, text_content->text.c_str(), style.font_size, font_spacing);
+			// FIXME: if nominal text width is longer than available width, we
+			// have to re-flow the text onto multiple lines.
 			layout->content_box.width = text_size.x;
 			layout->content_box.height = text_size.y;
 		}
 
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
-			layout->content_box.width = available_size.x - style.horizontal_spacing();
-			layout->content_box.height = available_size.y - style.vertical_spacing();
+			/* Element width */
+			float element_width = 0.0f;
+			if (const Pixels* absolute_width = std::get_if<Pixels>(&element->style.width)) {
+				element_width = std::min<float>(absolute_width->value, available_size.x);
+			}
+			if (const Percentage* relative_width = std::get_if<Percentage>(&element->style.width)) {
+				element_width = (relative_width->value / 100.0f) * available_size.x;
+			}
+
+			/* Element height */
+			float element_height = 0.0f;
+			if (const Pixels* absolute_height = std::get_if<Pixels>(&element->style.height)) {
+				element_height = std::min<float>(absolute_height->value, available_size.y);
+			}
+			if (const Percentage* relative_height = std::get_if<Percentage>(&element->style.height)) {
+				element_height = (relative_height->value / 100.0f) * available_size.y;
+			}
+
+			/* Size content box */
+			layout->content_box.width = element_width - style.horizontal_spacing();
+			layout->content_box.height = element_height - style.vertical_spacing();
+
+			/* Size all children */
 			for (Element& child : box_content->children) {
-				Vector2 available_child_size = available_size; // FIXME: compute actual
+				// FIXME: Check what the _desired_ size of the child is, and set
+				// the available size to the minimum of desired size and (parent
+				// size)/N where N is num children
+				Vector2 available_child_size = available_size / box_content->children.size();
 				compute_element_sizes(resources, available_child_size, &child);
 			}
 		}
@@ -217,7 +255,10 @@ void MainMenuScene::render(const Game& game) const {
 		.font_size = 16,
 	};
 	ui::Element root_element = {
-		.style = {},
+		.style = {
+			.width = ui::Percentage(50),
+			.height = ui::Percentage(50),
+		},
 		.content =
 			ui::BoxContent {
 				.direction = ui::Direction::Horizontal,
