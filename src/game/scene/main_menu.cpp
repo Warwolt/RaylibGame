@@ -38,15 +38,36 @@ namespace ui {
 		End,
 	};
 
-	struct Pixels {
-		int value;
+	struct Absolute {
+		int pixels;
 	};
 
-	struct Percentage {
-		int value;
+	struct Relative {
+		int percentage;
 	};
 
-	using Size = std::variant<Pixels, Percentage>;
+	struct Size {
+		std::variant<Absolute, Relative> value;
+
+		Size(Absolute value)
+			: value(value) {
+		}
+
+		Size(Relative value)
+			: value(value) {
+		}
+
+		float fit_to_parent(float parent_size) {
+			float pixels = 0.0f;
+			if (const Absolute* absolute_width = std::get_if<Absolute>(&this->value)) {
+				pixels = std::min<float>(absolute_width->pixels, parent_size);
+			}
+			if (const Relative* relative_width = std::get_if<Relative>(&this->value)) {
+				pixels = (relative_width->percentage / 100.0f) * parent_size;
+			}
+			return pixels;
+		}
+	};
 
 	struct Spacing {
 		float top;
@@ -68,8 +89,8 @@ namespace ui {
 	};
 
 	struct Style {
-		Size width = Percentage(100);
-		Size height = Percentage(100);
+		Size width = Relative(100);
+		Size height = Relative(100);
 		Spacing margin;
 		Spacing border;
 		Spacing padding;
@@ -117,25 +138,9 @@ namespace ui {
 		}
 
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
-			/* Element width */
-			float element_width = 0.0f;
-			if (const Pixels* absolute_width = std::get_if<Pixels>(&element->style.width)) {
-				element_width = std::min<float>(absolute_width->value, available_size.x);
-			}
-			if (const Percentage* relative_width = std::get_if<Percentage>(&element->style.width)) {
-				element_width = (relative_width->value / 100.0f) * available_size.x;
-			}
-
-			/* Element height */
-			float element_height = 0.0f;
-			if (const Pixels* absolute_height = std::get_if<Pixels>(&element->style.height)) {
-				element_height = std::min<float>(absolute_height->value, available_size.y);
-			}
-			if (const Percentage* relative_height = std::get_if<Percentage>(&element->style.height)) {
-				element_height = (relative_height->value / 100.0f) * available_size.y;
-			}
-
 			/* Size content box */
+			const float element_width = element->style.width.fit_to_parent(available_size.x);
+			const float element_height = element->style.width.fit_to_parent(available_size.y);
 			layout->content_box.width = element_width - style.horizontal_spacing();
 			layout->content_box.height = element_height - style.vertical_spacing();
 
@@ -256,8 +261,8 @@ void MainMenuScene::render(const Game& game) const {
 	};
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Percentage(50),
-			.height = ui::Percentage(50),
+			.width = ui::Relative(50),
+			.height = ui::Relative(50),
 		},
 		.content =
 			ui::BoxContent {
