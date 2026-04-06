@@ -129,12 +129,16 @@ namespace ui {
 
 		if (const TextContent* text_content = std::get_if<TextContent>(&element->content)) {
 			const Font& font = resources.get_font(style.font_id);
-			const float font_spacing = 0.0f;
-			const Vector2 text_size = Raylib_MeasureTextEx(font, text_content->text.c_str(), style.font_size, font_spacing);
-			// FIXME: if nominal text width is longer than available width, we
-			// have to re-flow the text onto multiple lines.
-			layout->content_box.width = text_size.x;
-			layout->content_box.height = text_size.y;
+			float text_width = 0;
+			const float text_height = element->style.font_size;
+			const float font_scaling = element->style.font_size / (float)font.baseSize;
+			for (char character : text_content->text) {
+				const GlyphInfo glyph = Raylib_GetGlyphInfo(font, character);
+				const float advance_x = font_scaling * glyph.advanceX;
+				text_width += advance_x;
+			}
+			layout->content_box.width = text_width;
+			layout->content_box.height = text_height;
 		}
 
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
