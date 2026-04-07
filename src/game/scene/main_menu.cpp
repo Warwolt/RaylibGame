@@ -178,7 +178,7 @@ namespace ui {
 				}
 				text_width = std::max<int>(text_width, cursor.x);
 			}
-			const int text_height = cursor.y + style.font_size;
+			const int text_height = std::min<int>(cursor.y, max_text_size.y);
 
 			layout->content_box.width = text_width;
 			layout->content_box.height = text_height;
@@ -196,10 +196,19 @@ namespace ui {
 				// FIXME: Check what the _desired_ size of the child is, and set
 				// the available size to the minimum of desired size and (parent
 				// size)/N where N is num children
-				Vector2 available_child_size = {
-					.x = layout->content_box.width / box_content->children.size(),
-					.y = layout->content_box.height / box_content->children.size(),
-				};
+				Vector2 available_child_size = {};
+				if (box_content->direction == Direction::Horizontal) {
+					available_child_size = {
+						.x = layout->content_box.width / box_content->children.size(),
+						.y = layout->content_box.height,
+					};
+				}
+				if (box_content->direction == Direction::Vertical) {
+					available_child_size = {
+						.x = layout->content_box.width,
+						.y = layout->content_box.height / box_content->children.size(),
+					};
+				}
 				compute_element_sizes(resources, available_child_size, &child);
 			}
 		}
@@ -261,9 +270,14 @@ namespace ui {
 		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
+			const Rectangle content_box = element.layout.content_box;
 			Vector2 line_pos = { element.layout.content_box.x, element.layout.content_box.y };
 			for (const std::string& line : text_content->lines) {
-				Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, BLACK);
+				Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
+				{
+					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, BLACK);
+				}
+				Raylib_EndScissorMode();
 				line_pos.y += style.font_size;
 			}
 		}
@@ -302,6 +316,8 @@ void MainMenuScene::update(Game* game) {
 }
 
 void MainMenuScene::render(const Game& game) const {
+	Raylib_ClearBackground(BLUE);
+
 	/* Input */
 	ui::Style text_style = {
 		.margin = ui::Spacing::with_size(0),
@@ -314,13 +330,20 @@ void MainMenuScene::render(const Game& game) const {
 	};
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Relative(100),
-			.height = ui::Relative(50),
+			.width = ui::Relative(50),
+			.height = ui::Relative(49),
 		},
 		.content =
 			ui::BoxContent {
-				.direction = ui::Direction::Horizontal,
+				.direction = ui::Direction::Vertical,
 				.children = {
+					ui::Element {
+						.style = text_style,
+						.content =
+							ui::TextContent {
+								.text = "Super Metroid[a][b] is a 1994 action-adventure game developed by Nintendo and Intelligent Systems and published by Nintendo for the Super Nintendo Entertainment System (SNES). It is the third Metroid game, following the Game Boy game Metroid II: Return of Samus (1991). The player controls bounty hunter Samus Aran, who travels to the planet Zebes to retrieve an infant Metroid creature stolen by the Space Pirate leader Ridley.",
+							},
+					},
 					ui::Element {
 						.style = text_style,
 						.content =
