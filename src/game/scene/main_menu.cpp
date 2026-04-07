@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <sstream>
 #include <variant>
 #include <vector>
 
@@ -22,6 +23,7 @@ namespace ui {
 
 	struct TextContent {
 		std::string text;
+		std::vector<std::string> lines; // computed during layout
 	};
 
 	struct BoxContent {
@@ -57,7 +59,7 @@ namespace ui {
 			: value(value) {
 		}
 
-		float fit_to_parent(float parent_size) {
+		float fit_to_parent(float parent_size) const {
 			float pixels = 0.0f;
 			if (const Absolute* absolute_width = std::get_if<Absolute>(&this->value)) {
 				pixels = std::min<float>(absolute_width->pixels, parent_size);
@@ -123,28 +125,69 @@ namespace ui {
 		Layout layout;
 	};
 
+	std::vector<std::string> split_words(const std::string& text) {
+		std::vector<std::string> words;
+
+		std::istringstream iss(text);
+		std::string word;
+		while (iss >> word) {
+			words.push_back(word);
+		}
+
+		return words;
+	}
+
 	void compute_element_sizes(const ResourceManager& resources, Vector2 available_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
-		if (const TextContent* text_content = std::get_if<TextContent>(&element->content)) {
+		if (TextContent* text_content = std::get_if<TextContent>(&element->content)) {
 			const Font& font = resources.get_font(style.font_id);
-			float text_width = 0;
-			const float text_height = element->style.font_size;
-			const float font_scaling = element->style.font_size / (float)font.baseSize;
-			for (char character : text_content->text) {
-				const GlyphInfo glyph = Raylib_GetGlyphInfo(font, character);
-				const float advance_x = font_scaling * glyph.advanceX;
-				text_width += advance_x;
+			const Vector2 max_text_size = {
+				available_size.x - style.horizontal_spacing(),
+				available_size.y - style.vertical_spacing(),
+			};
+			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
+			const std::vector<std::string> words = split_words(text_content->text);
+
+			Vector2 cursor = { 0, 0 };
+			int text_width = 0;
+			text_content->lines.push_back("");
+			for (const std::string& word : words) {
+				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, 0.0f).x;
+				// add space (if not at start of line)
+				if (cursor.x > 0) {
+					text_content->lines.back() += " ";
+					cursor.x += space_width;
+				}
+				// add word
+				if (cursor.x + word_length <= max_text_size.x) {
+					// add word to current line
+					text_content->lines.back() += word;
+					cursor.x += word_length;
+				} else {
+					// switch to new line
+					cursor.x = 0;
+					cursor.y = cursor.y + style.font_size;
+					text_content->lines.push_back("");
+					if (cursor.y > max_text_size.y) {
+						break;
+					}
+					text_content->lines.back() += word;
+					cursor.x = word_length;
+				}
+				text_width = std::max<int>(text_width, cursor.x);
 			}
+			const int text_height = cursor.y + style.font_size;
+
 			layout->content_box.width = text_width;
 			layout->content_box.height = text_height;
 		}
 
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
 			/* Size content box */
-			const float element_width = element->style.width.fit_to_parent(available_size.x);
-			const float element_height = element->style.width.fit_to_parent(available_size.y);
+			const float element_width = style.width.fit_to_parent(available_size.x);
+			const float element_height = style.height.fit_to_parent(available_size.y);
 			layout->content_box.width = element_width - style.horizontal_spacing();
 			layout->content_box.height = element_height - style.vertical_spacing();
 
@@ -153,7 +196,10 @@ namespace ui {
 				// FIXME: Check what the _desired_ size of the child is, and set
 				// the available size to the minimum of desired size and (parent
 				// size)/N where N is num children
-				Vector2 available_child_size = available_size / box_content->children.size();
+				Vector2 available_child_size = {
+					.x = layout->content_box.width / box_content->children.size(),
+					.y = layout->content_box.height / box_content->children.size(),
+				};
 				compute_element_sizes(resources, available_child_size, &child);
 			}
 		}
@@ -215,8 +261,11 @@ namespace ui {
 		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
-			const Vector2 content_pos = { element.layout.content_box.x, element.layout.content_box.y };
-			Raylib_DrawTextEx(font, text_content->text.c_str(), content_pos, style.font_size, 0.0f, BLACK);
+			Vector2 line_pos = { element.layout.content_box.x, element.layout.content_box.y };
+			for (const std::string& line : text_content->lines) {
+				Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, BLACK);
+				line_pos.y += style.font_size;
+			}
 		}
 		if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
 			for (const Element& child : box_content->children) {
@@ -256,8 +305,8 @@ void MainMenuScene::render(const Game& game) const {
 	/* Input */
 	ui::Style text_style = {
 		.margin = ui::Spacing::with_size(0),
-		.border = ui::Spacing::with_size(4),
-		.padding = ui::Spacing::with_size(10),
+		.border = ui::Spacing::with_size(0),
+		.padding = ui::Spacing::with_size(0),
 		.border_color = GRAY,
 		.background_color = LIGHTGRAY,
 		.font_id = FontID::default_font(),
@@ -265,7 +314,7 @@ void MainMenuScene::render(const Game& game) const {
 	};
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Relative(50),
+			.width = ui::Relative(100),
 			.height = ui::Relative(50),
 		},
 		.content =
@@ -276,14 +325,7 @@ void MainMenuScene::render(const Game& game) const {
 						.style = text_style,
 						.content =
 							ui::TextContent {
-								.text = "Sphinx of black quarts, judge my vow!",
-							},
-					},
-					ui::Element {
-						.style = text_style,
-						.content =
-							ui::TextContent {
-								.text = "The quick brown fox jumps over the lazy dog",
+								.text = "Super Metroid[a][b] is a 1994 action-adventure game developed by Nintendo and Intelligent Systems and published by Nintendo for the Super Nintendo Entertainment System (SNES). It is the third Metroid game, following the Game Boy game Metroid II: Return of Samus (1991). The player controls bounty hunter Samus Aran, who travels to the planet Zebes to retrieve an infant Metroid creature stolen by the Space Pirate leader Ridley.",
 							},
 					},
 				},
