@@ -267,13 +267,13 @@ namespace ui {
 		const Style& style = element.style;
 		Raylib_DrawRectangleRec(element.layout.border_box, element.style.border_color);
 		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
-		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Rectangle content_box = element.layout.content_box;
+			const Rectangle padding_box = element.layout.padding_box;
 			Vector2 line_pos = { element.layout.content_box.x, element.layout.content_box.y };
 			for (const std::string& line : text_content->lines) {
-				Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
+				Raylib_BeginScissorMode(padding_box.x, padding_box.y, padding_box.width, padding_box.height);
 				{
 					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, BLACK);
 				}
@@ -286,6 +286,7 @@ namespace ui {
 				draw_element(resources, child);
 			}
 		}
+		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
 	}
 
 	void debug_draw_element_boxes(const Layout& element_boxes) {
@@ -320,9 +321,9 @@ void MainMenuScene::render(const Game& game) const {
 
 	/* Input */
 	ui::Style text_style = {
-		.margin = ui::Spacing::with_size(0),
-		.border = ui::Spacing::with_size(0),
-		.padding = ui::Spacing::with_size(0),
+		.margin = ui::Spacing::with_size(10),
+		.border = ui::Spacing::with_size(10),
+		.padding = ui::Spacing::with_size(20),
 		.border_color = GRAY,
 		.background_color = LIGHTGRAY,
 		.font_id = FontID::default_font(),
@@ -330,8 +331,8 @@ void MainMenuScene::render(const Game& game) const {
 	};
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Relative(50),
-			.height = ui::Relative(49),
+			.width = ui::Relative(100),
+			.height = ui::Relative(100),
 		},
 		.content =
 			ui::BoxContent {
