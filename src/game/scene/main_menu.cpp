@@ -96,6 +96,7 @@ namespace ui {
 		Spacing margin;
 		Spacing border;
 		Spacing padding;
+		Alignment alignment;
 		Color border_color = { 0, 0, 0, 0 };
 		Color background_color = { 0, 0, 0, 0 };
 		FontID font_id;
@@ -151,36 +152,33 @@ namespace ui {
 			const std::vector<std::string> words = split_words(text_content->text);
 
 			Vector2 cursor = { 0, 0 };
-			int text_width = 0;
 			text_content->lines.push_back("");
 			for (const std::string& word : words) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, 0.0f).x;
-				// add space (if not at start of line)
-				if (cursor.x > 0) {
-					text_content->lines.back() += " ";
-					cursor.x += space_width;
-				}
-				// add word
-				if (cursor.x + word_length <= max_text_size.x) {
-					// add word to current line
+				const float projected_x = cursor.x > 0 ? cursor.x + space_width + word_length : word_length;
+				if (projected_x <= max_text_size.x) {
+					// word fits on the current line
+					if (cursor.x > 0) {
+						text_content->lines.back() += " ";
+						cursor.x += space_width;
+					}
 					text_content->lines.back() += word;
 					cursor.x += word_length;
 				} else {
 					// switch to new line
 					cursor.x = 0;
 					cursor.y = cursor.y + style.font_size;
-					text_content->lines.push_back("");
-					if (cursor.y > max_text_size.y) {
+					if (cursor.y + style.font_size > max_text_size.y) {
 						break;
 					}
+					text_content->lines.push_back("");
 					text_content->lines.back() += word;
 					cursor.x = word_length;
 				}
-				text_width = std::max<int>(text_width, cursor.x);
 			}
-			const int text_height = std::min<int>(cursor.y, max_text_size.y);
+			const int text_height = std::min<int>(cursor.y + style.font_size, max_text_size.y);
 
-			layout->content_box.width = text_width;
+			layout->content_box.width = max_text_size.x;
 			layout->content_box.height = text_height;
 		}
 
@@ -267,18 +265,39 @@ namespace ui {
 		const Style& style = element.style;
 		Raylib_DrawRectangleRec(element.layout.border_box, element.style.border_color);
 		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
+		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
+
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Rectangle content_box = element.layout.content_box;
-			const Rectangle padding_box = element.layout.padding_box;
-			Vector2 line_pos = { element.layout.content_box.x, element.layout.content_box.y };
+
+			int line_num = 0;
 			for (const std::string& line : text_content->lines) {
-				Raylib_BeginScissorMode(padding_box.x, padding_box.y, padding_box.width, padding_box.height);
+				const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, 0.0f).x;
+				const int remainder = content_box.width - line_length;
+				int left_padding = 0;
+				switch (style.alignment) {
+					case Alignment::Start:
+						left_padding = 0;
+						break;
+					case Alignment::Center:
+						left_padding = remainder / 2;
+						break;
+					case Alignment::End:
+						left_padding = remainder;
+						break;
+				}
+				Vector2 line_pos = {
+					.x = element.layout.content_box.x + left_padding,
+					.y = element.layout.content_box.y + line_num * style.font_size,
+				};
+
+				Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 				{
 					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, BLACK);
 				}
 				Raylib_EndScissorMode();
-				line_pos.y += style.font_size;
+				line_num++;
 			}
 		}
 		if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
@@ -286,7 +305,6 @@ namespace ui {
 				draw_element(resources, child);
 			}
 		}
-		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
 	}
 
 	void debug_draw_element_boxes(const Layout& element_boxes) {
@@ -321,9 +339,10 @@ void MainMenuScene::render(const Game& game) const {
 
 	/* Input */
 	ui::Style text_style = {
-		.margin = ui::Spacing::with_size(10),
-		.border = ui::Spacing::with_size(10),
-		.padding = ui::Spacing::with_size(20),
+		.margin = ui::Spacing::with_size(0),
+		.border = ui::Spacing::with_size(0),
+		.padding = ui::Spacing::with_size(0),
+		.alignment = ui::Alignment::Start,
 		.border_color = GRAY,
 		.background_color = LIGHTGRAY,
 		.font_id = FontID::default_font(),
