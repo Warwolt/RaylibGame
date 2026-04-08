@@ -99,6 +99,7 @@ namespace ui {
 		Alignment alignment;
 		Color border_color = { 0, 0, 0, 0 };
 		Color background_color = { 0, 0, 0, 0 };
+		Color font_color = BLACK;
 		FontID font_id;
 		int font_size;
 
@@ -151,6 +152,11 @@ namespace ui {
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
 			const std::vector<std::string> words = split_words(text_content->text);
 
+			// FIXME: review this text size code
+			// I had to let a robot help me fix some of the logic here, so we
+			// should sit down and think through what should really be going on
+			// in this computation.
+			// FIXME: make sure text elements respect the `width` and `height` style properties
 			Vector2 cursor = { 0, 0 };
 			text_content->lines.push_back("");
 			for (const std::string& word : words) {
@@ -265,7 +271,11 @@ namespace ui {
 		const Style& style = element.style;
 		Raylib_DrawRectangleRec(element.layout.border_box, element.style.border_color);
 		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
-		Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN); // debug
+
+		const bool show_debug_outline = false;
+		if (show_debug_outline) {
+			Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN);
+		}
 
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
@@ -294,7 +304,7 @@ namespace ui {
 
 				Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 				{
-					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, BLACK);
+					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, style.font_color);
 				}
 				Raylib_EndScissorMode();
 				line_num++;
@@ -339,18 +349,19 @@ void MainMenuScene::render(const Game& game) const {
 
 	/* Input */
 	ui::Style text_style = {
-		.margin = ui::Spacing::with_size(0),
+		.margin = ui::Spacing::with_size(7),
 		.border = ui::Spacing::with_size(0),
 		.padding = ui::Spacing::with_size(0),
 		.alignment = ui::Alignment::Start,
-		.border_color = GRAY,
-		.background_color = LIGHTGRAY,
+		.border_color = { 0 },
+		.background_color = { 0 },
+		.font_color = WHITE,
 		.font_id = FontID::default_font(),
 		.font_size = 16,
 	};
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Relative(100),
+			.width = ui::Relative(75),
 			.height = ui::Relative(100),
 		},
 		.content =
@@ -361,14 +372,14 @@ void MainMenuScene::render(const Game& game) const {
 						.style = text_style,
 						.content =
 							ui::TextContent {
-								.text = "Super Metroid[a][b] is a 1994 action-adventure game developed by Nintendo and Intelligent Systems and published by Nintendo for the Super Nintendo Entertainment System (SNES). It is the third Metroid game, following the Game Boy game Metroid II: Return of Samus (1991). The player controls bounty hunter Samus Aran, who travels to the planet Zebes to retrieve an infant Metroid creature stolen by the Space Pirate leader Ridley.",
+								.text = "Samus Aran brings the last Metroid to the Ceres space colony for scientific study. Investigation of the specimen, a larva, reveals that its energy-producing abilities could be harnessed for the good of civilization. Shortly after leaving, Samus receives a distress call alerting her to return to the colony immediately. She finds the scientists dead, and the Metroid larva stolen by Ridley, leader of the Space Pirates. Samus escapes during a self-destruct sequence and follows Ridley to the planet Zebes.[12] She searches the planet for the Metroid and finds that the Pirates have rebuilt their base there.[4]: 5 ",
 							},
 					},
 					ui::Element {
 						.style = text_style,
 						.content =
 							ui::TextContent {
-								.text = "Super Metroid[a][b] is a 1994 action-adventure game developed by Nintendo and Intelligent Systems and published by Nintendo for the Super Nintendo Entertainment System (SNES). It is the third Metroid game, following the Game Boy game Metroid II: Return of Samus (1991). The player controls bounty hunter Samus Aran, who travels to the planet Zebes to retrieve an infant Metroid creature stolen by the Space Pirate leader Ridley.",
+								.text = "After defeating three bosses in various regions of Zebes, Samus confronts Ridley in his lair and defeats him, only to discover that the capsule containing the Metroid larva has been shattered and the larva is missing. She then heads for Tourian,[5]: 109  the heart of the Space Pirates' base, and fights several Metroids that have reproduced. Samus confronts the Metroid larva, which has grown to enormous size. It attacks and nearly kills Samus, but relents at the last moment. As Samus was present at its hatching on SR388, the Metroid has imprinted on Samus, and recognizes her as its \"mother\".[5]: 113 [7][13]",
 							},
 					},
 				},
