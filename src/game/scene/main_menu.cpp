@@ -152,16 +152,12 @@ namespace ui {
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
 			const std::vector<std::string> words = split_words(text_content->text);
 
-			// FIXME: review this text size code
-			// I had to let a robot help me fix some of the logic here, so we
-			// should sit down and think through what should really be going on
-			// in this computation.
 			Vector2 cursor = { 0, 0 };
 			text_content->lines.push_back("");
 			for (const std::string& word : words) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, 0.0f).x;
-				const float projected_x = cursor.x > 0 ? cursor.x + space_width + word_length : word_length;
-				if (projected_x <= max_text_size.x) {
+				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
+				if (cursor.x + needed_length <= max_text_size.x) {
 					// word fits on the current line
 					if (cursor.x > 0) {
 						text_content->lines.back() += " ";
