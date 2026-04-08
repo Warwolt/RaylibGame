@@ -99,7 +99,7 @@ namespace ui {
 		Alignment alignment;
 		Color border_color = { 0, 0, 0, 0 };
 		Color background_color = { 0, 0, 0, 0 };
-		Color font_color = BLACK;
+		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
 
@@ -438,8 +438,6 @@ void MainMenuScene::render(const Game& game) const {
 					ui::Element {
 						.style = {
 							.height = ui::Relative(100),
-							.border = ui::Spacing::uniform(1),
-							.border_color = RED,
 						},
 						.content = ui::BoxContent {
 							.direction = ui::Direction::Horizontal,
@@ -447,7 +445,8 @@ void MainMenuScene::render(const Game& game) const {
 								ui::Element {
 									.style = {
 										.width = ui::Relative(100),
-										.border = ui::Spacing::uniform(1),
+										.border = ui::Spacing::uniform(5),
+										.padding = ui::Spacing::uniform(10),
 										.border_color = BLUE,
 										.font_color = WHITE,
 									},
@@ -458,7 +457,8 @@ void MainMenuScene::render(const Game& game) const {
 								ui::Element {
 									.style = {
 										.width = ui::Relative(100),
-										.border = ui::Spacing::uniform(1),
+										.border = ui::Spacing::uniform(5),
+										.padding = ui::Spacing::uniform(10),
 										.border_color = GREEN,
 										.font_color = WHITE,
 									},
@@ -472,11 +472,14 @@ void MainMenuScene::render(const Game& game) const {
 					ui::Element {
 						.style = {
 							.height = ui::Relative(25),
-							.border = ui::Spacing::uniform(1),
+							.border = ui::Spacing::uniform(5),
+							.padding = ui::Spacing::uniform(10),
 							.border_color = RED,
-							.background_color = ColorAlpha(RED, 0.5f),
+							.font_color = WHITE,
 						},
-						.content = ui::BoxContent {},
+						.content = ui::TextContent {
+							.text = "> All systems nominal"
+						},
 					},
 				},
 			},
