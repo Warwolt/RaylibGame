@@ -34,7 +34,9 @@ static GameLibrary load_library(const std::string& library_path) {
 	};
 }
 
+static bool library_has_been_rebuilt = false;
 static void on_build_command_done(int exit_code) {
+	library_has_been_rebuilt = exit_code == 0;
 	if (exit_code != 0) {
 		LOG_ERROR("Build finished with errors!");
 	}
@@ -64,7 +66,6 @@ int main(int argc, char** argv) {
 	Win32_copy_file(library_path, library_copy_path);
 
 	/* Load copy */
-	uint64_t library_last_modified = Win32_get_file_last_modified(library_path);
 	GameLibrary game_library = load_library(library_copy_name);
 
 	/* State */
@@ -81,8 +82,9 @@ int main(int argc, char** argv) {
 			}
 
 			/* Reload library when modified */
-			uint64_t current_last_modified = Win32_get_file_last_modified(library_path);
-			if (current_last_modified != library_last_modified) {
+			if (library_has_been_rebuilt) {
+				library_has_been_rebuilt = false;
+
 				/* Unload library */
 				FreeLibrary(game_library.handle);
 
@@ -91,7 +93,6 @@ int main(int argc, char** argv) {
 
 				/* Reload copied library */
 				game_library = load_library(library_copy_name);
-				library_last_modified = Win32_get_file_last_modified(library_path);
 			}
 		}
 
