@@ -248,7 +248,32 @@ namespace ui {
 
 		/* Recurse into children */
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
-			Vector2 cursor = { layout->content_box.x, layout->content_box.y };
+			/* Compute padding for alignment */
+			int left_padding = 0;
+			int top_padding = 0;
+			switch (box_content->direction) {
+				case Direction::Horizontal: {
+					int total_element_widths = 0;
+					for (Element& child : box_content->children) {
+						total_element_widths += child.layout.margin_box.width;
+					}
+					const int horizontal_remainder = element->layout.margin_box.width - total_element_widths;
+					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
+				} break;
+				case Direction::Vertical: {
+					int total_element_heights = 0;
+					for (Element& child : box_content->children) {
+						total_element_heights += child.layout.margin_box.height;
+					}
+					const int vertical_remainder = element->layout.margin_box.height - total_element_heights;
+					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
+				} break;
+			}
+
+			Vector2 cursor = {
+				.x = layout->content_box.x + left_padding,
+				.y = layout->content_box.y + top_padding,
+			};
 			for (Element& child : box_content->children) {
 				/* Compute child position */
 				Vector2 element_size = { layout->margin_box.width, layout->margin_box.height };
@@ -344,7 +369,9 @@ void MainMenuScene::render(const Game& game) const {
 
 	/* Input */
 	ui::Style text_style = {
-		.margin = ui::Spacing::with_size(7),
+		.width = ui::Relative(75),
+		.height = ui::Relative(100),
+		.margin = ui::Spacing::with_size(10),
 		.border = ui::Spacing::with_size(0),
 		.padding = ui::Spacing::with_size(0),
 		.alignment = ui::Alignment::Start,
@@ -356,12 +383,13 @@ void MainMenuScene::render(const Game& game) const {
 	};
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Relative(50),
+			.width = ui::Relative(100),
 			.height = ui::Relative(100),
+			.alignment = ui::Alignment::Center,
 		},
 		.content =
 			ui::BoxContent {
-				.direction = ui::Direction::Vertical,
+				.direction = ui::Direction::Horizontal,
 				.children = {
 					ui::Element {
 						.style = text_style,
