@@ -433,33 +433,45 @@ void MainMenuScene::render(const Game& game) const {
 		},
 		.content =
 			ui::BoxContent {
-				.direction = ui::Direction::Horizontal,
+				.direction = ui::Direction::Vertical,
 				.children = {
 					ui::Element {
 						.style = {
-							.width = ui::Relative(100),
+							.height = ui::Relative(100),
 							.border = ui::Spacing::uniform(1),
-							.border_color = BLUE,
-							.font_color = WHITE,
+							.border_color = RED,
 						},
-						.content = ui::TextContent {
-							.text = "Samus Aran brings the last Metroid to the Ceres space colony for scientific study. Investigation of the specimen, a larva, reveals that its energy-producing abilities could be harnessed for the good of civilization. Shortly after leaving, Samus receives a distress call alerting her to return to the colony immediately. She finds the scientists dead, and the Metroid larva stolen by Ridley, leader of the Space Pirates. Samus escapes during a self-destruct sequence and follows Ridley to the planet Zebes. She searches the planet for the Metroid and finds that the Pirates have rebuilt their base there.",
+						.content = ui::BoxContent {
+							.direction = ui::Direction::Horizontal,
+							.children = {
+								ui::Element {
+									.style = {
+										.width = ui::Relative(100),
+										.border = ui::Spacing::uniform(1),
+										.border_color = BLUE,
+										.font_color = WHITE,
+									},
+									.content = ui::TextContent {
+										.text = "Samus Aran brings the last Metroid to the Ceres space colony for scientific study. Investigation of the specimen, a larva, reveals that its energy-producing abilities could be harnessed for the good of civilization. Shortly after leaving, Samus receives a distress call alerting her to return to the colony immediately. She finds the scientists dead, and the Metroid larva stolen by Ridley, leader of the Space Pirates. Samus escapes during a self-destruct sequence and follows Ridley to the planet Zebes. She searches the planet for the Metroid and finds that the Pirates have rebuilt their base there.",
+									},
+								},
+								ui::Element {
+									.style = {
+										.width = ui::Relative(100),
+										.border = ui::Spacing::uniform(1),
+										.border_color = GREEN,
+										.font_color = WHITE,
+									},
+									.content = ui::TextContent {
+										.text = "After defeating three bosses in various regions of Zebes, Samus confronts Ridley in his lair and defeats him, only to discover that the capsule containing the Metroid larva has been shattered and the larva is missing. She then heads for Tourian, the heart of the Space Pirates' base, and fights several Metroids that have reproduced. Samus confronts the Metroid larva, which has grown to enormous size. It attacks and nearly kills Samus, but relents at the last moment. As Samus was present at its hatching on SR388, the Metroid has imprinted on Samus, and recognizes her as its \"mother\"."
+									},
+								},
+							},
 						},
 					},
 					ui::Element {
 						.style = {
-							.width = ui::Relative(100),
-							.border = ui::Spacing::uniform(1),
-							.border_color = GREEN,
-							.font_color = WHITE,
-						},
-						.content = ui::TextContent {
-							.text = "After defeating three bosses in various regions of Zebes, Samus confronts Ridley in his lair and defeats him, only to discover that the capsule containing the Metroid larva has been shattered and the larva is missing. She then heads for Tourian, the heart of the Space Pirates' base, and fights several Metroids that have reproduced. Samus confronts the Metroid larva, which has grown to enormous size. It attacks and nearly kills Samus, but relents at the last moment. As Samus was present at its hatching on SR388, the Metroid has imprinted on Samus, and recognizes her as its \"mother\"."
-						},
-					},
-					ui::Element {
-						.style = {
-							.width = ui::Relative(25),
+							.height = ui::Relative(25),
 							.border = ui::Spacing::uniform(1),
 							.border_color = RED,
 							.background_color = ColorAlpha(RED, 0.5f),
