@@ -40,31 +40,31 @@ namespace ui {
 		End,
 	};
 
-	struct Absolute {
+	struct AbsoluteSize {
 		int pixels;
 	};
 
-	struct Relative {
+	struct RelativeSize {
 		int percentage; // relative parent size
 	};
 
 	struct Size {
-		std::variant<Absolute, Relative> value;
+		std::variant<AbsoluteSize, RelativeSize> value;
 
-		Size(Absolute value)
+		Size(AbsoluteSize value)
 			: value(value) {
 		}
 
-		Size(Relative value)
+		Size(RelativeSize value)
 			: value(value) {
 		}
 
 		float fit_to_parent(float parent_size) const {
 			float pixels = 0.0f;
-			if (const Absolute* absolute_width = std::get_if<Absolute>(&this->value)) {
+			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&this->value)) {
 				pixels = std::min<float>(absolute_width->pixels, parent_size);
 			}
-			if (const Relative* relative_width = std::get_if<Relative>(&this->value)) {
+			if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&this->value)) {
 				pixels = (relative_width->percentage / 100.0f) * parent_size;
 			}
 			return pixels;
@@ -91,8 +91,8 @@ namespace ui {
 	};
 
 	struct Style {
-		Size width = Relative(100);
-		Size height = Relative(100);
+		Size width = RelativeSize(100);
+		Size height = RelativeSize(100);
 		Spacing margin;
 		Spacing border;
 		Spacing padding;
@@ -426,8 +426,8 @@ void MainMenuScene::render(const Game& game) const {
 	/* Input */
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Relative(100),
-			.height = ui::Relative(100),
+			.width = ui::RelativeSize(100),
+			.height = ui::RelativeSize(100),
 			.margin = ui::Spacing::uniform(0),
 			.alignment = ui::Alignment::Start,
 		},
@@ -437,14 +437,14 @@ void MainMenuScene::render(const Game& game) const {
 				.children = {
 					ui::Element {
 						.style = {
-							.height = ui::Relative(100),
+							.height = ui::RelativeSize(100),
 						},
 						.content = ui::BoxContent {
 							.direction = ui::Direction::Horizontal,
 							.children = {
 								ui::Element {
 									.style = {
-										.width = ui::Relative(100),
+										.width = ui::RelativeSize(100),
 										.border = ui::Spacing::uniform(5),
 										.padding = ui::Spacing::uniform(10),
 										.border_color = BLUE,
@@ -456,7 +456,7 @@ void MainMenuScene::render(const Game& game) const {
 								},
 								ui::Element {
 									.style = {
-										.width = ui::Relative(100),
+										.width = ui::RelativeSize(100),
 										.border = ui::Spacing::uniform(5),
 										.padding = ui::Spacing::uniform(10),
 										.border_color = GREEN,
@@ -471,7 +471,7 @@ void MainMenuScene::render(const Game& game) const {
 					},
 					ui::Element {
 						.style = {
-							.height = ui::Relative(25),
+							.height = ui::RelativeSize(25),
 							.border = ui::Spacing::uniform(5),
 							.padding = ui::Spacing::uniform(10),
 							.border_color = RED,
