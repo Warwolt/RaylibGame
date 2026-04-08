@@ -100,8 +100,8 @@ namespace ui {
 		Color border_color = { 0, 0, 0, 0 };
 		Color background_color = { 0, 0, 0, 0 };
 		Color font_color = BLACK;
-		FontID font_id;
-		int font_size;
+		FontID font_id = FontID::default_font();
+		int font_size = 16;
 
 		float horizontal_spacing() const {
 			return margin.horizontal() + border.horizontal() + padding.horizontal();
@@ -201,55 +201,53 @@ namespace ui {
 			content_box.width = element_size.x - style.horizontal_spacing();
 			content_box.height = element_size.y - style.vertical_spacing();
 
-			// FIXME: Can we factor out the horizontal-vertical stuff?
-			// It would be nice to compute the fitting one-dimensionally
-			// We only have to squeeze things along one axis (box_content->direction)
-			// The size along the other axis is just gonna be the element_size
 			/* Size all children */
-			// 1. compute desired size of each child
-			struct IndexedVector2 {
-				size_t index;
-				Vector2 value;
-			};
-			std::vector<IndexedVector2> desired_sizes;
-			for (size_t i = 0; i < box_content->children.size(); i++) {
-				Element& child = box_content->children[i];
-				const Vector2 desired_size = {
-					.x = child.style.width.fit_to_parent(content_box.width),
-					.y = child.style.height.fit_to_parent(content_box.height),
+			{
+				// 1. compute desired size of each child
+				struct IndexedVector2 {
+					size_t index;
+					Vector2 value;
 				};
-				desired_sizes.push_back({ i, desired_size });
-			}
-			// 2. sort desired sizes from smallest to biggest
-			auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
-				if (box_content->direction == Direction::Horizontal) {
-					return lhs.value.x < rhs.value.x;
-				} else {
-					return lhs.value.y < rhs.value.y;
+				std::vector<IndexedVector2> desired_sizes;
+				for (size_t i = 0; i < box_content->children.size(); i++) {
+					Element& child = box_content->children[i];
+					const Vector2 desired_size = {
+						.x = child.style.width.fit_to_parent(content_box.width),
+						.y = child.style.height.fit_to_parent(content_box.height),
+					};
+					desired_sizes.push_back({ i, desired_size });
 				}
-			};
-			std::sort(desired_sizes.begin(), desired_sizes.end(), ordering);
-			// 3. from smallest to biggest, compute actual sizes
-			float remaining_width = content_box.width;
-			float remaining_height = content_box.height;
-			for (size_t i = 0; i < box_content->children.size(); i++) {
-				const size_t remaining_children = box_content->children.size() - i;
-				const IndexedVector2& desired_size = desired_sizes[i];
-				Element& child = box_content->children[desired_size.index];
-				if (box_content->direction == Direction::Horizontal) {
-					const Vector2 child_size = {
-						.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
-						.y = content_box.height,
-					};
-					remaining_width -= child_size.x;
-					compute_child_element_sizes(resources, child_size, &child);
-				} else {
-					const Vector2 child_size = {
-						.x = content_box.width,
-						.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
-					};
-					remaining_height -= child_size.y;
-					compute_child_element_sizes(resources, child_size, &child);
+				// 2. sort desired sizes from smallest to biggest
+				auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
+					if (box_content->direction == Direction::Horizontal) {
+						return lhs.value.x < rhs.value.x;
+					} else {
+						return lhs.value.y < rhs.value.y;
+					}
+				};
+				std::sort(desired_sizes.begin(), desired_sizes.end(), ordering);
+				// 3. from smallest to biggest, compute actual sizes
+				float remaining_width = content_box.width;
+				float remaining_height = content_box.height;
+				for (size_t i = 0; i < box_content->children.size(); i++) {
+					const size_t remaining_children = box_content->children.size() - i;
+					const IndexedVector2& desired_size = desired_sizes[i];
+					Element& child = box_content->children[desired_size.index];
+					if (box_content->direction == Direction::Horizontal) {
+						const Vector2 child_size = {
+							.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
+							.y = content_box.height,
+						};
+						remaining_width -= child_size.x;
+						compute_child_element_sizes(resources, child_size, &child);
+					} else {
+						const Vector2 child_size = {
+							.x = content_box.width,
+							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
+						};
+						remaining_height -= child_size.y;
+						compute_child_element_sizes(resources, child_size, &child);
+					}
 				}
 			}
 		}
@@ -330,8 +328,39 @@ namespace ui {
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
 		const Style& style = element.style;
-		Raylib_DrawRectangleLinesEx(element.layout.border_box, 1, element.style.border_color);
 		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
+
+		/* Draw border */
+		{
+			const Rectangle border_top = {
+				.x = element.layout.border_box.x,
+				.y = element.layout.border_box.y,
+				.width = element.layout.border_box.width,
+				.height = element.style.border.top,
+			};
+			const Rectangle border_bottom = {
+				.x = element.layout.border_box.x,
+				.y = element.layout.padding_box.y + element.layout.padding_box.height,
+				.width = element.layout.border_box.width,
+				.height = element.style.border.bottom,
+			};
+			const Rectangle border_left = {
+				.x = element.layout.border_box.x,
+				.y = element.layout.padding_box.y,
+				.width = element.style.border.left,
+				.height = element.layout.padding_box.height,
+			};
+			const Rectangle border_right = {
+				.x = element.layout.border_box.x + element.layout.border_box.width - element.style.border.right,
+				.y = element.layout.padding_box.y,
+				.width = element.style.border.right,
+				.height = element.layout.padding_box.height,
+			};
+			Raylib_DrawRectangleRec(border_top, element.style.border_color);
+			Raylib_DrawRectangleRec(border_bottom, element.style.border_color);
+			Raylib_DrawRectangleRec(border_left, element.style.border_color);
+			Raylib_DrawRectangleRec(border_right, element.style.border_color);
+		}
 
 		const bool show_debug_outline = false;
 		if (show_debug_outline) {
@@ -341,23 +370,21 @@ namespace ui {
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Rectangle content_box = element.layout.content_box;
-
-			int line_num = 0;
-			for (const std::string& line : text_content->lines) {
-				const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, 0.0f).x;
-				const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
-				Vector2 line_pos = {
-					.x = element.layout.content_box.x + left_padding,
-					.y = element.layout.content_box.y + line_num * style.font_size,
-				};
-
-				Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
-				{
+			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
+			{
+				int line_num = 0;
+				for (const std::string& line : text_content->lines) {
+					const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, 0.0f).x;
+					const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
+					Vector2 line_pos = {
+						.x = element.layout.content_box.x + left_padding,
+						.y = element.layout.content_box.y + line_num * style.font_size,
+					};
 					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, style.font_color);
+					line_num++;
 				}
-				Raylib_EndScissorMode();
-				line_num++;
 			}
+			Raylib_EndScissorMode();
 		}
 		if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
 			for (const Element& child : box_content->children) {
@@ -401,7 +428,7 @@ void MainMenuScene::render(const Game& game) const {
 		.style = {
 			.width = ui::Relative(100),
 			.height = ui::Relative(100),
-			.margin = ui::Spacing::uniform(50),
+			.margin = ui::Spacing::uniform(0),
 			.alignment = ui::Alignment::Start,
 		},
 		.content =
@@ -411,14 +438,19 @@ void MainMenuScene::render(const Game& game) const {
 					ui::Element {
 						.style = {
 							.width = ui::Relative(25),
+							.border = ui::Spacing::uniform(1),
 							.border_color = BLUE,
 							.background_color = ColorAlpha(BLUE, 0.5f),
+							.font_color = WHITE,
 						},
-						.content = ui::BoxContent {},
+						.content = ui::TextContent {
+							.text = "Hello"
+						},
 					},
 					ui::Element {
 						.style = {
 							.width = ui::Relative(100),
+							.border = ui::Spacing::uniform(1),
 							.border_color = GREEN,
 							.background_color = ColorAlpha(GREEN, 0.5f),
 						},
@@ -427,6 +459,7 @@ void MainMenuScene::render(const Game& game) const {
 					ui::Element {
 						.style = {
 							.width = ui::Relative(100),
+							.border = ui::Spacing::uniform(1),
 							.border_color = RED,
 							.background_color = ColorAlpha(RED, 0.5f),
 						},
