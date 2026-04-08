@@ -146,8 +146,8 @@ namespace ui {
 		if (TextContent* text_content = std::get_if<TextContent>(&element->content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Vector2 max_text_size = {
-				available_size.x - style.horizontal_spacing(),
-				available_size.y - style.vertical_spacing(),
+				.x = style.width.fit_to_parent(available_size.x) - style.horizontal_spacing(),
+				.y = style.height.fit_to_parent(available_size.y) - style.vertical_spacing(),
 			};
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
 			const std::vector<std::string> words = split_words(text_content->text);
@@ -156,7 +156,6 @@ namespace ui {
 			// I had to let a robot help me fix some of the logic here, so we
 			// should sit down and think through what should really be going on
 			// in this computation.
-			// FIXME: make sure text elements respect the `width` and `height` style properties
 			Vector2 cursor = { 0, 0 };
 			text_content->lines.push_back("");
 			for (const std::string& word : words) {
@@ -272,7 +271,7 @@ namespace ui {
 		Raylib_DrawRectangleRec(element.layout.border_box, element.style.border_color);
 		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
 
-		const bool show_debug_outline = false;
+		const bool show_debug_outline = true;
 		if (show_debug_outline) {
 			Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN);
 		}
@@ -361,7 +360,7 @@ void MainMenuScene::render(const Game& game) const {
 	};
 	ui::Element root_element = {
 		.style = {
-			.width = ui::Relative(75),
+			.width = ui::Relative(50),
 			.height = ui::Relative(100),
 		},
 		.content =
