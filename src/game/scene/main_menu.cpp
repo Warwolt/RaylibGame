@@ -85,7 +85,7 @@ namespace ui {
 			return this->top + this->bottom;
 		}
 
-		static Spacing with_size(float size) {
+		static Spacing uniform(float size) {
 			return { size, size, size, size };
 		}
 	};
@@ -197,8 +197,9 @@ namespace ui {
 
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
 			/* Size content box */
-			layout->content_box.width = element_size.x - style.horizontal_spacing();
-			layout->content_box.height = element_size.y - style.vertical_spacing();
+			Rectangle& content_box = layout->content_box;
+			content_box.width = element_size.x - style.horizontal_spacing();
+			content_box.height = element_size.y - style.vertical_spacing();
 
 			// FIXME: Can we factor out the horizontal-vertical stuff?
 			// It would be nice to compute the fitting one-dimensionally
@@ -214,8 +215,8 @@ namespace ui {
 			for (size_t i = 0; i < box_content->children.size(); i++) {
 				Element& child = box_content->children[i];
 				const Vector2 desired_size = {
-					.x = child.style.width.fit_to_parent(element_size.x),
-					.y = child.style.height.fit_to_parent(element_size.y),
+					.x = child.style.width.fit_to_parent(content_box.width),
+					.y = child.style.height.fit_to_parent(content_box.height),
 				};
 				desired_sizes.push_back({ i, desired_size });
 			}
@@ -229,8 +230,8 @@ namespace ui {
 			};
 			std::sort(desired_sizes.begin(), desired_sizes.end(), ordering);
 			// 3. from smallest to biggest, compute actual sizes
-			float remaining_width = element_size.x;
-			float remaining_height = element_size.y;
+			float remaining_width = content_box.width;
+			float remaining_height = content_box.height;
 			for (size_t i = 0; i < box_content->children.size(); i++) {
 				const size_t remaining_children = box_content->children.size() - i;
 				const IndexedVector2& desired_size = desired_sizes[i];
@@ -238,13 +239,13 @@ namespace ui {
 				if (box_content->direction == Direction::Horizontal) {
 					const Vector2 child_size = {
 						.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
-						.y = element_size.y,
+						.y = content_box.height,
 					};
 					remaining_width -= child_size.x;
 					compute_child_element_sizes(resources, child_size, &child);
 				} else {
 					const Vector2 child_size = {
-						.x = element_size.x,
+						.x = content_box.width,
 						.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 					};
 					remaining_height -= child_size.y;
@@ -286,7 +287,7 @@ namespace ui {
 					for (Element& child : box_content->children) {
 						total_element_widths += child.layout.margin_box.width;
 					}
-					const int horizontal_remainder = element->layout.margin_box.width - total_element_widths;
+					const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
 					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
 				} break;
 				case Direction::Vertical: {
@@ -294,7 +295,7 @@ namespace ui {
 					for (Element& child : box_content->children) {
 						total_element_heights += child.layout.margin_box.height;
 					}
-					const int vertical_remainder = element->layout.margin_box.height - total_element_heights;
+					const int vertical_remainder = element->layout.content_box.height - total_element_heights;
 					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
 				} break;
 			}
@@ -305,7 +306,6 @@ namespace ui {
 			};
 			for (Element& child : box_content->children) {
 				/* Compute child position */
-				Vector2 element_size = { layout->margin_box.width, layout->margin_box.height };
 				Vector2 child_position = cursor;
 				compute_element_positions(child_position, &child);
 
@@ -401,6 +401,7 @@ void MainMenuScene::render(const Game& game) const {
 		.style = {
 			.width = ui::Relative(100),
 			.height = ui::Relative(100),
+			.margin = ui::Spacing::uniform(50),
 			.alignment = ui::Alignment::Start,
 		},
 		.content =
