@@ -127,6 +127,21 @@ namespace ui {
 		Layout layout;
 	};
 
+	float alignment_padding(Alignment alignment, float remainder) {
+		switch (alignment) {
+			case Alignment::Start:
+				return 0;
+				break;
+			case Alignment::Center:
+				return remainder / 2;
+				break;
+			case Alignment::End:
+				return remainder;
+				break;
+		}
+		return 0;
+	}
+
 	std::vector<std::string> split_text_into_words(const std::string& text) {
 		std::vector<std::string> words;
 
@@ -276,19 +291,7 @@ namespace ui {
 			int line_num = 0;
 			for (const std::string& line : text_content->lines) {
 				const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, 0.0f).x;
-				const int remainder = content_box.width - line_length;
-				int left_padding = 0;
-				switch (style.alignment) {
-					case Alignment::Start:
-						left_padding = 0;
-						break;
-					case Alignment::Center:
-						left_padding = remainder / 2;
-						break;
-					case Alignment::End:
-						left_padding = remainder;
-						break;
-				}
+				const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
 				Vector2 line_pos = {
 					.x = element.layout.content_box.x + left_padding,
 					.y = element.layout.content_box.y + line_num * style.font_size,
