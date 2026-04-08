@@ -161,8 +161,8 @@ namespace ui {
 		if (TextContent* text_content = std::get_if<TextContent>(&element->content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Vector2 max_text_size = {
-				.x = style.width.fit_to_parent(element_size.x) - style.horizontal_spacing(),
-				.y = style.height.fit_to_parent(element_size.y) - style.vertical_spacing(),
+				.x = element_size.x - style.horizontal_spacing(),
+				.y = element_size.y - style.vertical_spacing(),
 			};
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
 			/* Fit text to element size */
@@ -437,14 +437,14 @@ void MainMenuScene::render(const Game& game) const {
 				.children = {
 					ui::Element {
 						.style = {
-							.width = ui::Relative(25),
+							.width = ui::Relative(100),
 							.border = ui::Spacing::uniform(1),
 							.border_color = BLUE,
-							.background_color = ColorAlpha(BLUE, 0.5f),
+							// .background_color = ColorAlpha(BLUE, 0.5f),
 							.font_color = WHITE,
 						},
 						.content = ui::TextContent {
-							.text = "Hello"
+							.text = "Samus Aran brings the last Metroid to the Ceres space colony for scientific study. Investigation of the specimen, a larva, reveals that its energy-producing abilities could be harnessed for the good of civilization. Shortly after leaving, Samus receives a distress call alerting her to return to the colony immediately. She finds the scientists dead, and the Metroid larva stolen by Ridley, leader of the Space Pirates. Samus escapes during a self-destruct sequence and follows Ridley to the planet Zebes. She searches the planet for the Metroid and finds that the Pirates have rebuilt their base there.",
 						},
 					},
 					ui::Element {
