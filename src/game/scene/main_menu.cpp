@@ -127,7 +127,7 @@ namespace ui {
 		Layout layout;
 	};
 
-	std::vector<std::string> split_words(const std::string& text) {
+	std::vector<std::string> split_text_into_words(const std::string& text) {
 		std::vector<std::string> words;
 
 		std::istringstream iss(text);
@@ -150,15 +150,13 @@ namespace ui {
 				.y = style.height.fit_to_parent(available_size.y) - style.vertical_spacing(),
 			};
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
-			const std::vector<std::string> words = split_words(text_content->text);
-
 			Vector2 cursor = { 0, 0 };
 			text_content->lines.push_back("");
-			for (const std::string& word : words) {
+			for (const std::string& word : split_text_into_words(text_content->text)) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, 0.0f).x;
 				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
 				if (cursor.x + needed_length <= max_text_size.x) {
-					// word fits on the current line
+					// add word to current line
 					if (cursor.x > 0) {
 						text_content->lines.back() += " ";
 						cursor.x += space_width;
@@ -178,7 +176,6 @@ namespace ui {
 				}
 			}
 			const int text_height = std::min<int>(cursor.y + style.font_size, max_text_size.y);
-
 			layout->content_box.width = max_text_size.x;
 			layout->content_box.height = text_height;
 		}
