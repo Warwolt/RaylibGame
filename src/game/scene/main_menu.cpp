@@ -440,7 +440,6 @@ void MainMenuScene::render(const Game& game) const {
 							.width = ui::Relative(100),
 							.border = ui::Spacing::uniform(1),
 							.border_color = BLUE,
-							// .background_color = ColorAlpha(BLUE, 0.5f),
 							.font_color = WHITE,
 						},
 						.content = ui::TextContent {
@@ -452,13 +451,15 @@ void MainMenuScene::render(const Game& game) const {
 							.width = ui::Relative(100),
 							.border = ui::Spacing::uniform(1),
 							.border_color = GREEN,
-							.background_color = ColorAlpha(GREEN, 0.5f),
+							.font_color = WHITE,
 						},
-						.content = ui::BoxContent {},
+						.content = ui::TextContent {
+							.text = "After defeating three bosses in various regions of Zebes, Samus confronts Ridley in his lair and defeats him, only to discover that the capsule containing the Metroid larva has been shattered and the larva is missing. She then heads for Tourian, the heart of the Space Pirates' base, and fights several Metroids that have reproduced. Samus confronts the Metroid larva, which has grown to enormous size. It attacks and nearly kills Samus, but relents at the last moment. As Samus was present at its hatching on SR388, the Metroid has imprinted on Samus, and recognizes her as its \"mother\"."
+						},
 					},
 					ui::Element {
 						.style = {
-							.width = ui::Relative(100),
+							.width = ui::Relative(25),
 							.border = ui::Spacing::uniform(1),
 							.border_color = RED,
 							.background_color = ColorAlpha(RED, 0.5f),
