@@ -90,6 +90,11 @@ namespace ui {
 		}
 	};
 
+	struct StyleDebug {
+		bool show_margin_outline = false;
+		bool show_content_outline = false;
+	};
+
 	struct Style {
 		Size width = RelativeSize(100);
 		Size height = RelativeSize(100);
@@ -102,6 +107,7 @@ namespace ui {
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
+		StyleDebug debug;
 
 		float horizontal_spacing() const {
 			return margin.horizontal() + border.horizontal() + padding.horizontal();
@@ -154,15 +160,15 @@ namespace ui {
 		return words;
 	}
 
-	void compute_child_element_sizes(const ResourceManager& resources, Vector2 element_size, Element* element) {
+	void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
 		if (TextContent* text_content = std::get_if<TextContent>(&element->content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Vector2 max_text_size = {
-				.x = element_size.x - style.horizontal_spacing(),
-				.y = element_size.y - style.vertical_spacing(),
+				.x = max_size.x - style.horizontal_spacing(),
+				.y = max_size.y - style.vertical_spacing(),
 			};
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
 			/* Fit text to element size */
@@ -192,14 +198,14 @@ namespace ui {
 				}
 			}
 			layout->content_box.width = max_text_size.x;
-			layout->content_box.height = max_text_size.y;
+			layout->content_box.height = std::min(max_text_size.y, cursor.y + style.font_size);
 		}
 
 		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
 			/* Size content box */
 			Rectangle& content_box = layout->content_box;
-			content_box.width = element_size.x - style.horizontal_spacing();
-			content_box.height = element_size.y - style.vertical_spacing();
+			content_box.width = max_size.x - style.horizontal_spacing();
+			content_box.height = max_size.y - style.vertical_spacing();
 
 			/* Size all children */
 			{
@@ -239,14 +245,14 @@ namespace ui {
 							.y = content_box.height,
 						};
 						remaining_width -= child_size.x;
-						compute_child_element_sizes(resources, child_size, &child);
+						compute_element_sizes(resources, child_size, &child);
 					} else {
 						const Vector2 child_size = {
 							.x = content_box.width,
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
-						remaining_height -= child_size.y;
-						compute_child_element_sizes(resources, child_size, &child);
+						compute_element_sizes(resources, child_size, &child);
+						remaining_height -= child.layout.margin_box.height;
 					}
 				}
 			}
@@ -322,7 +328,7 @@ namespace ui {
 
 	void compute_element_layout(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		const Vector2 top_left = { 0, 0 };
-		compute_child_element_sizes(resources, window_size, element);
+		compute_element_sizes(resources, window_size, element);
 		compute_element_positions(top_left, element);
 	}
 
@@ -362,11 +368,18 @@ namespace ui {
 			Raylib_DrawRectangleRec(border_right, element.style.border_color);
 		}
 
-		const bool show_debug_outline = false;
-		if (show_debug_outline) {
-			Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN);
+		/* Debug draw box outlines */
+		{
+			if (element.style.debug.show_margin_outline) {
+				Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN);
+			}
+
+			if (element.style.debug.show_content_outline) {
+				Raylib_DrawRectangleLinesEx(element.layout.content_box, 1, GREEN);
+			}
 		}
 
+		/* Draw content */
 		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Rectangle content_box = element.layout.content_box;
@@ -386,7 +399,7 @@ namespace ui {
 			}
 			Raylib_EndScissorMode();
 		}
-		if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
+		else if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
 			for (const Element& child : box_content->children) {
 				draw_element(resources, child);
 			}
@@ -447,12 +460,35 @@ void MainMenuScene::render(const Game& game) const {
 										.width = ui::RelativeSize(100),
 										.border = ui::Spacing::uniform(5),
 										.padding = ui::Spacing::uniform(10),
+										.alignment = ui::Alignment::Start,
 										.border_color = BLUE,
 										.font_color = WHITE,
 									},
-									.content = ui::TextContent {
-										.text = "Samus Aran brings the last Metroid to the Ceres space colony for scientific study. Investigation of the specimen, a larva, reveals that its energy-producing abilities could be harnessed for the good of civilization. Shortly after leaving, Samus receives a distress call alerting her to return to the colony immediately. She finds the scientists dead, and the Metroid larva stolen by Ridley, leader of the Space Pirates. Samus escapes during a self-destruct sequence and follows Ridley to the planet Zebes. She searches the planet for the Metroid and finds that the Pirates have rebuilt their base there.",
-									},
+									.content = ui::BoxContent {
+										.direction = ui::Direction::Vertical,
+										.children = {
+											ui::Element {
+												.style = {
+													.margin {
+														.bottom = 10,
+													},
+												},
+												.content = ui::TextContent {
+													.text = "Samus Aran brings the last Metroid to the Ceres space colony for scientific study. Investigation of the specimen, a larva, reveals that its energy-producing abilities could be harnessed for the good of civilization.",
+												},
+											},
+											ui::Element {
+												.style = {
+													.margin = {
+														.bottom = 10,
+													},
+												},
+												.content = ui::TextContent {
+													.text = "Shortly after leaving, Samus receives a distress call alerting her to return to the colony immediately. She finds the scientists dead, and the Metroid larva stolen by Ridley, leader of the Space Pirates. Samus escapes during a self-destruct sequence and follows Ridley to the planet Zebes. She searches the planet for the Metroid and finds that the Pirates have rebuilt their base there.",
+												},
+											},
+										},
+									}
 								},
 								ui::Element {
 									.style = {
@@ -462,8 +498,29 @@ void MainMenuScene::render(const Game& game) const {
 										.border_color = GREEN,
 										.font_color = WHITE,
 									},
-									.content = ui::TextContent {
-										.text = "After defeating three bosses in various regions of Zebes, Samus confronts Ridley in his lair and defeats him, only to discover that the capsule containing the Metroid larva has been shattered and the larva is missing. She then heads for Tourian, the heart of the Space Pirates' base, and fights several Metroids that have reproduced. Samus confronts the Metroid larva, which has grown to enormous size. It attacks and nearly kills Samus, but relents at the last moment. As Samus was present at its hatching on SR388, the Metroid has imprinted on Samus, and recognizes her as its \"mother\"."
+									.content = ui::BoxContent {
+										.children = {
+											ui::Element {
+												.style = {
+													.margin = {
+														.bottom = 10,
+													}
+												},
+												.content = ui::TextContent {
+													.text = "After defeating three bosses in various regions of Zebes, Samus confronts Ridley in his lair and defeats him, only to discover that the capsule containing the Metroid larva has been shattered and the larva is missing."
+												},
+											},
+											ui::Element {
+												.style = {
+													.margin = {
+														.bottom = 10,
+													}
+												},
+												.content = ui::TextContent {
+													.text = "She then heads for Tourian, the heart of the Space Pirates' base, and fights several Metroids that have reproduced. Samus confronts the Metroid larva, which has grown to enormous size. It attacks and nearly kills Samus, but relents at the last moment. As Samus was present at its hatching on SR388, the Metroid has imprinted on Samus, and recognizes her as its \"mother\"."
+												},
+											},
+										},
 									},
 								},
 							},
@@ -471,14 +528,20 @@ void MainMenuScene::render(const Game& game) const {
 					},
 					ui::Element {
 						.style = {
-							.height = ui::RelativeSize(25),
+							.height = ui::AbsoluteSize(80),
 							.border = ui::Spacing::uniform(5),
 							.padding = ui::Spacing::uniform(10),
 							.border_color = RED,
 							.font_color = WHITE,
 						},
-						.content = ui::TextContent {
-							.text = "> All systems nominal"
+						.content = ui::BoxContent {
+							.children = {
+								ui::Element {
+									.content = ui::TextContent {
+										.text = "> All systems nominal"
+									},
+								},
+							},
 						},
 					},
 				},
