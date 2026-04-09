@@ -21,17 +21,17 @@ namespace ui {
 		Vertical,
 	};
 
-	struct TextContent {
+	struct Text {
 		std::string text;
 		std::vector<std::string> lines; // computed during layout
 	};
 
-	struct BoxContent {
+	struct Box {
 		Direction direction = Direction::Vertical;
 		std::vector<Element> children;
 	};
 
-	using Content = std::variant<BoxContent, TextContent>;
+	using Content = std::variant<Box, Text>;
 
 	/* Style */
 	enum class Alignment {
@@ -164,44 +164,42 @@ namespace ui {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
-		if (TextContent* text_content = std::get_if<TextContent>(&element->content)) {
+		if (Text* text = std::get_if<Text>(&element->content)) {
 			const Font& font = resources.get_font(style.font_id);
-			const Vector2 max_text_size = {
-				.x = max_size.x - style.horizontal_spacing(),
-				.y = max_size.y - style.vertical_spacing(),
-			};
+			const float max_text_width = max_size.x - style.horizontal_spacing();
+			const float max_text_height = max_size.y - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
-			text_content->lines.push_back("");
-			for (const std::string& word : split_text_into_words(text_content->text)) {
+			text->lines.push_back("");
+			for (const std::string& word : split_text_into_words(text->text)) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, 0.0f).x;
 				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
-				if (cursor.x + needed_length <= max_text_size.x) {
+				if (cursor.x + needed_length <= max_text_width) {
 					// add word to current line
 					if (cursor.x > 0) {
-						text_content->lines.back() += " ";
+						text->lines.back() += " ";
 						cursor.x += space_width;
 					}
-					text_content->lines.back() += word;
+					text->lines.back() += word;
 					cursor.x += word_length;
 				} else {
 					// switch to new line
 					cursor.x = 0;
 					cursor.y = cursor.y + style.font_size;
-					if (cursor.y + style.font_size > max_text_size.y) {
+					if (cursor.y + style.font_size > max_text_height) {
 						break;
 					}
-					text_content->lines.push_back("");
-					text_content->lines.back() += word;
+					text->lines.push_back("");
+					text->lines.back() += word;
 					cursor.x = word_length;
 				}
 			}
-			layout->content_box.width = max_text_size.x;
-			layout->content_box.height = std::min(max_text_size.y, cursor.y + style.font_size);
+			layout->content_box.width = max_text_width;
+			layout->content_box.height = std::min(max_text_height, cursor.y + style.font_size);
 		}
 
-		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
+		if (Box* box = std::get_if<Box>(&element->content)) {
 			/* Size content box */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
@@ -215,8 +213,8 @@ namespace ui {
 					Vector2 value;
 				};
 				std::vector<IndexedVector2> desired_sizes;
-				for (size_t i = 0; i < box_content->children.size(); i++) {
-					Element& child = box_content->children[i];
+				for (size_t i = 0; i < box->children.size(); i++) {
+					Element& child = box->children[i];
 					const Vector2 desired_size = {
 						.x = child.style.width.fit_to_parent(content_box.width),
 						.y = child.style.height.fit_to_parent(content_box.height),
@@ -225,7 +223,7 @@ namespace ui {
 				}
 				// 2. sort desired sizes from smallest to biggest
 				auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
-					if (box_content->direction == Direction::Horizontal) {
+					if (box->direction == Direction::Horizontal) {
 						return lhs.value.x < rhs.value.x;
 					} else {
 						return lhs.value.y < rhs.value.y;
@@ -235,11 +233,11 @@ namespace ui {
 				// 3. from smallest to biggest, compute actual sizes
 				float remaining_width = content_box.width;
 				float remaining_height = content_box.height;
-				for (size_t i = 0; i < box_content->children.size(); i++) {
-					const size_t remaining_children = box_content->children.size() - i;
+				for (size_t i = 0; i < box->children.size(); i++) {
+					const size_t remaining_children = box->children.size() - i;
 					const IndexedVector2& desired_size = desired_sizes[i];
-					Element& child = box_content->children[desired_size.index];
-					if (box_content->direction == Direction::Horizontal) {
+					Element& child = box->children[desired_size.index];
+					if (box->direction == Direction::Horizontal) {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
 							.y = content_box.height,
@@ -281,14 +279,14 @@ namespace ui {
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
 
 		/* Recurse into children */
-		if (BoxContent* box_content = std::get_if<BoxContent>(&element->content)) {
+		if (Box* box = std::get_if<Box>(&element->content)) {
 			/* Compute padding for alignment */
 			int left_padding = 0;
 			int top_padding = 0;
-			switch (box_content->direction) {
+			switch (box->direction) {
 				case Direction::Horizontal: {
 					int total_element_widths = 0;
-					for (Element& child : box_content->children) {
+					for (Element& child : box->children) {
 						total_element_widths += child.layout.margin_box.width;
 					}
 					const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
@@ -296,7 +294,7 @@ namespace ui {
 				} break;
 				case Direction::Vertical: {
 					int total_element_heights = 0;
-					for (Element& child : box_content->children) {
+					for (Element& child : box->children) {
 						total_element_heights += child.layout.margin_box.height;
 					}
 					const int vertical_remainder = element->layout.content_box.height - total_element_heights;
@@ -308,13 +306,13 @@ namespace ui {
 				.x = layout->content_box.x + left_padding,
 				.y = layout->content_box.y + top_padding,
 			};
-			for (Element& child : box_content->children) {
+			for (Element& child : box->children) {
 				/* Compute child position */
 				Vector2 child_position = cursor;
 				compute_element_positions(child_position, &child);
 
 				/* Move cursor */
-				switch (box_content->direction) {
+				switch (box->direction) {
 					case Direction::Horizontal:
 						cursor.x += child.layout.margin_box.width;
 						break;
@@ -380,13 +378,13 @@ namespace ui {
 		}
 
 		/* Draw content */
-		if (const ui::TextContent* text_content = std::get_if<ui::TextContent>(&element.content)) {
+		if (const ui::Text* text = std::get_if<ui::Text>(&element.content)) {
 			const Font& font = resources.get_font(style.font_id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
-				for (const std::string& line : text_content->lines) {
+				for (const std::string& line : text->lines) {
 					const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, 0.0f).x;
 					const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
@@ -399,8 +397,8 @@ namespace ui {
 			}
 			Raylib_EndScissorMode();
 		}
-		else if (const ui::BoxContent* box_content = std::get_if<ui::BoxContent>(&element.content)) {
-			for (const Element& child : box_content->children) {
+		else if (const ui::Box* box = std::get_if<ui::Box>(&element.content)) {
+			for (const Element& child : box->children) {
 				draw_element(resources, child);
 			}
 		}
@@ -445,14 +443,14 @@ void MainMenuScene::render(const Game& game) const {
 			.alignment = ui::Alignment::Start,
 		},
 		.content =
-			ui::BoxContent {
+			ui::Box {
 				.direction = ui::Direction::Vertical,
 				.children = {
 					ui::Element {
 						.style = {
 							.height = ui::RelativeSize(100),
 						},
-						.content = ui::BoxContent {
+						.content = ui::Box {
 							.direction = ui::Direction::Horizontal,
 							.children = {
 								ui::Element {
@@ -464,7 +462,7 @@ void MainMenuScene::render(const Game& game) const {
 										.border_color = BLUE,
 										.font_color = WHITE,
 									},
-									.content = ui::BoxContent {
+									.content = ui::Box {
 										.direction = ui::Direction::Vertical,
 										.children = {
 											ui::Element {
@@ -473,7 +471,7 @@ void MainMenuScene::render(const Game& game) const {
 														.bottom = 10,
 													},
 												},
-												.content = ui::TextContent {
+												.content = ui::Text {
 													.text = "Samus Aran brings the last Metroid to the Ceres space colony for scientific study. Investigation of the specimen, a larva, reveals that its energy-producing abilities could be harnessed for the good of civilization.",
 												},
 											},
@@ -483,7 +481,7 @@ void MainMenuScene::render(const Game& game) const {
 														.bottom = 10,
 													},
 												},
-												.content = ui::TextContent {
+												.content = ui::Text {
 													.text = "Shortly after leaving, Samus receives a distress call alerting her to return to the colony immediately. She finds the scientists dead, and the Metroid larva stolen by Ridley, leader of the Space Pirates. Samus escapes during a self-destruct sequence and follows Ridley to the planet Zebes. She searches the planet for the Metroid and finds that the Pirates have rebuilt their base there.",
 												},
 											},
@@ -498,7 +496,7 @@ void MainMenuScene::render(const Game& game) const {
 										.border_color = GREEN,
 										.font_color = WHITE,
 									},
-									.content = ui::BoxContent {
+									.content = ui::Box {
 										.children = {
 											ui::Element {
 												.style = {
@@ -506,7 +504,7 @@ void MainMenuScene::render(const Game& game) const {
 														.bottom = 10,
 													}
 												},
-												.content = ui::TextContent {
+												.content = ui::Text {
 													.text = "After defeating three bosses in various regions of Zebes, Samus confronts Ridley in his lair and defeats him, only to discover that the capsule containing the Metroid larva has been shattered and the larva is missing."
 												},
 											},
@@ -516,7 +514,7 @@ void MainMenuScene::render(const Game& game) const {
 														.bottom = 10,
 													}
 												},
-												.content = ui::TextContent {
+												.content = ui::Text {
 													.text = "She then heads for Tourian, the heart of the Space Pirates' base, and fights several Metroids that have reproduced. Samus confronts the Metroid larva, which has grown to enormous size. It attacks and nearly kills Samus, but relents at the last moment. As Samus was present at its hatching on SR388, the Metroid has imprinted on Samus, and recognizes her as its \"mother\"."
 												},
 											},
@@ -534,10 +532,10 @@ void MainMenuScene::render(const Game& game) const {
 							.border_color = RED,
 							.font_color = WHITE,
 						},
-						.content = ui::BoxContent {
+						.content = ui::Box {
 							.children = {
 								ui::Element {
-									.content = ui::TextContent {
+									.content = ui::Text {
 										.text = "> All systems nominal"
 									},
 								},
