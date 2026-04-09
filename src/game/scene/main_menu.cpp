@@ -45,31 +45,21 @@ namespace ui {
 	};
 
 	struct RelativeSize {
-		int percentage; // relative parent size
+		float percentage; // relative parent size, range [0, 100]
 	};
 
-	struct Size {
-		std::variant<AbsoluteSize, RelativeSize> value;
+	using Size = std::variant<AbsoluteSize, RelativeSize>;
 
-		Size(AbsoluteSize value)
-			: value(value) {
-		}
-
-		Size(RelativeSize value)
-			: value(value) {
-		}
-
-		float fit_to_parent(float parent_size) const {
+	float fit_size_to_parent(const Size& size, float parent_size) {
 			float pixels = 0.0f;
-			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&this->value)) {
+			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&size)) {
 				pixels = std::min<float>(absolute_width->pixels, parent_size);
 			}
-			if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&this->value)) {
+			if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&size)) {
 				pixels = (relative_width->percentage / 100.0f) * parent_size;
 			}
 			return pixels;
-		}
-	};
+	}
 
 	struct Spacing {
 		float top;
@@ -216,8 +206,8 @@ namespace ui {
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
 					const Vector2 desired_size = {
-						.x = child.style.width.fit_to_parent(content_box.width),
-						.y = child.style.height.fit_to_parent(content_box.height),
+						.x = fit_size_to_parent(child.style.width, content_box.width),
+						.y = fit_size_to_parent(child.style.height, content_box.height),
 					};
 					desired_sizes.push_back({ i, desired_size });
 				}
@@ -526,7 +516,7 @@ void MainMenuScene::render(const Game& game) const {
 					},
 					ui::Element {
 						.style = {
-							.height = ui::AbsoluteSize(80),
+							.height = ui::RelativeSize(25),
 							.border = ui::Spacing::uniform(5),
 							.padding = ui::Spacing::uniform(10),
 							.border_color = RED,
@@ -535,6 +525,11 @@ void MainMenuScene::render(const Game& game) const {
 						.content = ui::Box {
 							.children = {
 								ui::Element {
+									.style = {
+										.debug ={
+											.show_content_outline = false,
+										},
+									},
 									.content = ui::Text {
 										.text = "> All systems nominal"
 									},
