@@ -23,7 +23,7 @@ void MainMenuScene::render(const Game& game) const {
 	const Font& font = game.resources.get_font(FontID::default_font());
 	const int font_size = 32;
 	const char* text = "Main Menu";
-	const int text_width = Raylib_MeasureText(text, font_size);
+	const int text_width = Raylib_MeasureTextEx(font, text, font_size, 0.0f).x;
 	const Vector2 pos = {
 		.x = (game.window.width() - text_width) / 2.0f,
 		.y = (game.window.height() - font_size) / 2.0f,
