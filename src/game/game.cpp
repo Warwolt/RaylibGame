@@ -30,12 +30,13 @@ Game* Game_initialize(int argc, char** argv) {
 
 	/* Initialize game */
 	Game* game = new Game {
-		.scene_manager = SceneManager(SceneID::MainMenu),
 		.window = Window::initialize(SCREEN_WIDTH, SCREEN_HEIGHT),
+		.scenes = SceneManager(SceneID::MainMenu),
 	};
 	if (start_fullscreen) {
 		game->window.toggle_fullscreen();
 	}
+	game->resources.load_default_font("resource/font/ModernDOS8x16.ttf");
 
 	LOG_INFO("Game initialized");
 
@@ -54,7 +55,7 @@ void Game_update(Game* game) {
 	game->window.update();
 
 	/* Update scene */
-	game->scene_manager.update_current_scene(game);
+	game->scenes.update_current_scene(game);
 }
 
 void Game_render(const Game& game) {
@@ -62,7 +63,7 @@ void Game_render(const Game& game) {
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
-		game.scene_manager.render_current_scene(game);
+		game.scenes.render_current_scene(game);
 	}
 	Raylib_EndTextureMode();
 
