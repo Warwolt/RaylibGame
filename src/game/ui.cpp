@@ -1,23 +1,11 @@
 #include "game/ui.h"
 
+#include "core/util.h"
+
 #include <algorithm>
 #include <memory>
-#include <sstream>
 
 namespace ui {
-
-	// FIXME: move to util file
-	std::vector<std::string> split_text_into_words(const std::string& text) {
-		std::vector<std::string> words;
-
-		std::istringstream iss(text);
-		std::string word;
-		while (iss >> word) {
-			words.push_back(word);
-		}
-
-		return words;
-	}
 
 	static float alignment_padding(Alignment alignment, float remainder) {
 		switch (alignment) {
@@ -46,7 +34,7 @@ namespace ui {
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
 			text->lines.push_back("");
-			for (const std::string& word : split_text_into_words(text->text)) {
+			for (const std::string& word : util::split_text_into_words(text->text)) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, 0.0f).x;
 				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
 				if (cursor.x + needed_length <= max_text_width) {
