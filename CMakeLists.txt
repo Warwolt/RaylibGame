@@ -65,7 +65,13 @@ target_link_libraries(Tests PUBLIC ${LIB} gtest gmock)
 SET(TARGETS Executable Library Source)
 foreach(TARGET IN ITEMS ${TARGETS})
     target_include_directories(${TARGET} PRIVATE ${INC})
-    target_compile_options(${TARGET} PUBLIC /W4 /w44062 /wd4996)
+    target_compile_options(${TARGET} PUBLIC
+        /W4
+        /w44062 # enable warning on unhandled switch case
+        /wd4996 # ignore MSVC insisting on _s functions
+        /wd4244 # ignore conversion from 'type1' to 'type2', possible loss of data
+        /wd4838 # ignore conversion from 'type_1' to 'type_2' requires a narrowing conversion
+    )
     set_property(TARGET ${TARGET} PROPERTY CXX_STANDARD 23)
     if (WARNINGS_AS_ERRORS)
         target_compile_options(${TARGET} PUBLIC /WX)
