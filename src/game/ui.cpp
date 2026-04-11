@@ -197,7 +197,7 @@ namespace ui {
 		}
 	}
 
-	void compute_element_layout(const ResourceManager& resources, Vector2 window_size, Element* element) {
+	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		const Vector2 top_left = { 0, 0 };
 		compute_element_sizes(resources, window_size, element);
 		compute_element_positions(top_left, element);

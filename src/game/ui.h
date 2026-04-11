@@ -31,12 +31,6 @@ namespace ui {
 	using Content = std::variant<Box, Text>;
 
 	/* Style */
-	enum class Alignment {
-		Start,
-		Center,
-		End,
-	};
-
 	struct AbsoluteSize {
 		int pixels;
 	};
@@ -66,6 +60,12 @@ namespace ui {
 		}
 	};
 
+	enum class Alignment {
+		Start,
+		Center,
+		End,
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
@@ -78,8 +78,8 @@ namespace ui {
 		Spacing border;
 		Spacing padding;
 		Alignment alignment;
-		Color border_color = { 0, 0, 0, 0 };
-		Color background_color = { 0, 0, 0, 0 };
+		Color border_color;
+		Color background_color;
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
@@ -109,7 +109,7 @@ namespace ui {
 		Layout layout;
 	};
 
-	void compute_element_layout(const ResourceManager& resources, Vector2 window_size, Element* element);
+	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
 
 } // namespace ui

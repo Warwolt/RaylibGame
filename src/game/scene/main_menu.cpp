@@ -142,7 +142,7 @@ void MainMenuScene::render(const Game& game) const {
 	};
 
 	/* Compute layout */
-	ui::compute_element_layout(game.resources, game.window.size(), &root_element);
+	ui::layout_element(game.resources, game.window.size(), &root_element);
 
 	/* Render elements */
 	ui::draw_element(game.resources, root_element);
