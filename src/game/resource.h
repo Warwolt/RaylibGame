@@ -5,11 +5,11 @@
 #include <unordered_map>
 
 struct FontID {
+	int value = 0;
+
 	static FontID default_font() {
 		return FontID { 0 };
 	};
-
-	int value = 0;
 };
 
 class ResourceManager {
@@ -17,7 +17,6 @@ public:
 	ResourceManager() = default;
 
 	void load_default_font(const std::string& path);
-	const Font& default_font() const;
 	const Font& get_font(FontID font_id) const;
 
 private:

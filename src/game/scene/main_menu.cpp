@@ -51,14 +51,14 @@ namespace ui {
 	using Size = std::variant<AbsoluteSize, RelativeSize>;
 
 	float fit_size_to_parent(const Size& size, float parent_size) {
-			float pixels = 0.0f;
-			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&size)) {
-				pixels = std::min<float>(absolute_width->pixels, parent_size);
-			}
-			if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&size)) {
-				pixels = (relative_width->percentage / 100.0f) * parent_size;
-			}
-			return pixels;
+		float pixels = 0.0f;
+		if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&size)) {
+			pixels = std::min<float>(absolute_width->pixels, parent_size);
+		}
+		if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&size)) {
+			pixels = (relative_width->percentage / 100.0f) * parent_size;
+		}
+		return pixels;
 	}
 
 	struct Spacing {
@@ -386,8 +386,7 @@ namespace ui {
 				}
 			}
 			Raylib_EndScissorMode();
-		}
-		else if (const ui::Box* box = std::get_if<ui::Box>(&element.content)) {
+		} else if (const ui::Box* box = std::get_if<ui::Box>(&element.content)) {
 			for (const Element& child : box->children) {
 				draw_element(resources, child);
 			}
