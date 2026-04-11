@@ -5,11 +5,11 @@
 #include <unordered_map>
 
 struct FontID {
+	int value = 0;
+
 	static FontID default_font() {
 		return FontID { 0 };
 	};
-
-	int value = 0;
 };
 
 class ResourceManager {
