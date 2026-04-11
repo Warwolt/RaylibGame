@@ -47,17 +47,6 @@ namespace ui {
 
 	using Size = std::variant<AbsoluteSize, RelativeSize>;
 
-	inline float fit_size_to_parent(const Size& size, float parent_size) {
-		float pixels = 0.0f;
-		if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&size)) {
-			pixels = std::min<float>(absolute_width->pixels, parent_size);
-		}
-		if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&size)) {
-			pixels = (relative_width->percentage / 100.0f) * parent_size;
-		}
-		return pixels;
-	}
-
 	struct Spacing {
 		float top;
 		float bottom;

@@ -22,7 +22,18 @@ namespace ui {
 		return 0;
 	}
 
-	void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+	static float fit_size_to_parent(const Size& size, float parent_size) {
+		float pixels = 0.0f;
+		if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&size)) {
+			pixels = std::min<float>(absolute_width->pixels, parent_size);
+		}
+		if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&size)) {
+			pixels = (relative_width->percentage / 100.0f) * parent_size;
+		}
+		return pixels;
+	}
+
+	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
@@ -126,7 +137,7 @@ namespace ui {
 		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
 
-	void compute_element_positions(Vector2 position, Element* element) {
+	static void compute_element_positions(Vector2 position, Element* element) {
 		const Style style = element->style;
 		Layout* layout = &element->layout;
 
