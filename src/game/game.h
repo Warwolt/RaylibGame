@@ -1,12 +1,14 @@
 #pragma once
 
+#include "game/resource.h"
 #include "game/scene/scene.h"
 #include "platform/window.h"
 
 struct Game {
 	bool should_quit = false;
-	SceneManager scene_manager;
 	Window window;
+	SceneManager scenes;
+	ResourceManager resources;
 };
 
 extern "C" __declspec(dllexport) Game* Game_initialize(int argc, char** argv);
