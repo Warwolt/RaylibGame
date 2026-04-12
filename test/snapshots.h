@@ -12,7 +12,7 @@
 		const std::string _test_name = testing::UnitTest::GetInstance()->current_test_info()->name();                     \
 		const Image _actual = (image);                                                                                    \
 		if (std::optional<Image> _snapshot = snapshots::try_load_snapshot(_suite_name, _test_name)) {                     \
-			if (image_pixels(_actual) == image_pixels(_snapshot.value())) {                                               \
+			if (snapshots::image_pixels(_actual) == snapshots::image_pixels(_snapshot.value())) {                         \
 				snapshots::report_passed_snapshot(_suite_name, _test_name);                                               \
 			} else {                                                                                                      \
 				if (snapshots::should_update_snapshots()) {                                                               \
@@ -48,6 +48,7 @@ namespace snapshots {
 	std::optional<Image> try_load_snapshot(std::string test_suite_name, std::string test_name);
 	void save_snapshot(const Image& snapshot, std::string test_suite_name, std::string test_name);
 	void save_snapshot_diff(const Image& snapshot, std::string test_suite_name, std::string test_name);
+	std::vector<Color> image_pixels(const Image& image);
 
 	void initialize_snapshot_tests(int argc, char** argv);
 	void generate_snapshot_report();

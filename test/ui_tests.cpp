@@ -7,6 +7,9 @@
 #include <filesystem>
 #include <functional>
 
+constexpr int SCREEN_WIDTH = 768;
+constexpr int SCREEN_HEIGHT = 432;
+
 class UITests : public ::testing::Test {
 public:
 	void SetUp() {
@@ -20,7 +23,7 @@ public:
 	}
 };
 
-Image render_to_image(int width, int height, std::function<void()> render) {
+Image render_image(int width, int height, std::function<void()> render) {
 	RenderTexture2D texture = Raylib_LoadRenderTexture(width, height);
 	Raylib_BeginTextureMode(texture);
 	render();
@@ -30,15 +33,8 @@ Image render_to_image(int width, int height, std::function<void()> render) {
 	return image;
 }
 
-std::vector<Color> image_pixels(Image image) {
-	Color* pixels_ptr = LoadImageColors(image);
-	std::vector<Color> pixels = std::vector<Color>(pixels_ptr, pixels_ptr + image.width * image.height);
-	UnloadImageColors(pixels_ptr);
-	return pixels;
-}
-
 TEST_F(UITests, HelloWorld) {
-	Image image = render_to_image(100, 100, []() {
+	Image image = render_image(SCREEN_WIDTH, SCREEN_HEIGHT, []() {
 		Raylib_ClearBackground(BLUE);
 		Raylib_DrawText("Test", 0, 0, 16, WHITE);
 	});

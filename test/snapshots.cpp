@@ -292,6 +292,13 @@ namespace snapshots {
 		Raylib_ExportImage(snapshot, snapshot_diff_filepath(suite_name, test_name).string().c_str());
 	}
 
+	std::vector<Color> image_pixels(const Image& image) {
+		Color* pixels_ptr = LoadImageColors(image);
+		std::vector<Color> pixels = std::vector<Color>(pixels_ptr, pixels_ptr + image.width * image.height);
+		UnloadImageColors(pixels_ptr);
+		return pixels;
+	}
+
 	void initialize_snapshot_tests(int argc, char** argv) {
 		for (int i = 0; i < argc; i++) {
 			if (std::string(argv[i]) == "--update-snapshots") {
