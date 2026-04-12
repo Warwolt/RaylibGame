@@ -10,11 +10,22 @@ jobs:
         with:
           submodules: recursive
 
+      # Mesa is used to support OpenGL on windows-latest
+      - name: Download Mesa
+        run: |
+          curl -L -o mesa.zip https://github.com/pal1000/mesa-dist-win/releases/latest/download/mesa3d.zip
+          tar -xf mesa.zip -C mesa
+
       - name: Setup CMake
         uses: threeal/cmake-action@v2.1.0
 
       - name: Build
         run: cmake --build build
+
+      - name: Setup Mesa
+        run: |
+          copy mesa/x64/opengl32.dll ./build/Debug/
+          echo LIBGL_ALWAYS_SOFTWARE=1 >> $env:GITHUB_ENV
 
       - name: Run tests
         run: ./build/Debug/Tests.exe

@@ -248,13 +248,11 @@ namespace snapshots {
 			return suite.name == suite_name;
 		});
 		if (it == g_context.all_suites.end()) {
-			g_context.all_suites.push_back(
-				SnapshotTestSuite {
-					.name = suite_name,
-					.path = suite_name + "/index.html",
-					.tests = { test_case },
-				}
-			);
+			g_context.all_suites.push_back(SnapshotTestSuite {
+				.name = suite_name,
+				.path = suite_name + "/index.html",
+				.tests = { test_case },
+			});
 		} else {
 			it->tests.push_back(test_case);
 		}
