@@ -17,8 +17,8 @@ public:
 	ResourceManager() = default;
 
 	void load_default_font(const std::string& path);
-	const Font& get_font(FontID font_id) const;
+	Font get_font(FontID font_id) const;
 
 private:
-	Font m_default_font;
+	Font m_default_font = {};
 };
