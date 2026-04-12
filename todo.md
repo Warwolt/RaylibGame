@@ -7,10 +7,8 @@
 - Integrate Tracy profiler so we can measure performance of UI system
 - Bug: Fix clang format not formatting nested designated initializers
 
-# Doing
-- Test the layout UI code
-
 # Done
+- Add first snapshot tests for UI layout code
 - Snapshot testing for UI
 - Prototype basic UI rendering
 - Basic Scene system
