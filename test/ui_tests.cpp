@@ -50,7 +50,7 @@ TEST_F(UITests, HelloWorld) {
 		Raylib_DrawText("Test", 0, 0, 16, WHITE);
 	});
 
-	// EXPECT_EQ_SNAPSHOT(image)
+	// EXPECT_SNAPSHOT_EQ(image)
 	{
 		const std::string testcase_name = testing::UnitTest::GetInstance()->current_test_info()->name();
 		const std::filesystem::path testfile_path = std::filesystem::path(__FILE__);
@@ -61,10 +61,12 @@ TEST_F(UITests, HelloWorld) {
 
 		const bool should_update = false;
 		if (should_update) {
+			// update snapshot with actual
 			std::filesystem::create_directories(snapshot_dir);
 			Raylib_ExportImage(image, snapshot_path.string().c_str());
 		} else {
 			if (std::optional<Image> snapshot = try_load_snapshot(snapshot_path)) {
+				// compare actual image with snapshot
 				const bool actual_matches_snapshot = image_pixels(image) == image_pixels(snapshot.value());
 				if (!actual_matches_snapshot) {
 					const std::filesystem::path report_dir = "./snapshot_report";
