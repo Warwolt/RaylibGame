@@ -39,14 +39,15 @@ namespace ui {
 
 		if (Text* text = std::get_if<Text>(&element->content)) {
 			const Font& font = resources.get_font(style.font_id);
+			const float font_spacing = 0.0f;
 			const float max_text_width = max_size.x - style.horizontal_spacing();
 			const float max_text_height = max_size.y - style.vertical_spacing();
-			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, 0.0f).x;
+			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
 			text->lines.push_back("");
 			for (const std::string& word : util::split_text_into_words(text->text)) {
-				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, 0.0f).x;
+				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, font_spacing).x;
 				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
 				if (cursor.x + needed_length <= max_text_width) {
 					// add word to current line
@@ -199,7 +200,11 @@ namespace ui {
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		const Vector2 top_left = { 0, 0 };
-		compute_element_sizes(resources, window_size, element);
+		const Vector2 element_size = {
+			.x = fit_size_to_parent(element->style.width, window_size.x),
+			.y = fit_size_to_parent(element->style.height, window_size.y),
+		};
+		compute_element_sizes(resources, element_size, element);
 		compute_element_positions(top_left, element);
 	}
 
@@ -258,13 +263,14 @@ namespace ui {
 			{
 				int line_num = 0;
 				for (const std::string& line : text->lines) {
-					const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, 0.0f).x;
+					const float font_spacing = 0.0f;
+					const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, font_spacing).x;
 					const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
 						.y = element.layout.content_box.y + line_num * style.font_size,
 					};
-					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, 0.0f, style.font_color);
+					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, font_spacing, style.font_color);
 					line_num++;
 				}
 			}
