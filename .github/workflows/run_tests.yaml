@@ -28,7 +28,7 @@ jobs:
       - name: Setup Mesa
         shell: pwsh
         run: |
-          Copy-Item mesa/x64/opengl32.dll build/Debug/ -Force
+          Copy-Item mesa/x64/*.dll build/Debug/ -Force
           echo "LIBGL_ALWAYS_SOFTWARE=1" >> $env:GITHUB_ENV
 
       - name: Run tests
