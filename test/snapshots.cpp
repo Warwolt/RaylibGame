@@ -58,6 +58,22 @@ namespace snapshots {
 
 	SnapshotTestContext g_context;
 
+	std::filesystem::path snapshot_directory(std::string suite_name) {
+		return SNAPSHOT_DIRECTORY / suite_name;
+	}
+
+	static std::filesystem::path snapshot_report_directory(std::string suite_name) {
+		return REPORT_DIRECTORY / suite_name;
+	}
+
+	std::filesystem::path snapshot_filepath(std::string suite_name, std::string test_name) {
+		return snapshot_directory(suite_name) / (test_name + ".png");
+	}
+
+	static std::filesystem::path snapshot_diff_filepath(std::string test_suite_name, std::string test_name) {
+		return snapshot_report_directory(test_suite_name) / (test_name + ".png");
+	}
+
 	static std::string report_header_html(std::string title) {
 		const auto now = std::chrono::zoned_time(std::chrono::current_zone(), std::chrono::system_clock::now());
 		const std::string timestamp = std::format("{:%Y-%m-%d %H:%M}", now);
@@ -125,6 +141,102 @@ namespace snapshots {
 		return std::format(HTML_TEMPLATE, html_body);
 	}
 
+	static std::string snapshot_suite_html(const SnapshotTestSuite& suite) {
+		int num_passed_snapshots = 0;
+		int num_failed_snapshots = 0;
+		int num_updated_snapshots = 0;
+		for (const SnapshotTestCase& test : suite.tests) {
+			if (test.result == SnapshotTestResult::Failed) {
+				num_failed_snapshots++;
+			} else {
+				num_passed_snapshots++;
+				if (test.result == SnapshotTestResult::Updated) {
+					num_updated_snapshots++;
+				}
+			}
+		}
+
+		/* Add page header */
+		std::string html_body;
+		html_body += report_header_html("Snapshot Test Report: " + suite.name);
+		html_body += R"(<a href="../index.html">Back to summary</a>)";
+		html_body += snapshot_stats_html(num_passed_snapshots, num_failed_snapshots);
+
+		/* List failed snapshots */
+		if (num_failed_snapshots > 0) {
+			html_body += "<h2>Failures</h2>";
+			html_body += "<ol>";
+			for (const SnapshotTestCase& test : suite.tests) {
+				if (test.result == SnapshotTestResult::Failed) {
+					html_body += "<li>";
+					html_body += std::format(R"(<a href="#{}">{}</a>)", test.name, test.name);
+					html_body += "</li>";
+				}
+			}
+			html_body += "</ol>";
+		}
+
+		/* List updated snapshots*/
+		if (num_updated_snapshots > 0) {
+			html_body += "<h2>Updates</h2>";
+			html_body += "<ol>";
+			for (const SnapshotTestCase& test : suite.tests) {
+				if (test.result == SnapshotTestResult::Updated) {
+					html_body += "<li>";
+					html_body += std::format(R"(<a href="#{}">{}</a>)", test.name, test.name);
+					html_body += "</li>";
+				}
+			}
+			html_body += "</ol>";
+		}
+
+		/* Display snapshots */
+		html_body += "<h2>Snapshots</h2>";
+		html_body += "<ol>";
+		for (const SnapshotTestCase& test : suite.tests) {
+			html_body += "<li><a href=#" + test.name + ">" + test.name + "</a></li>";
+		}
+		html_body += "</ol>";
+		for (size_t i = 0; i < suite.tests.size(); i++) {
+			const SnapshotTestCase& test = suite.tests[i];
+			/* Test name */
+			html_body += std::format("<h3 id=\"{}\">", test.name);
+			html_body += test.result == SnapshotTestResult::Failed ? "❌ " : "✅ ";
+			html_body += std::format("{}. ", i + 1);
+			html_body += test.name;
+			if (test.result == SnapshotTestResult::Failed)
+				html_body += " (failed)";
+			if (test.result == SnapshotTestResult::Updated)
+				html_body += " (updated)";
+			html_body += "</h3>";
+
+			/* Snapshot */
+			html_body += "<div style=\"display: flex; align-items: center\">";
+			std::filesystem::path snapshot_path = "..\\.." / snapshot_filepath(suite.name, test.name);
+			std::filesystem::path diff_path = "..\\.." / snapshot_diff_filepath(suite.name, test.name);
+			switch (test.result) {
+				case SnapshotTestResult::Passed:
+					html_body += std::format("<img src=\"{}\">", snapshot_path.string());
+					break;
+
+				case SnapshotTestResult::Failed:
+					html_body += std::format("<img src=\"{}\">", snapshot_path.string());
+					html_body += "<p style=\"margin: 1em\">➡️</p>";
+					html_body += std::format("<img src=\"{}\">", diff_path.string());
+					break;
+
+				case SnapshotTestResult::Updated:
+					html_body += std::format("<img src=\"{}\">", diff_path.string());
+					html_body += "<p style=\"margin: 1em\">➡️</p>";
+					html_body += std::format("<img src=\"{}\">", snapshot_path.string());
+					break;
+			}
+			html_body += "</div>";
+		}
+
+		return std::format(HTML_TEMPLATE, html_body);
+	}
+
 	static void report_snapshot(std::string suite_name, std::string test_name, SnapshotTestResult test_result) {
 		SnapshotTestCase test_case = {
 			.name = test_name,
@@ -144,22 +256,6 @@ namespace snapshots {
 		} else {
 			it->tests.push_back(test_case);
 		}
-	}
-
-	std::filesystem::path snapshot_directory(std::string suite_name) {
-		return SNAPSHOT_DIRECTORY / suite_name;
-	}
-
-	static std::filesystem::path snapshot_report_directory(std::string suite_name) {
-		return REPORT_DIRECTORY / suite_name;
-	}
-
-	std::filesystem::path snapshot_filepath(std::string suite_name, std::string test_name) {
-		return snapshot_directory(suite_name) / (test_name + ".png");
-	}
-
-	static std::filesystem::path snapshot_diff_filepath(std::string test_suite_name, std::string test_name) {
-		return snapshot_report_directory(test_suite_name) / (test_name + ".png");
 	}
 
 	bool should_update_snapshots() {
@@ -205,12 +301,43 @@ namespace snapshots {
 	}
 
 	void generate_snapshot_report() {
+		/* Copy over failed tests */
+		for (const SnapshotTestSuite& suite : g_context.all_suites) {
+			bool has_any_failures = false;
+			bool has_any_updates = false;
+			for (const SnapshotTestCase& test : suite.tests) {
+				if (test.result == SnapshotTestResult::Failed) {
+					has_any_failures = true;
+				}
+				if (test.result == SnapshotTestResult::Updated) {
+					has_any_updates = true;
+				}
+			}
+			if (has_any_failures) {
+				g_context.failed_suites.push_back(suite);
+			} else if (has_any_updates) {
+				g_context.updated_suites.push_back(suite);
+			}
+		}
+
 		/* Create report HTML file */
 		std::filesystem::create_directory(REPORT_DIRECTORY);
 		std::ofstream report_file;
 		report_file.open(REPORT_DIRECTORY / "index.html");
 		report_file << snapshot_report_html() << std::endl;
 		report_file.close();
-	}
 
+		/* Create suite HTML files */
+		for (const SnapshotTestSuite& suite : g_context.all_suites) {
+			std::filesystem::create_directory(REPORT_DIRECTORY / suite.path.parent_path());
+			std::ofstream suite_file;
+			suite_file.open(REPORT_DIRECTORY / suite.path);
+			suite_file << snapshot_suite_html(suite) << std::endl;
+			suite_file.close();
+		}
+
+		if (!g_context.all_suites.empty()) {
+			printf("\nSnapshot test report updated: %s\n", "./snapshot_report/index.html");
+		}
+	}
 } // namespace snapshots
