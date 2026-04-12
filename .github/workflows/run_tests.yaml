@@ -4,6 +4,7 @@ on:
 jobs:
   run_tests:
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
@@ -14,15 +15,15 @@ jobs:
       - name: Download Mesa
         shell: pwsh
         run: |
-          $url = "https://github.com/pal1000/mesa-dist-win/releases/latest/download/mesa3d.zip"
-          Invoke-WebRequest $url -OutFile mesa.zip
-          Expand-Archive mesa.zip -DestinationPath mesa
+          $url = "https://github.com/pal1000/mesa-dist-win/releases/download/23.1.9/mesa3d-23.1.9-release-msvc.7z"
+          Invoke-WebRequest $url -OutFile mesa.7z
+          7z x mesa.7z -omesa
 
       - name: Setup CMake
         uses: threeal/cmake-action@v2.1.0
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --config Debug
 
       - name: Setup Mesa
         shell: pwsh
