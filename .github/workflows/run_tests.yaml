@@ -11,7 +11,7 @@ jobs:
         with:
           submodules: recursive
 
-      # Mesa is used to support OpenGL on windows-latest
+      # Mesa is a CPU-only OpenGL implementation, windows-latest doesn't have GPUs
       - name: Download Mesa
         shell: pwsh
         run: |
