@@ -35,6 +35,8 @@ set(LIB
     shlwapi
 )
 
+set(INC .)
+
 # Source library
 add_library(Source OBJECT ${SRC})
 target_include_directories(Source PUBLIC src lib)

@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-
 #include "core/debug/logging.h"
+#include "test/snapshots.h"
 
+#include <gtest/gtest.h>
 #include <raylib.h>
 
 #include <filesystem>
@@ -21,7 +21,7 @@ public:
 };
 
 Image render_to_image(int width, int height, std::function<void()> render) {
-	RenderTexture2D texture = Raylib_LoadRenderTexture(64, 64);
+	RenderTexture2D texture = Raylib_LoadRenderTexture(width, height);
 	Raylib_BeginTextureMode(texture);
 	render();
 	Raylib_EndTextureMode();
@@ -51,36 +51,31 @@ TEST_F(UITests, HelloWorld) {
 	});
 
 	// EXPECT_SNAPSHOT_EQ(image)
-	{
-		const std::string testcase_name = testing::UnitTest::GetInstance()->current_test_info()->name();
-		const std::filesystem::path testfile_path = std::filesystem::path(__FILE__);
-		const std::filesystem::path testfile_dir = testfile_path.parent_path();
-		const std::filesystem::path testfile_name = testfile_path.stem();
-		const std::filesystem::path snapshot_dir = testfile_dir / "snapshots" / testfile_name;
-		const std::filesystem::path snapshot_path = snapshot_dir / (testcase_name + ".png");
-
-		const bool should_update = false;
-		if (should_update) {
-			// update snapshot with actual
-			std::filesystem::create_directories(snapshot_dir);
-			Raylib_ExportImage(image, snapshot_path.string().c_str());
-		} else {
-			if (std::optional<Image> snapshot = try_load_snapshot(snapshot_path)) {
-				// compare actual image with snapshot
-				const bool actual_matches_snapshot = image_pixels(image) == image_pixels(snapshot.value());
-				if (!actual_matches_snapshot) {
-					const std::filesystem::path report_dir = "./snapshot_report";
-					const std::filesystem::path diff_dir = report_dir / "diffs" / testfile_name;
-					const std::filesystem::path diff_path = diff_dir / (testcase_name + ".png");
-					std::filesystem::create_directories(diff_dir);
-					Raylib_ExportImage(image, diff_path.string().c_str());
+	do {
+		const std::string _suite_name = testing::UnitTest::GetInstance()->current_test_info()->test_suite_name();
+		const std::string _test_name = testing::UnitTest::GetInstance()->current_test_info()->name();
+		const Image _actual = (image);
+		if (std::optional<Image> _snapshot = snapshots::try_load_snapshot(_suite_name, _test_name)) {
+			if (image_pixels(_actual) == image_pixels(_snapshot.value())) {
+				snapshots::report_passed_snapshot(_suite_name, _test_name);
+			} else {
+				if (snapshots::should_update_snapshots()) {
+					std::string snapshot_filepath = snapshots::snapshot_filepath(_suite_name, _test_name).string();
+					printf("[   INFO   ] Updating snapshot file \"%s\"\n", snapshot_filepath.c_str());
+					snapshots::report_updated_snapshot(_suite_name, _test_name);
+					snapshots::save_snapshot_diff(_snapshot.value(), _suite_name, _test_name);
+					snapshots::save_snapshot(_actual, _suite_name, _test_name);
+				} else {
+					snapshots::report_failed_snapshot(_suite_name, _test_name);
+					snapshots::save_snapshot_diff(_actual, _suite_name, _test_name);
 					ADD_FAILURE() << "Actual image in test did not match snapshot image, see test report for more info.";
 				}
-			} else {
-				// snapshot doesn't exist, write actual as snapshot
-				std::filesystem::create_directories(snapshot_dir);
-				Raylib_ExportImage(image, snapshot_path.string().c_str());
 			}
+		} else {
+			std::string snapshot_filepath = snapshots::snapshot_filepath(_suite_name, _test_name).string();
+			printf("[   INFO   ] No snapshot found, saving new file \"%s\"\n", snapshot_filepath.c_str());
+			snapshots::report_passed_snapshot(_suite_name, _test_name);
+			snapshots::save_snapshot(_actual, _suite_name, _test_name);
 		}
-	}
+	} while (0);
 }
