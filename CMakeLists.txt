@@ -21,11 +21,13 @@ endif()
 # Source files
 set(SRC
     src/core/debug/logging.cpp
+    src/core/util.cpp
     src/game/game.cpp
-    src/game/scene/scene.cpp
-    src/game/scene/main_menu.cpp
-    src/game/scene/gameplay.cpp
     src/game/resource.cpp
+    src/game/scene/gameplay.cpp
+    src/game/scene/main_menu.cpp
+    src/game/scene/scene.cpp
+    src/game/ui.cpp
     src/platform/window.cpp
 )
 set(LIB
