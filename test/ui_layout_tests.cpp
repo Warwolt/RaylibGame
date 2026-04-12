@@ -10,7 +10,7 @@
 constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
 
-class UITests : public ::testing::Test {
+class UILayoutTests : public ::testing::Test {
 public:
 	void SetUp() {
 		Raylib_SetTraceLogLevel(LOG_WARNING);
@@ -33,10 +33,10 @@ Image render_image(int width, int height, std::function<void()> render) {
 	return image;
 }
 
-TEST_F(UITests, HelloWorld) {
+TEST_F(UILayoutTests, HelloWorld) {
 	Image image = render_image(SCREEN_WIDTH, SCREEN_HEIGHT, []() {
-		Raylib_ClearBackground(BLUE);
-		Raylib_DrawText("Test", 0, 0, 16, WHITE);
+		Raylib_ClearBackground(RED);
+		Raylib_DrawText("Test2", 0, 0, 16, WHITE);
 	});
 	EXPECT_SNAPSHOT_EQ(image);
 }

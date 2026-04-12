@@ -1,5 +1,7 @@
 #include "test/snapshots.h"
 
+#include "core/debug/logging.h"
+
 #include <chrono>
 #include <filesystem>
 #include <format>
@@ -300,13 +302,25 @@ namespace snapshots {
 	}
 
 	void initialize_snapshot_tests(int argc, char** argv) {
+		bool clean_snapshots = false;
 		for (int i = 0; i < argc; i++) {
-			if (std::string(argv[i]) == "--update-snapshots") {
+			std::string arg = std::string(argv[i]);
+			if (arg == "--update-snapshots") {
 				g_context.should_update_snapshots = true;
+			}
+
+			if (arg == "--clean-snapshots") {
+				clean_snapshots = true;
 			}
 		}
 
-		// FIXME: implement `--clean-snapshots` that removes old snapshot files
+		if (clean_snapshots) {
+			std::filesystem::remove_all(REPORT_DIRECTORY);
+			LOG_INFO("removed %s", REPORT_DIRECTORY.string().c_str());
+
+			std::filesystem::remove_all(SNAPSHOT_DIRECTORY);
+			LOG_INFO("removed %s", SNAPSHOT_DIRECTORY.string().c_str());
+		}
 	}
 
 	void generate_snapshot_report() {
