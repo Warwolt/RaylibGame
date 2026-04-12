@@ -30,26 +30,55 @@ Image render_to_image(int width, int height, std::function<void()> render) {
 	return image;
 }
 
+std::vector<Color> image_pixels(Image image) {
+	Color* pixels_ptr = LoadImageColors(image);
+	std::vector<Color> pixels = std::vector<Color>(pixels_ptr, pixels_ptr + image.width * image.height);
+	UnloadImageColors(pixels_ptr);
+	return pixels;
+}
+
+std::optional<Image> try_load_snapshot(std::filesystem::path snapshot_path) {
+	if (std::filesystem::exists(snapshot_path)) {
+		return Raylib_LoadImage(snapshot_path.string().c_str());
+	}
+	return {};
+}
+
 TEST_F(UITests, HelloWorld) {
 	Image image = render_to_image(64, 64, []() {
-		Raylib_ClearBackground(GREEN);
+		Raylib_ClearBackground(BLUE);
 		Raylib_DrawText("Test", 0, 0, 16, WHITE);
 	});
 
-	// IF should update THEN update snapshot with actual
+	// EXPECT_EQ_SNAPSHOT(image)
 	{
-		std::string test_name = testing::UnitTest::GetInstance()->current_test_info()->name();
-		std::filesystem::path testfile_dir = std::filesystem::path(__FILE__).parent_path();
-		std::filesystem::path testfile_filename = std::filesystem::path(__FILE__).filename();
-		std::filesystem::path snapshot_dir = testfile_dir / "snapshots" / testfile_filename;
-		std::filesystem::path snapshot_filename = snapshot_dir / (test_name + ".png");
-		LOG_DEBUG("%s", snapshot_filename.string().c_str());
-		std::filesystem::create_directories(snapshot_dir);
-		Raylib_ExportImage(image, snapshot_filename.string().c_str());
-	}
-	// ELSE IF snapshot exists THEN compare actual to snapshot
-	{
-		// check if snapshot file exists
-		// if it does, load it then compare snapshot image with actual image
+		const std::string testcase_name = testing::UnitTest::GetInstance()->current_test_info()->name();
+		const std::filesystem::path testfile_path = std::filesystem::path(__FILE__);
+		const std::filesystem::path testfile_dir = testfile_path.parent_path();
+		const std::filesystem::path testfile_name = testfile_path.stem();
+		const std::filesystem::path snapshot_dir = testfile_dir / "snapshots" / testfile_name;
+		const std::filesystem::path snapshot_path = snapshot_dir / (testcase_name + ".png");
+
+		const bool should_update = false;
+		if (should_update) {
+			std::filesystem::create_directories(snapshot_dir);
+			Raylib_ExportImage(image, snapshot_path.string().c_str());
+		} else {
+			if (std::optional<Image> snapshot = try_load_snapshot(snapshot_path)) {
+				const bool actual_matches_snapshot = image_pixels(image) == image_pixels(snapshot.value());
+				if (!actual_matches_snapshot) {
+					const std::filesystem::path report_dir = "./snapshot_report";
+					const std::filesystem::path diff_dir = report_dir / "diffs" / testfile_name;
+					const std::filesystem::path diff_path = diff_dir / (testcase_name + ".png");
+					std::filesystem::create_directories(diff_dir);
+					Raylib_ExportImage(image, diff_path.string().c_str());
+					ADD_FAILURE() << "Actual image in test did not match snapshot image, see test report for more info.";
+				}
+			} else {
+				// snapshot doesn't exist, write actual as snapshot
+				std::filesystem::create_directories(snapshot_dir);
+				Raylib_ExportImage(image, snapshot_path.string().c_str());
+			}
+		}
 	}
 }
