@@ -15,10 +15,13 @@ constexpr Vector2 SCREEN_SIZE = { SCREEN_WIDTH, SCREEN_HEIGHT };
 
 class UILayoutTests : public ::testing::Test {
 public:
+	ResourceManager m_resources;
+
 	void SetUp() {
 		Raylib_SetTraceLogLevel(LOG_WARNING);
 		Raylib_SetConfigFlags(FLAG_WINDOW_HIDDEN);
 		Raylib_InitWindow(1, 1, "Unit Test");
+		m_resources.load_default_font("resource/font/ModernDOS8x16.ttf");
 	}
 
 	void TearDown() {
@@ -29,6 +32,7 @@ public:
 Image render_image(std::function<void()> render) {
 	RenderTexture2D texture = Raylib_LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
 	Raylib_BeginTextureMode(texture);
+	Raylib_ClearBackground(BLACK);
 	render();
 	Raylib_EndTextureMode();
 	Image image = Raylib_LoadImageFromTexture(texture.texture);
@@ -37,7 +41,6 @@ Image render_image(std::function<void()> render) {
 }
 
 TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
-	ResourceManager resources;
 	ui::Element root = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -58,8 +61,8 @@ TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
 		},
 	};
 
-	ui::layout_element(resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &root);
+	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[0].layout.margin_box.width, SCREEN_WIDTH / 2);
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[1].layout.margin_box.width, SCREEN_WIDTH / 2);
@@ -67,7 +70,6 @@ TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
 }
 
 TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
-	ResourceManager resources;
 	ui::Element root = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -94,8 +96,8 @@ TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
 		},
 	};
 
-	ui::layout_element(resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &root);
+	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[1].layout.margin_box.width, SCREEN_WIDTH * 0.25);
@@ -103,9 +105,64 @@ TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, BoxLayout_100_WithMultipleParagraphs) {
-	ResourceManager resources;
-	resources.load_default_font("resource/font/ModernDOS8x16.ttf");
+TEST_F(UILayoutTests, Text_LeftAligned) {
+	ui::Element root = {
+		.style = {
+			.width = ui::RelativeSize(100),
+			.padding = ui::Spacing::uniform(20),
+			.alignment = ui::Alignment::Start,
+			.font_size = 32,
+		},
+		.content = ui::Text {
+			.text = "Left Aligned Text",
+		}
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &root);
+	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UILayoutTests, Text_CenterAligned) {
+	ui::Element root = {
+		.style = {
+			.width = ui::RelativeSize(100),
+			.padding = ui::Spacing::uniform(20),
+			.alignment = ui::Alignment::Center,
+			.font_size = 32,
+		},
+		.content = ui::Text {
+			.text = "Center Aligned Text",
+		}
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &root);
+	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UILayoutTests, Text_RightAligned) {
+	ui::Element root = {
+		.style = {
+			.width = ui::RelativeSize(100),
+			.padding = ui::Spacing::uniform(20),
+			.alignment = ui::Alignment::End,
+			.font_size = 32,
+		},
+		.content = ui::Text {
+			.text = "Right Aligned Text",
+		}
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &root);
+	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
 	ui::Element root = {
 		.style = {
 			.width = ui::RelativeSize(100),
@@ -159,11 +216,8 @@ TEST_F(UILayoutTests, BoxLayout_100_WithMultipleParagraphs) {
 		},
 	};
 
-	ui::layout_element(resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() {
-		Raylib_ClearBackground(BLACK);
-		ui::draw_element(resources, root);
-	});
+	ui::layout_element(m_resources, SCREEN_SIZE, &root);
+	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
