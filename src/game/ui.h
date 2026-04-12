@@ -102,14 +102,28 @@ namespace ui {
 		Rectangle content_box;
 	};
 
+	/* State */
+	struct Input {
+		Vector2 mouse_pos;
+		bool left_mouse_is_down;
+	};
+
+	struct State {
+		bool is_hovered; // e.g. mouse over
+		bool is_active; // e.g. mouse click (button down)
+		// bool is_focused; // e.g. mouse over, navigated to with keyboard
+	};
+
 	/* Element */
 	struct Element {
 		Style style;
 		Content content;
 		Layout layout;
+		State state;
 	};
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
+	void update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
 
 } // namespace ui

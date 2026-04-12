@@ -248,11 +248,13 @@ namespace snapshots {
 			return suite.name == suite_name;
 		});
 		if (it == g_context.all_suites.end()) {
-			g_context.all_suites.push_back(SnapshotTestSuite {
-				.name = suite_name,
-				.path = suite_name + "/index.html",
-				.tests = { test_case },
-			});
+			g_context.all_suites.push_back(
+				SnapshotTestSuite {
+					.name = suite_name,
+					.path = suite_name + "/index.html",
+					.tests = { test_case },
+				}
+			);
 		} else {
 			it->tests.push_back(test_case);
 		}
@@ -290,6 +292,17 @@ namespace snapshots {
 	void save_snapshot_diff(const Image& snapshot, std::string suite_name, std::string test_name) {
 		std::filesystem::create_directories(snapshot_report_directory(suite_name));
 		Raylib_ExportImage(snapshot, snapshot_diff_filepath(suite_name, test_name).string().c_str());
+	}
+
+	Image render_image(Vector2 image_size, std::function<void()> render) {
+		RenderTexture2D texture = Raylib_LoadRenderTexture(image_size.x, image_size.y);
+		Raylib_BeginTextureMode(texture);
+		Raylib_ClearBackground(BLACK);
+		render();
+		Raylib_EndTextureMode();
+		Image image = Raylib_LoadImageFromTexture(texture.texture);
+		Raylib_ImageFlipVertical(&image);
+		return image;
 	}
 
 	std::vector<Color> image_pixels(const Image& image) {

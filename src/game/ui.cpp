@@ -208,6 +208,11 @@ namespace ui {
 		compute_element_positions(top_left, element);
 	}
 
+	void update_element(const Input& input, Element* element) {
+		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
+		element->state.is_active = element->state.is_hovered && input.left_mouse_is_down;
+	}
+
 	void draw_element(const ResourceManager& resources, const Element& element) {
 		const Style& style = element.style;
 		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);

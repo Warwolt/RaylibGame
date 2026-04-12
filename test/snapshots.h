@@ -3,6 +3,7 @@
 #include <raylib.h>
 
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <string>
 
@@ -48,6 +49,8 @@ namespace snapshots {
 	std::optional<Image> try_load_snapshot(std::string test_suite_name, std::string test_name);
 	void save_snapshot(const Image& snapshot, std::string test_suite_name, std::string test_name);
 	void save_snapshot_diff(const Image& snapshot, std::string test_suite_name, std::string test_name);
+
+	Image render_image(Vector2 image_size, std::function<void()> render);
 	std::vector<Color> image_pixels(const Image& image);
 
 	void initialize_snapshot_tests(int argc, char** argv);

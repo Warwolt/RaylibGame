@@ -29,19 +29,8 @@ public:
 	}
 };
 
-Image render_image(std::function<void()> render) {
-	RenderTexture2D texture = Raylib_LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
-	Raylib_BeginTextureMode(texture);
-	Raylib_ClearBackground(BLACK);
-	render();
-	Raylib_EndTextureMode();
-	Image image = Raylib_LoadImageFromTexture(texture.texture);
-	Raylib_ImageFlipVertical(&image);
-	return image;
-}
-
 TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
-	ui::Element root = {
+	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
 			.children = {
@@ -61,16 +50,16 @@ TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
-	EXPECT_EQ(std::get<ui::Box>(root.content).children[0].layout.margin_box.width, SCREEN_WIDTH / 2);
-	EXPECT_EQ(std::get<ui::Box>(root.content).children[1].layout.margin_box.width, SCREEN_WIDTH / 2);
+	EXPECT_EQ(std::get<ui::Box>(element.content).children[0].layout.margin_box.width, SCREEN_WIDTH / 2);
+	EXPECT_EQ(std::get<ui::Box>(element.content).children[1].layout.margin_box.width, SCREEN_WIDTH / 2);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
 TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
-	ui::Element root = {
+	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
 			.children = {
@@ -96,17 +85,17 @@ TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
-	EXPECT_EQ(std::get<ui::Box>(root.content).children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
-	EXPECT_EQ(std::get<ui::Box>(root.content).children[1].layout.margin_box.width, SCREEN_WIDTH * 0.25);
-	EXPECT_EQ(std::get<ui::Box>(root.content).children[2].layout.margin_box.width, SCREEN_WIDTH * 0.375);
+	EXPECT_EQ(std::get<ui::Box>(element.content).children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
+	EXPECT_EQ(std::get<ui::Box>(element.content).children[1].layout.margin_box.width, SCREEN_WIDTH * 0.25);
+	EXPECT_EQ(std::get<ui::Box>(element.content).children[2].layout.margin_box.width, SCREEN_WIDTH * 0.375);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
 TEST_F(UILayoutTests, Text_LeftAligned) {
-	ui::Element root = {
+	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
 			.padding = ui::Spacing::uniform(20),
@@ -118,14 +107,14 @@ TEST_F(UILayoutTests, Text_LeftAligned) {
 		}
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
 TEST_F(UILayoutTests, Text_CenterAligned) {
-	ui::Element root = {
+	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
 			.padding = ui::Spacing::uniform(20),
@@ -137,14 +126,14 @@ TEST_F(UILayoutTests, Text_CenterAligned) {
 		}
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
 TEST_F(UILayoutTests, Text_RightAligned) {
-	ui::Element root = {
+	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
 			.padding = ui::Spacing::uniform(20),
@@ -156,14 +145,14 @@ TEST_F(UILayoutTests, Text_RightAligned) {
 		}
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
 TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
-	ui::Element root = {
+	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
 			.padding = ui::Spacing::uniform(20),
@@ -216,8 +205,8 @@ TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
