@@ -298,6 +298,8 @@ namespace snapshots {
 				g_context.should_update_snapshots = true;
 			}
 		}
+
+		// FIXME: implement `--clean-snapshots` that removes old snapshot files
 	}
 
 	void generate_snapshot_report() {
