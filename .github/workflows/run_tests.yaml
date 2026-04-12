@@ -12,9 +12,11 @@ jobs:
 
       # Mesa is used to support OpenGL on windows-latest
       - name: Download Mesa
+        shell: pwsh
         run: |
-          curl -L -o mesa.zip https://github.com/pal1000/mesa-dist-win/releases/latest/download/mesa3d.zip
-          tar -xf mesa.zip -C mesa
+          $url = "https://github.com/pal1000/mesa-dist-win/releases/latest/download/mesa3d.zip"
+          Invoke-WebRequest $url -OutFile mesa.zip
+          Expand-Archive mesa.zip -DestinationPath mesa
 
       - name: Setup CMake
         uses: threeal/cmake-action@v2.1.0
@@ -23,9 +25,10 @@ jobs:
         run: cmake --build build
 
       - name: Setup Mesa
+        shell: pwsh
         run: |
-          copy mesa/x64/opengl32.dll ./build/Debug/
-          echo LIBGL_ALWAYS_SOFTWARE=1 >> $env:GITHUB_ENV
+          Copy-Item mesa/x64/opengl32.dll build/Debug/ -Force
+          echo "LIBGL_ALWAYS_SOFTWARE=1" >> $env:GITHUB_ENV
 
       - name: Run tests
         run: ./build/Debug/Tests.exe
