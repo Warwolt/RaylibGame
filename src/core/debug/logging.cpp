@@ -2,6 +2,7 @@
 
 #include "platform/lean_mean_windows.h"
 
+#include <filesystem>
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
@@ -63,16 +64,6 @@ static const char* log_level_color(LogLevel level) {
 	return "";
 }
 
-static char* filename_from_path(const char* path_str) {
-	char* filename = (char*)path_str;
-	for (char* c = (char*)path_str; *c != '\0'; c++) {
-		if (*c == '\\') {
-			filename = c + 1;
-		}
-	}
-	return filename;
-}
-
 void initialize_logging() {
 	// If we're debugging, we're using the Visual Studio debug output window
 	// instead of a terminal that uses stdout. Skip color init in that case.
@@ -92,7 +83,7 @@ void disable_log_colors() {
 	g_should_add_colors = false;
 }
 
-void debug_log(LogLevel log_level, const char* filename, int line, const char* fmt, ...) {
+void debug_log(LogLevel log_level, const char* file_path, int line, const char* fmt, ...) {
 	const bool debugger_is_present = IsDebuggerPresent();
 	char buffer[1024] = { 0 };
 	int offset = 0;
@@ -103,13 +94,14 @@ void debug_log(LogLevel log_level, const char* filename, int line, const char* f
 	}
 
 	/* Add timestamp */
-	time_t t = time(0); // get time now
-	struct tm* now = localtime(&t);
+	const time_t t = time(0); // get time now
+	const struct tm* now = localtime(&t);
 	offset += snprintf(buffer + offset, 1024 - offset, "%02d-%02d-%02d ", now->tm_year + 1900, now->tm_mon + 1, now->tm_mday); // year
 	offset += snprintf(buffer + offset, 1024 - offset, "%02d:%02d ", now->tm_hour, now->tm_min); // hour
 
 	/* File and line */
-	offset += snprintf(buffer + offset, 1024 - offset, "%s:%d ", filename_from_path(filename), line);
+	const std::string filename = std::filesystem::path(file_path).filename().string();
+	offset += snprintf(buffer + offset, 1024 - offset, "%s:%d ", filename.c_str(), line);
 
 	/* Log level */
 	offset += snprintf(buffer + offset, 1024 - offset, "%s ", log_level_to_str(log_level));

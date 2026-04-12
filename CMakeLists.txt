@@ -35,6 +35,8 @@ set(LIB
     shlwapi
 )
 
+set(INC .)
+
 # Source library
 add_library(Source OBJECT ${SRC})
 target_include_directories(Source PUBLIC src lib)
@@ -57,7 +59,8 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 # Tests
 add_executable(Tests
     $<TARGET_OBJECTS:Source>
-    test/dummy_tests.cpp
+    test/snapshots.cpp
+    test/ui_layout_tests.cpp
     test/main.cpp
 )
 target_include_directories(Tests PUBLIC src lib)
@@ -65,7 +68,7 @@ target_link_libraries(Tests PUBLIC ${LIB} gtest gmock)
 
 
 # Set compilation options
-SET(TARGETS Executable Library Source)
+SET(TARGETS Executable Library Source Tests)
 foreach(TARGET IN ITEMS ${TARGETS})
     target_include_directories(${TARGET} PRIVATE ${INC})
     target_compile_options(${TARGET} PUBLIC
