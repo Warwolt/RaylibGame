@@ -66,7 +66,7 @@ target_link_libraries(Tests PUBLIC ${LIB} gtest gmock)
 
 
 # Set compilation options
-SET(TARGETS Executable Library Source)
+SET(TARGETS Executable Library Source Tests)
 foreach(TARGET IN ITEMS ${TARGETS})
     target_include_directories(${TARGET} PRIVATE ${INC})
     target_compile_options(${TARGET} PUBLIC
