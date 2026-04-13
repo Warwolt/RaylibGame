@@ -218,6 +218,7 @@ namespace snapshots {
 			std::filesystem::path diff_path = "..\\.." / snapshot_diff_filepath(suite.name, test.name);
 			switch (test.result) {
 				case SnapshotTestResult::Passed:
+				case SnapshotTestResult::Updated:
 					html_body += std::format("<img src=\"{}\">", snapshot_path.string());
 					break;
 
@@ -225,12 +226,6 @@ namespace snapshots {
 					html_body += std::format("<img src=\"{}\">", snapshot_path.string());
 					html_body += "<p style=\"margin: 1em\">➡️</p>";
 					html_body += std::format("<img src=\"{}\">", diff_path.string());
-					break;
-
-				case SnapshotTestResult::Updated:
-					html_body += std::format("<img src=\"{}\">", diff_path.string());
-					html_body += "<p style=\"margin: 1em\">➡️</p>";
-					html_body += std::format("<img src=\"{}\">", snapshot_path.string());
 					break;
 			}
 			html_body += "</div>";
