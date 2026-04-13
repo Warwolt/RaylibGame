@@ -79,7 +79,11 @@ namespace ui {
 		Spacing padding;
 		Alignment alignment;
 		Color border_color;
-		Color background_color;
+		struct {
+			Color base;
+			Color hovered;
+			Color active;
+		} background_color;
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;

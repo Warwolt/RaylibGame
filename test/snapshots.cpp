@@ -316,7 +316,7 @@ namespace snapshots {
 		bool clean_snapshots = false;
 		for (int i = 0; i < argc; i++) {
 			std::string arg = std::string(argv[i]);
-			if (arg == "--update-snapshots") {
+			if (arg == "--update-snapshots" || arg == "-u") {
 				g_context.should_update_snapshots = true;
 			}
 

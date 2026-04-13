@@ -99,6 +99,3 @@ TEST(UIInteractionTests, BoxElementWithChild_MouseOver_MouseDown_IsActive) {
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 }
-
-// box in a box, hover child => parent not hovered
-// box in a box, hover child && mouse down => parent not active

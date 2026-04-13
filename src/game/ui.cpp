@@ -220,7 +220,15 @@ namespace ui {
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
 		const Style& style = element.style;
-		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
+
+		/* Draw padding box */
+		Color background_color = element.style.background_color.base;
+		if (element.state.is_active) {
+			background_color = element.style.background_color.active;
+		} else if (element.state.is_hovered) {
+			background_color = element.style.background_color.hovered;
+		}
+		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
 
 		/* Draw border */
 		{

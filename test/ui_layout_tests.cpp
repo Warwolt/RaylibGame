@@ -210,3 +210,43 @@ TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
+
+TEST_F(UILayoutTests, BoxLayout_HoveredStyle) {
+	ui::Element element = {
+		.style = {
+			.width = ui::RelativeSize(100),
+			.background_color = {
+				.base = DARKGREEN,
+				.hovered = GREEN,
+			}
+		},
+		.content = ui::Box {},
+	};
+
+	element.state.is_hovered = true;
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UILayoutTests, BoxLayout_ActiveStyle) {
+	ui::Element element = {
+		.style = {
+			.width = ui::RelativeSize(100),
+			.background_color = {
+				.base = DARKGREEN,
+				.hovered = GREEN,
+				.active = BLUE,
+			},
+		},
+		.content = ui::Box {},
+	};
+
+	element.state.is_hovered = true;
+	element.state.is_active = true;
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
