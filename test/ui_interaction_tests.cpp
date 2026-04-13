@@ -11,56 +11,94 @@ constexpr Vector2 middle = { (size.x / 2) - 1, (size.y / 2) - 1 };
 constexpr Vector2 bottom_right = { size.x - 1, size.y - 1 };
 constexpr Vector2 outside = { size.x + 1, size.y + 1 };
 
-TEST(UIInteractionTests, Box_Mouse_IsHovered) {
+TEST(UIInteractionTests, BoxElementWithChild_MouseOverIsHovered) {
 	ResourceManager resources;
 	ui::Element element = {
 		.style = {
 			.width = ui::AbsoluteSize(size.x),
 			.height = ui::AbsoluteSize(size.y),
 		},
-		.content = ui::Box {},
+		.content = ui::Box {
+			.children = {
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(size.x / 2),
+						.height = ui::AbsoluteSize(size.y / 2),
+					},
+					.content = ui::Box {},
+				},
+			},
+		},
 	};
+	const ui::Element& child = std::get<ui::Box>(element.content).children[0];
 
 	/* Element initially not hovered */
 	ui::layout_element(resources, SCREEN_SIZE, &element);
-	EXPECT_FALSE(element.state.is_hovered);
+	EXPECT_EQ(element.state.is_hovered, false);
+	EXPECT_EQ(child.state.is_hovered, false);
 
 	/* Hover top left */
 	ui::update_element(ui::Input { .mouse_pos = top_left }, &element);
-	EXPECT_TRUE(element.state.is_hovered);
+	EXPECT_EQ(element.state.is_hovered, true);
+	EXPECT_EQ(child.state.is_hovered, true);
 
 	/* Hover middle */
 	ui::update_element(ui::Input { .mouse_pos = middle }, &element);
-	EXPECT_TRUE(element.state.is_hovered);
+	EXPECT_EQ(element.state.is_hovered, true);
+	EXPECT_EQ(child.state.is_hovered, true);
 
 	/* Hover bottom right */
 	ui::update_element(ui::Input { .mouse_pos = bottom_right }, &element);
-	EXPECT_TRUE(element.state.is_hovered);
+	EXPECT_EQ(element.state.is_hovered, true);
+	EXPECT_EQ(child.state.is_hovered, false);
+
+	/* Hover outside */
+	ui::update_element(ui::Input { .mouse_pos = outside }, &element);
+	EXPECT_EQ(element.state.is_hovered, false);
+	EXPECT_EQ(child.state.is_hovered, false);
 }
 
-TEST(UIInteractionTests, Box_Mouse_IsActive) {
+TEST(UIInteractionTests, BoxElementWithChild_MouseOver_MouseDown_IsActive) {
 	ResourceManager resources;
 	ui::Element element = {
 		.style = {
 			.width = ui::AbsoluteSize(size.x),
 			.height = ui::AbsoluteSize(size.y),
 		},
-		.content = ui::Box {},
+		.content = ui::Box {
+			.children = {
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(size.x / 2),
+						.height = ui::AbsoluteSize(size.y / 2),
+					},
+					.content = ui::Box {},
+				},
+			},
+		},
 	};
+	const ui::Element& child = std::get<ui::Box>(element.content).children[0];
 
 	/* Element initially not active */
 	ui::layout_element(resources, SCREEN_SIZE, &element);
-	EXPECT_FALSE(element.state.is_active);
+	EXPECT_EQ(element.state.is_active, false);
+	EXPECT_EQ(child.state.is_active, false);
 
 	/* Click top left */
 	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_is_down = true }, &element);
-	EXPECT_TRUE(element.state.is_active);
+	EXPECT_EQ(element.state.is_active, true);
+	EXPECT_EQ(child.state.is_active, true);
 
 	/* Release top left */
 	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_is_down = false }, &element);
-	EXPECT_FALSE(element.state.is_active);
+	EXPECT_EQ(element.state.is_active, false);
+	EXPECT_EQ(child.state.is_active, false);
 
 	/* Click outside box */
 	ui::update_element(ui::Input { .mouse_pos = outside, .left_mouse_is_down = true }, &element);
-	EXPECT_FALSE(element.state.is_active);
+	EXPECT_EQ(element.state.is_active, false);
+	EXPECT_EQ(child.state.is_active, false);
 }
+
+// box in a box, hover child => parent not hovered
+// box in a box, hover child && mouse down => parent not active

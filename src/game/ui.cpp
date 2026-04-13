@@ -211,6 +211,11 @@ namespace ui {
 	void update_element(const Input& input, Element* element) {
 		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
 		element->state.is_active = element->state.is_hovered && input.left_mouse_is_down;
+		if (ui::Box* box = std::get_if<ui::Box>(&element->content)) {
+			for (Element& child : box->children) {
+				update_element(input, &child);
+			}
+		}
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {

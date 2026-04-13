@@ -111,7 +111,6 @@ namespace ui {
 	struct State {
 		bool is_hovered; // e.g. mouse over
 		bool is_active; // e.g. mouse click (button down)
-		// bool is_focused; // e.g. mouse over, navigated to with keyboard
 	};
 
 	/* Element */
