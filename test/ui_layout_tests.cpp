@@ -117,6 +117,48 @@ TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+TEST_F(UILayoutTests, BoxLayout_DefaultStyle) {
+	ui::Element element = {
+		.style = button_style,
+		.content = ui::Text { .text = "Press Me" },
+	};
+	element.state.is_hovered = false;
+	element.state.is_active = false;
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UILayoutTests, BoxLayout_HoveredStyle) {
+	ui::Element element = {
+		.style = button_style,
+		.content = ui::Text { .text = "Press Me" },
+	};
+	element.state.is_hovered = true;
+	element.state.is_active = false;
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UILayoutTests, BoxLayout_ActiveStyle) {
+	ui::Element element = {
+		.style = button_style,
+		.content = ui::Text { .text = "Press Me" },
+	};
+	element.state.is_hovered = true;
+	element.state.is_active = true;
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
 TEST_F(UILayoutTests, Text_LeftAligned) {
 	ui::Element element = {
 		.style = {
@@ -227,48 +269,6 @@ TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
 			}
 		},
 	};
-
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
-
-TEST_F(UILayoutTests, BoxLayout_DefaultStyle) {
-	ui::Element element = {
-		.style = button_style,
-		.content = ui::Text { .text = "Press Me" },
-	};
-	element.state.is_hovered = false;
-	element.state.is_active = false;
-
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
-
-TEST_F(UILayoutTests, BoxLayout_HoveredStyle) {
-	ui::Element element = {
-		.style = button_style,
-		.content = ui::Text { .text = "Press Me" },
-	};
-	element.state.is_hovered = true;
-	element.state.is_active = false;
-
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
-
-TEST_F(UILayoutTests, BoxLayout_ActiveStyle) {
-	ui::Element element = {
-		.style = button_style,
-		.content = ui::Text { .text = "Press Me" },
-	};
-	element.state.is_hovered = true;
-	element.state.is_active = true;
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
