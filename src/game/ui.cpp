@@ -222,16 +222,23 @@ namespace ui {
 		const Style& style = element.style;
 
 		/* Draw padding box */
-		Color background_color = element.style.background_color.base;
+		Color background_color = element.style.background_color;
 		if (element.state.is_active) {
-			background_color = element.style.background_color.active;
+			background_color = element.style.active.background_color.value_or(background_color);
 		} else if (element.state.is_hovered) {
-			background_color = element.style.background_color.hovered;
+			background_color = element.style.hovered.background_color.value_or(background_color);
 		}
 		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
 
 		/* Draw border */
 		{
+			Color border_color = element.style.border_color;
+			if (element.state.is_active) {
+				border_color = element.style.active.border_color.value_or(border_color);
+			} else if (element.state.is_hovered) {
+				border_color = element.style.hovered.border_color.value_or(border_color);
+			}
+
 			const Rectangle border_top = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.border_box.y,
@@ -256,10 +263,10 @@ namespace ui {
 				.width = element.style.border.right,
 				.height = element.layout.padding_box.height,
 			};
-			Raylib_DrawRectangleRec(border_top, element.style.border_color);
-			Raylib_DrawRectangleRec(border_bottom, element.style.border_color);
-			Raylib_DrawRectangleRec(border_left, element.style.border_color);
-			Raylib_DrawRectangleRec(border_right, element.style.border_color);
+			Raylib_DrawRectangleRec(border_top, border_color);
+			Raylib_DrawRectangleRec(border_bottom, border_color);
+			Raylib_DrawRectangleRec(border_left, border_color);
+			Raylib_DrawRectangleRec(border_right, border_color);
 		}
 
 		/* Debug draw box outlines */

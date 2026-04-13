@@ -4,6 +4,7 @@
 
 #include <raylib.h>
 
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -71,6 +72,11 @@ namespace ui {
 		bool show_content_outline = false;
 	};
 
+	struct StyleOverride {
+		std::optional<Color> border_color;
+		std::optional<Color> background_color;
+	};
+
 	struct Style {
 		Size width = RelativeSize(100);
 		Size height = RelativeSize(100);
@@ -79,15 +85,13 @@ namespace ui {
 		Spacing padding;
 		Alignment alignment;
 		Color border_color;
-		struct {
-			Color base;
-			Color hovered;
-			Color active;
-		} background_color;
+		Color background_color;
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
 		StyleDebug debug;
+		StyleOverride hovered;
+		StyleOverride active;
 
 		inline float horizontal_spacing() const {
 			return margin.horizontal() + border.horizontal() + padding.horizontal();
