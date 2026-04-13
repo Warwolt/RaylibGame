@@ -12,7 +12,29 @@
 constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
 constexpr Vector2 SCREEN_SIZE = { SCREEN_WIDTH, SCREEN_HEIGHT };
-constexpr Color LIGHTGREEN = Color(191, 240, 172, 255);
+#define LIGHTGREEN Color(191, 240, 172, 255)
+
+const ui::Style button_style = {
+		.width = ui::AbsoluteSize(200),
+		.height = ui::AbsoluteSize(100),
+		.border = ui::Spacing::uniform(10),
+		.padding = ui::Spacing::uniform(10),
+		.alignment = ui::Alignment::Center,
+		.border_color = DARKGREEN,
+		.background_color = GREEN,
+		.font_color = DARKGREEN,
+
+		.hovered = {
+			.border_color = GREEN,
+			.background_color = LIGHTGREEN,
+		},
+
+		.active = {
+			.border_color = GREEN,
+			.background_color = DARKGREEN,
+			.font_color = GREEN,
+		},
+	};
 
 class UILayoutTests : public ::testing::Test {
 public:
@@ -214,20 +236,8 @@ TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
 
 TEST_F(UILayoutTests, BoxLayout_DefaultStyle) {
 	ui::Element element = {
-		.style = {
-			.border = ui::Spacing::uniform(10),
-			.border_color = DARKGREEN,
-			.background_color = GREEN,
-			.hovered = {
-				.border_color = GREEN,
-				.background_color = LIGHTGREEN,
-			},
-			.active = {
-				.border_color = GREEN,
-				.background_color = DARKGREEN,
-			},
-		},
-		.content = ui::Box {},
+		.style = button_style,
+		.content = ui::Text { .text = "Press Me" },
 	};
 	element.state.is_hovered = false;
 	element.state.is_active = false;
@@ -240,20 +250,8 @@ TEST_F(UILayoutTests, BoxLayout_DefaultStyle) {
 
 TEST_F(UILayoutTests, BoxLayout_HoveredStyle) {
 	ui::Element element = {
-		.style = {
-			.border = ui::Spacing::uniform(10),
-			.border_color = DARKGREEN,
-			.background_color = GREEN,
-			.hovered = {
-				.border_color = GREEN,
-				.background_color = LIGHTGREEN,
-			},
-			.active = {
-				.border_color = GREEN,
-				.background_color = DARKGREEN,
-			},
-		},
-		.content = ui::Box {},
+		.style = button_style,
+		.content = ui::Text { .text = "Press Me" },
 	};
 	element.state.is_hovered = true;
 	element.state.is_active = false;
@@ -266,22 +264,10 @@ TEST_F(UILayoutTests, BoxLayout_HoveredStyle) {
 
 TEST_F(UILayoutTests, BoxLayout_ActiveStyle) {
 	ui::Element element = {
-		.style = {
-			.border = ui::Spacing::uniform(10),
-			.border_color = DARKGREEN,
-			.background_color = GREEN,
-			.hovered = {
-				.border_color = GREEN,
-				.background_color = LIGHTGREEN,
-			},
-			.active = {
-				.border_color = GREEN,
-				.background_color = DARKGREEN,
-			},
-		},
-		.content = ui::Box {},
+		.style = button_style,
+		.content = ui::Text { .text = "Press Me" },
 	};
-	element.state.is_hovered = false;
+	element.state.is_hovered = true;
 	element.state.is_active = true;
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);

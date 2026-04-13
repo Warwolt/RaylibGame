@@ -295,7 +295,13 @@ namespace ui {
 						.x = element.layout.content_box.x + left_padding,
 						.y = element.layout.content_box.y + line_num * style.font_size,
 					};
-					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, font_spacing, style.font_color);
+					Color font_color = style.font_color;
+					if (element.state.is_active) {
+						font_color = style.active.font_color.value_or(font_color);
+					} else if (element.state.is_hovered) {
+						font_color = style.hovered.font_color.value_or(font_color);
+					}
+					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, font_spacing, font_color);
 					line_num++;
 				}
 			}

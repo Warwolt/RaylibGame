@@ -75,6 +75,7 @@ namespace ui {
 	struct StyleOverride {
 		std::optional<Color> border_color;
 		std::optional<Color> background_color;
+		std::optional<Color> font_color;
 	};
 
 	struct Style {
