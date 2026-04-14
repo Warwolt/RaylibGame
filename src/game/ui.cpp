@@ -281,7 +281,7 @@ namespace ui {
 		}
 
 		/* Draw content */
-		if (const ui::Text* text = std::get_if<ui::Text>(&element.content)) {
+		if (const ui::Text* text = element.text()) {
 			const Font& font = resources.get_font(style.font_id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
@@ -306,7 +306,7 @@ namespace ui {
 				}
 			}
 			Raylib_EndScissorMode();
-		} else if (const ui::Box* box = std::get_if<ui::Box>(&element.content)) {
+		} else if (const ui::Box* box = element.box()) {
 			for (const Element& child : box->children) {
 				draw_element(resources, child);
 			}

@@ -11,9 +11,8 @@ constexpr Vector2 middle = { (size.x / 2) - 1, (size.y / 2) - 1 };
 constexpr Vector2 bottom_right = { size.x - 1, size.y - 1 };
 constexpr Vector2 outside = { size.x + 1, size.y + 1 };
 
-TEST(UIInteractionTests, BoxElementWithChild_MouseOverIsHovered) {
-	ResourceManager resources;
-	ui::Element element = {
+ui::Element box_element_with_child() {
+	return ui::Element {
 		.style = {
 			.width = ui::AbsoluteSize(size.x),
 			.height = ui::AbsoluteSize(size.y),
@@ -30,7 +29,12 @@ TEST(UIInteractionTests, BoxElementWithChild_MouseOverIsHovered) {
 			},
 		},
 	};
-	const ui::Element& child = std::get<ui::Box>(element.content).children[0];
+}
+
+TEST(UIInteractionTests, BoxElementWithChild_MouseOver_IsHovered) {
+	ResourceManager resources;
+	ui::Element element = box_element_with_child();
+	const ui::Element& child = element.box()->children[0];
 
 	/* Element initially not hovered */
 	ui::layout_element(resources, SCREEN_SIZE, &element);
@@ -60,24 +64,8 @@ TEST(UIInteractionTests, BoxElementWithChild_MouseOverIsHovered) {
 
 TEST(UIInteractionTests, BoxElementWithChild_MouseOver_MouseDown_IsActive) {
 	ResourceManager resources;
-	ui::Element element = {
-		.style = {
-			.width = ui::AbsoluteSize(size.x),
-			.height = ui::AbsoluteSize(size.y),
-		},
-		.content = ui::Box {
-			.children = {
-				ui::Element {
-					.style = {
-						.width = ui::AbsoluteSize(size.x / 2),
-						.height = ui::AbsoluteSize(size.y / 2),
-					},
-					.content = ui::Box {},
-				},
-			},
-		},
-	};
-	const ui::Element& child = std::get<ui::Box>(element.content).children[0];
+	ui::Element element = box_element_with_child();
+	const ui::Element& child = element.box()->children[0];
 
 	/* Element initially not active */
 	ui::layout_element(resources, SCREEN_SIZE, &element);

@@ -128,6 +128,22 @@ namespace ui {
 		Content content;
 		Layout layout;
 		State state;
+
+		inline Box* box() {
+			return std::get_if<Box>(&this->content);
+		}
+
+		inline const Box* box() const {
+			return std::get_if<Box>(&this->content);
+		}
+
+		inline Text* text() {
+			return std::get_if<Text>(&this->content);
+		}
+
+		inline const Text* text() const {
+			return std::get_if<Text>(&this->content);
+		}
 	};
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
