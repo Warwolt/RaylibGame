@@ -67,6 +67,17 @@ TEST(UIInteractionTests, BoxElementWithChild_MouseOver_MouseDown_IsActive) {
 	ui::Element element = box_element_with_child();
 	const ui::Element& child = element.box()->children[0];
 
+	// FIXME: mouse down has to start INSIDE the box for it to become active!
+	//
+	// Right now this code permits just sliding the mouse over to the box while
+	// holding down left mouse button to activate it.
+	//
+	// We need to track previous element states here.
+	// Only if we already hover when changing to left_mouse_is_down should is_active be true.
+	// Then, it should be false if we stop hovering OR if we stop holding down the button.
+	//
+	// How should we track that state? In ui::State probably?
+
 	/* Element initially not active */
 	ui::layout_element(resources, SCREEN_SIZE, &element);
 	EXPECT_EQ(element.state.is_active, false);
@@ -87,3 +98,10 @@ TEST(UIInteractionTests, BoxElementWithChild_MouseOver_MouseDown_IsActive) {
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 }
+
+// Somehow test click events themselves
+//
+// For a given element, is_clicked(element) == is_hovered(element) && input_now.left_mouse_is_up && is_hovered(element_prev) && input_prev.left_mouse_is_down
+//
+// We have to mouse down on the element and mouse up on the element for a press to happen
+//
