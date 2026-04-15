@@ -112,9 +112,16 @@ namespace ui {
 	};
 
 	/* State */
+	enum class KeyState {
+		Up,
+		Released,
+		Down,
+		Pressed,
+	};
+
 	struct Input {
 		Vector2 mouse_pos;
-		bool left_mouse_is_down;
+		KeyState left_mouse_button;
 	};
 
 	struct State {

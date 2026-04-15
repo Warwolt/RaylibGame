@@ -67,34 +67,44 @@ TEST(UIInteractionTests, BoxElementWithChild_MouseOver_MouseDown_IsActive) {
 	ui::Element element = box_element_with_child();
 	const ui::Element& child = element.box()->children[0];
 
-	// FIXME: mouse down has to start INSIDE the box for it to become active!
-	//
-	// Right now this code permits just sliding the mouse over to the box while
-	// holding down left mouse button to activate it.
-	//
-	// We need to track previous element states here.
-	// Only if we already hover when changing to left_mouse_is_down should is_active be true.
-	// Then, it should be false if we stop hovering OR if we stop holding down the button.
-	//
-	// How should we track that state? In ui::State probably?
-
 	/* Element initially not active */
 	ui::layout_element(resources, SCREEN_SIZE, &element);
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 
 	/* Click top left */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_is_down = true }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Pressed }, &element);
+	EXPECT_EQ(element.state.is_active, true);
+	EXPECT_EQ(child.state.is_active, true);
+
+	/* Hold down button top left */
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Down }, &element);
 	EXPECT_EQ(element.state.is_active, true);
 	EXPECT_EQ(child.state.is_active, true);
 
 	/* Release top left */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_is_down = false }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Released }, &element);
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 
 	/* Click outside box */
-	ui::update_element(ui::Input { .mouse_pos = outside, .left_mouse_is_down = true }, &element);
+	ui::update_element(ui::Input { .mouse_pos = outside, .left_mouse_button = ui::KeyState::Pressed }, &element);
+	EXPECT_EQ(element.state.is_active, false);
+	EXPECT_EQ(child.state.is_active, false);
+}
+
+TEST(UIInteractionTests, BoxElementWithChild_MouseDown_MouseOver_NotActive) {
+	ResourceManager resources;
+	ui::Element element = box_element_with_child();
+	const ui::Element& child = element.box()->children[0];
+
+	/* Click outside box */
+	ui::layout_element(resources, SCREEN_SIZE, &element);
+	EXPECT_EQ(element.state.is_active, false);
+	EXPECT_EQ(child.state.is_active, false);
+
+	/* Drag mouse to top left while button down */
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Down }, &element);
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 }

@@ -208,9 +208,20 @@ namespace ui {
 		compute_element_positions(top_left, element);
 	}
 
+	static bool key_is_down(KeyState state) {
+		return state == KeyState::Down || state == KeyState::Pressed;
+	}
+
 	void update_element(const Input& input, Element* element) {
 		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
-		element->state.is_active = element->state.is_hovered && input.left_mouse_is_down;
+		if (element->state.is_active) {
+			// element stays active as long as button is held down
+			element->state.is_active = key_is_down(input.left_mouse_button);
+		} else {
+			// element becomes active is pressed while hovered
+			element->state.is_active = element->state.is_hovered && input.left_mouse_button == KeyState::Pressed;
+		}
+
 		if (ui::Box* box = std::get_if<ui::Box>(&element->content)) {
 			for (Element& child : box->children) {
 				update_element(input, &child);
