@@ -90,9 +90,9 @@ namespace ui {
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
-		StyleDebug debug;
 		StyleOverride hovered;
 		StyleOverride active;
+		StyleDebug debug;
 
 		inline float horizontal_spacing() const {
 			return margin.horizontal() + border.horizontal() + padding.horizontal();
