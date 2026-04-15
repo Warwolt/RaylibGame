@@ -212,8 +212,11 @@ namespace ui {
 		return state == KeyState::Down || state == KeyState::Pressed;
 	}
 
-	void update_element(const Input& input, Element* element) {
+	bool update_element(const Input& input, Element* element) {
+		/* Hovered */
 		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
+
+		/* Active */
 		if (element->state.is_active) {
 			// element stays active as long as button is held down
 			element->state.is_active = key_is_down(input.left_mouse_button);
@@ -222,11 +225,23 @@ namespace ui {
 			element->state.is_active = element->state.is_hovered && input.left_mouse_button == KeyState::Pressed;
 		}
 
+		/* Update children */
+		bool any_child_clicked = false;
 		if (ui::Box* box = element->box()) {
 			for (Element& child : box->children) {
-				update_element(input, &child);
+				any_child_clicked |= update_element(input, &child);
 			}
 		}
+
+		/* Clicked */
+		if (any_child_clicked) {
+			element->state.is_clicked = false;
+		} else {
+			element->state.is_clicked = element->state.is_hovered && input.left_mouse_button == KeyState::Released;
+		}
+		const bool click_handled = any_child_clicked || element->state.is_clicked;
+
+		return click_handled;
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {

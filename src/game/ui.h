@@ -125,8 +125,9 @@ namespace ui {
 	};
 
 	struct State {
-		bool is_hovered; // e.g. mouse over
-		bool is_active; // e.g. mouse click (button down)
+		bool is_hovered;
+		bool is_active;
+		bool is_clicked;
 	};
 
 	/* Element */
@@ -154,7 +155,7 @@ namespace ui {
 	};
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
-	void update_element(const Input& input, Element* element);
+	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
 
 } // namespace ui
