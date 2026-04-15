@@ -37,7 +37,7 @@ namespace ui {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
-		if (Text* text = std::get_if<Text>(&element->content)) {
+		if (Text* text = element->text()) {
 			const Font& font = resources.get_font(style.font_id);
 			const float font_spacing = 0.0f;
 			const float max_text_width = max_size.x - style.horizontal_spacing();
@@ -73,7 +73,7 @@ namespace ui {
 			layout->content_box.height = std::min(max_text_height, cursor.y + style.font_size);
 		}
 
-		if (Box* box = std::get_if<Box>(&element->content)) {
+		if (Box* box = element->box()) {
 			/* Size content box */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
@@ -153,7 +153,7 @@ namespace ui {
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
 
 		/* Recurse into children */
-		if (Box* box = std::get_if<Box>(&element->content)) {
+		if (Box* box = element->box()) {
 			/* Compute padding for alignment */
 			int left_padding = 0;
 			int top_padding = 0;
@@ -222,7 +222,7 @@ namespace ui {
 			element->state.is_active = element->state.is_hovered && input.left_mouse_button == KeyState::Pressed;
 		}
 
-		if (ui::Box* box = std::get_if<ui::Box>(&element->content)) {
+		if (ui::Box* box = element->box()) {
 			for (Element& child : box->children) {
 				update_element(input, &child);
 			}
