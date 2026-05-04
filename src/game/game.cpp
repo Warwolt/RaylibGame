@@ -5,6 +5,7 @@
 
 #include <raylib.h>
 #include <raymath.h>
+#include <tracy/Tracy.hpp>
 
 // low resolution 16:9
 constexpr int SCREEN_WIDTH = 768;
@@ -44,6 +45,9 @@ Game* Game_initialize(int argc, char** argv) {
 }
 
 void Game_update(Game* game) {
+	// FIXME: for some reason using any tracy macro causes the game to hang on shutdown
+	// ZoneScoped; // tracy profiler
+
 	/* Check input */
 	game->should_quit = Raylib_WindowShouldClose();
 

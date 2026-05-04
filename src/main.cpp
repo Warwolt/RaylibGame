@@ -5,6 +5,8 @@
 #include "game/game.h"
 #include "platform/lean_mean_windows.h"
 
+#include <tracy/Tracy.hpp>
+
 #include <format>
 #include <string>
 
@@ -34,9 +36,9 @@ static GameLibrary load_library(const std::string& library_path) {
 	};
 }
 
-static bool library_has_been_rebuilt = false;
+static bool g_library_has_been_rebuilt = false;
 static void on_build_command_done(int exit_code) {
-	library_has_been_rebuilt = exit_code == 0;
+	g_library_has_been_rebuilt = exit_code == 0;
 	if (exit_code != 0) {
 		LOG_ERROR("Build finished with errors!");
 	}
@@ -82,8 +84,8 @@ int main(int argc, char** argv) {
 			}
 
 			/* Reload library when modified */
-			if (library_has_been_rebuilt) {
-				library_has_been_rebuilt = false;
+			if (g_library_has_been_rebuilt) {
+				g_library_has_been_rebuilt = false;
 
 				/* Unload library */
 				FreeLibrary(game_library.handle);
@@ -99,6 +101,7 @@ int main(int argc, char** argv) {
 		/* Run game */
 		game_library.update(game_state);
 		game_library.render(*game_state);
+		FrameMark; // tracy profiler
 	}
 
 	/* Shutdown */
