@@ -147,15 +147,12 @@ void MainMenuScene::update(Game* game) {
 			left_mouse_button = Raylib_IsMouseButtonReleased(MOUSE_BUTTON_LEFT) ? ui::ButtonState::Released : ui::ButtonState::Up;
 		}
 
-		Vector2 mouse_pos = Raylib_GetMousePosition();
 		const Rectangle letterbox = game->window.letterbox();
-
-		// offset mouse position relative to letterbox
-		mouse_pos.x -= letterbox.x;
-		mouse_pos.y -= letterbox.y;
-
-		// scale
-		mouse_pos /= game->window.letterbox_scale();
+		const int letterbox_scale = game->window.letterbox_scale();
+		const Vector2 mouse_pos = {
+			.x = (Raylib_GetMouseX() - letterbox.x) / letterbox_scale,
+			.y = (Raylib_GetMouseY() - letterbox.y) / letterbox_scale,
+		};
 
 		ui::Input input = {
 			.mouse_pos = mouse_pos,
@@ -168,6 +165,9 @@ void MainMenuScene::update(Game* game) {
 			LOG_DEBUG("Left mouse pressed");
 		}
 
+		// FIXME: Program gets sluggish after being fullscreen a while
+		// For some reason the game is much less responsive after idling a few seconds.
+		// I don't really know why, I don't think we're aggresively leaking memory?
 		if (m_root_element.box()->children[0].box()->children[0].state.is_clicked) {
 			game->scenes.push_scene(game, SceneID::Gameplay);
 		}
