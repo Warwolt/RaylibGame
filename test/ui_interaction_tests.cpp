@@ -83,22 +83,22 @@ TEST(UIInteractionTests, BoxElementWithChild_IsActive) {
 	EXPECT_EQ(child.state.is_active, false);
 
 	/* Click top left */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Pressed }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::ButtonState::Pressed }, &element);
 	EXPECT_EQ(element.state.is_active, true);
 	EXPECT_EQ(child.state.is_active, true);
 
 	/* Hold down button top left */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Down }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::ButtonState::Down }, &element);
 	EXPECT_EQ(element.state.is_active, true);
 	EXPECT_EQ(child.state.is_active, true);
 
 	/* Release top left */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Released }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::ButtonState::Released }, &element);
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 
 	/* Click outside box */
-	ui::update_element(ui::Input { .mouse_pos = outside, .left_mouse_button = ui::KeyState::Pressed }, &element);
+	ui::update_element(ui::Input { .mouse_pos = outside, .left_mouse_button = ui::ButtonState::Pressed }, &element);
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 }
@@ -114,22 +114,22 @@ TEST(UIInteractionTests, BoxElementWithChild_IsClicked) {
 	EXPECT_EQ(child.state.is_clicked, false);
 
 	/* Mouse down while hovering, not clicked */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Pressed }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::ButtonState::Pressed }, &element);
 	EXPECT_EQ(element.state.is_clicked, false);
 	EXPECT_EQ(child.state.is_clicked, false);
 
 	/* Mouse up while hovering child, only child is clicked */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Released }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::ButtonState::Released }, &element);
 	EXPECT_EQ(element.state.is_clicked, false);
 	EXPECT_EQ(child.state.is_clicked, true);
 
 	/* Mouse down while hovering only parent, not clicked */
-	ui::update_element(ui::Input { .mouse_pos = bottom_right, .left_mouse_button = ui::KeyState::Pressed }, &element);
+	ui::update_element(ui::Input { .mouse_pos = bottom_right, .left_mouse_button = ui::ButtonState::Pressed }, &element);
 	EXPECT_EQ(element.state.is_clicked, false);
 	EXPECT_EQ(child.state.is_clicked, false);
 
 	/* Mouse up while hovering only parent, only parent is clicked */
-	ui::update_element(ui::Input { .mouse_pos = bottom_right, .left_mouse_button = ui::KeyState::Released }, &element);
+	ui::update_element(ui::Input { .mouse_pos = bottom_right, .left_mouse_button = ui::ButtonState::Released }, &element);
 	EXPECT_EQ(element.state.is_clicked, true);
 	EXPECT_EQ(child.state.is_clicked, false);
 }
@@ -145,7 +145,7 @@ TEST(UIInteractionTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
 	EXPECT_EQ(child.state.is_active, false);
 
 	/* Drag mouse to top left while button down */
-	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::KeyState::Down }, &element);
+	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::ButtonState::Down }, &element);
 	EXPECT_EQ(element.state.is_active, false);
 	EXPECT_EQ(child.state.is_active, false);
 }

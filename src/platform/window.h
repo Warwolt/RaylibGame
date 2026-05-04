@@ -18,6 +18,7 @@ public:
 	Vector2 size() const;
 	RenderTexture viewport() const;
 	Rectangle letterbox() const;
+	int letterbox_scale() const;
 
 	void update();
 	void toggle_fullscreen();

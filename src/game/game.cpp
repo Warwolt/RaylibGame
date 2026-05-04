@@ -31,8 +31,8 @@ Game* Game_initialize(int argc, char** argv) {
 	/* Initialize game */
 	Game* game = new Game {
 		.window = Window::initialize(SCREEN_WIDTH, SCREEN_HEIGHT),
-		.scenes = SceneManager(SceneID::MainMenu),
 	};
+	game->scenes.push_scene(game, SceneID::MainMenu);
 	if (start_fullscreen) {
 		game->window.toggle_fullscreen();
 	}

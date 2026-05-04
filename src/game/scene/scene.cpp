@@ -44,9 +44,7 @@ private:
 	SceneState m_state;
 };
 
-SceneManager::SceneManager(SceneID start_scene_id) {
-	m_scenes.push_back(Scene(start_scene_id));
-}
+SceneManager::SceneManager() = default;
 
 SceneManager::~SceneManager() = default;
 
@@ -65,9 +63,13 @@ void SceneManager::pop_scene(Game* game) {
 }
 
 void SceneManager::update_current_scene(Game* game) {
-	m_scenes.back().update(game);
+	if (!m_scenes.empty()) {
+		m_scenes.back().update(game);
+	}
 }
 
 void SceneManager::render_current_scene(const Game& game) const {
-	m_scenes.back().render(game);
+	if (!m_scenes.empty()) {
+		m_scenes.back().render(game);
+	}
 }

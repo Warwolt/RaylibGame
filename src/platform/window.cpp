@@ -35,6 +35,10 @@ Rectangle Window::letterbox() const {
 	return m_letterbox;
 }
 
+int Window::letterbox_scale() const {
+	return m_scale;
+}
+
 void Window::update() {
 	int screen_width = Raylib_GetScreenWidth();
 	int screen_height = Raylib_GetScreenHeight();

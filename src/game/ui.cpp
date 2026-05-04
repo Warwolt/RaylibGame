@@ -208,8 +208,8 @@ namespace ui {
 		compute_element_positions(top_left, element);
 	}
 
-	static bool key_is_down(KeyState state) {
-		return state == KeyState::Down || state == KeyState::Pressed;
+	static bool key_is_down(ButtonState state) {
+		return state == ButtonState::Down || state == ButtonState::Pressed;
 	}
 
 	bool update_element(const Input& input, Element* element) {
@@ -221,8 +221,8 @@ namespace ui {
 			// element stays active as long as button is held down
 			element->state.is_active = key_is_down(input.left_mouse_button);
 		} else {
-			// element becomes active is pressed while hovered
-			element->state.is_active = element->state.is_hovered && input.left_mouse_button == KeyState::Pressed;
+			// element becomes active if pressed while hovered
+			element->state.is_active = element->state.is_hovered && input.left_mouse_button == ButtonState::Pressed;
 		}
 
 		/* Update children */
@@ -235,9 +235,9 @@ namespace ui {
 
 		/* Clicked */
 		if (any_child_clicked) {
-			element->state.is_clicked = false;
+			element->state.is_clicked = true; // propagate clicks
 		} else {
-			element->state.is_clicked = element->state.is_hovered && input.left_mouse_button == KeyState::Released;
+			element->state.is_clicked = element->state.is_hovered && input.left_mouse_button == ButtonState::Released;
 		}
 		const bool click_handled = any_child_clicked || element->state.is_clicked;
 
