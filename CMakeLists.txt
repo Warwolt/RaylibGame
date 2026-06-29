@@ -21,6 +21,8 @@ endif()
 # Tracy profiler
 option(TRACY_ENABLE "" ON)
 option(TRACY_ON_DEMAND "" ON)
+option(TRACY_DELAYED_INIT "" ON)
+option(TRACY_MANUAL_LIFETIME "" ON)
 add_subdirectory(lib/tracy)
 
 # Source files
@@ -47,7 +49,7 @@ set(INC .)
 add_library(Source OBJECT ${SRC})
 target_include_directories(Source PUBLIC src lib)
 target_link_libraries(Source PUBLIC ${LIB})
-target_compile_definitions(Source PRIVATE TRACY_ENABLE)
+target_compile_definitions(Source PRIVATE TRACY_ENABLE TRACY_DELAYED_INIT TRACY_MANUAL_LIFETIME)
 
 # Hot reload DLL
 add_library(Library SHARED $<TARGET_OBJECTS:Source>)
@@ -62,7 +64,7 @@ target_link_libraries(Executable ${LIB})
 set_property(TARGET Executable PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Executable)
 set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
-target_compile_definitions(Executable PRIVATE TRACY_ENABLE)
+target_compile_definitions(Executable PRIVATE TRACY_ENABLE TRACY_DELAYED_INIT TRACY_MANUAL_LIFETIME)
 
 # Tests
 add_executable(Tests

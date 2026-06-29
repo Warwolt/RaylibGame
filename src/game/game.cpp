@@ -23,6 +23,9 @@ Game* Game_initialize(int argc, char** argv) {
 		}
 	}
 
+	/* Initialize Tracy */
+	tracy::StartupProfiler();
+
 	/* Initialize Raylib */
 	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
 	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
@@ -45,8 +48,7 @@ Game* Game_initialize(int argc, char** argv) {
 }
 
 void Game_update(Game* game) {
-	// FIXME: for some reason using any tracy macro causes the game to hang on shutdown
-	// ZoneScoped; // tracy profiler
+	ZoneScoped; // tracy profiler
 
 	/* Check input */
 	game->should_quit = Raylib_WindowShouldClose();
@@ -81,11 +83,18 @@ void Game_render(const Game& game) {
 		DrawTexturePro(viewport.texture, viewport_rect, letterbox, Vector2Zero(), 0, WHITE);
 	}
 	Raylib_EndDrawing();
+
+	FrameMark; // tracy profiler
 }
 
 void Game_shutdown(Game* game) {
+	/* Shut down Raylib */
 	game->window.deinitialize();
 	Raylib_CloseWindow();
+
+	/* Shut down Tracy */
+	tracy::ShutdownProfiler();
+
 	LOG_INFO("Game shutdown");
 	delete game;
 }

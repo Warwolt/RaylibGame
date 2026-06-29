@@ -5,8 +5,6 @@
 #include "game/game.h"
 #include "platform/lean_mean_windows.h"
 
-#include <tracy/Tracy.hpp>
-
 #include <format>
 #include <string>
 
@@ -101,7 +99,6 @@ int main(int argc, char** argv) {
 		/* Run game */
 		game_library.update(game_state);
 		game_library.render(*game_state);
-		FrameMark; // tracy profiler
 	}
 
 	/* Shutdown */
