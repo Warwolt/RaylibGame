@@ -1,6 +1,7 @@
 #include "game/game.h"
 
 #include "core/debug/logging.h"
+#include "core/debug/profiling.h"
 #include "platform/win32.h"
 
 #include <raylib.h>
@@ -24,7 +25,7 @@ Game* Game_initialize(int argc, char** argv) {
 	}
 
 	/* Initialize Tracy */
-	tracy::StartupProfiler();
+	PROFILING_STARTUP_PROFILER();
 
 	/* Initialize Raylib */
 	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
@@ -47,7 +48,7 @@ Game* Game_initialize(int argc, char** argv) {
 }
 
 void Game_update(Game* game) {
-	ZoneScoped; // tracy profiler
+	PROFILING_SCOPE();
 
 	/* Check input */
 	game->should_quit = Raylib_WindowShouldClose();
@@ -64,12 +65,12 @@ void Game_update(Game* game) {
 }
 
 void Game_render(const Game& game) {
-	ZoneScoped;
+	PROFILING_SCOPE();
 
 	/* Draw game onto viewport */
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
-		ZoneScopedN("Draw to viewport");
+		PROFLING_SCOPE_LABELED("Draw to viewport");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		game.scenes.render_current_scene(game);
 	}
@@ -78,7 +79,7 @@ void Game_render(const Game& game) {
 	/* Draw viewport onto application window */
 	Raylib_BeginDrawing();
 	{
-		ZoneScopedN("Draw to window");
+		PROFLING_SCOPE_LABELED("Draw to window");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		RenderTexture viewport = game.window.viewport();
 		Rectangle viewport_rect = { .width = (float)viewport.texture.width, .height = (float)-viewport.texture.height };
@@ -91,12 +92,12 @@ void Game_render(const Game& game) {
 }
 
 void Game_shutdown(Game* game) {
-	/* Shut down Raylib */
+	/* Raylib shutdown */
 	game->window.deinitialize();
 	Raylib_CloseWindow();
 
-	/* Shut down Tracy */
-	tracy::ShutdownProfiler();
+	/* Profiler shutdown */
+	PROFILING_SHUTDOWN_PROFILER();
 
 	LOG_INFO("Game shutdown");
 	delete game;
