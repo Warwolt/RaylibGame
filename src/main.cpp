@@ -6,7 +6,6 @@
 #include "game/game.h"
 #include "platform/lean_mean_windows.h"
 
-#include <format>
 #include <string>
 
 struct GameLibrary {
@@ -47,8 +46,9 @@ static void on_build_command_done(int exit_code) {
 }
 
 int main(int argc, char** argv) {
-	initialize_logging();
+	Win32_enable_crash_handler();
 	Win32_set_process_dpi_aware();
+	initialize_logging();
 
 	/* Initialize Tracy */
 	PROFILING_STARTUP_PROFILER();
