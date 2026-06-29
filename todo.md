@@ -4,10 +4,10 @@
 - Gameplay scene with basic camera + character movement
 - Collision detection test screen
 - Collision resolution test screen
-- Integrate Tracy profiler so we can measure performance of UI system
 - Bug: Fix clang format not formatting nested designated initializers
 
 # Done
+- Integrate Tracy profiler so we can measure performance of UI system
 - Add first snapshot tests for UI layout code
 - Snapshot testing for UI
 - Prototype basic UI rendering
