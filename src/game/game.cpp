@@ -24,9 +24,6 @@ Game* Game_initialize(int argc, char** argv) {
 		}
 	}
 
-	/* Initialize Tracy */
-	PROFILING_STARTUP_PROFILER();
-
 	/* Initialize Raylib */
 	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
 	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
@@ -95,9 +92,6 @@ void Game_shutdown(Game* game) {
 	/* Raylib shutdown */
 	game->window.deinitialize();
 	Raylib_CloseWindow();
-
-	/* Profiler shutdown */
-	PROFILING_SHUTDOWN_PROFILER();
 
 	LOG_INFO("Game shutdown");
 	delete game;

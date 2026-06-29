@@ -2,6 +2,7 @@
 #include "core/debug/logging.cpp"
 #include "platform/win32.cpp"
 
+#include "core/debug/profiling.h"
 #include "game/game.h"
 #include "platform/lean_mean_windows.h"
 
@@ -45,6 +46,9 @@ static void on_build_command_done(int exit_code) {
 int main(int argc, char** argv) {
 	initialize_logging();
 	Win32_set_process_dpi_aware();
+
+	/* Initialize Tracy */
+	PROFILING_STARTUP_PROFILER();
 
 	/* Get executable directory */
 	std::string executable_directory = Win32_get_executable_directory();
@@ -104,5 +108,6 @@ int main(int argc, char** argv) {
 	/* Shutdown */
 	game_library.shutdown(game_state);
 	FreeLibrary(game_library.handle);
+	PROFILING_SHUTDOWN_PROFILER();
 	return 0;
 }

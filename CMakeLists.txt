@@ -19,6 +19,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Tracy profiler
+option(TRACY_STATIC "" OFF) # Tracy as DLL
 option(TRACY_ENABLE "" ON)
 option(TRACY_ON_DEMAND "" ON)
 option(TRACY_DELAYED_INIT "" ON)
@@ -97,4 +98,12 @@ add_custom_command(TARGET Executable POST_BUILD
         $<TARGET_FILE:raylib>
         $<TARGET_FILE_DIR:Executable>
     COMMENT "Copy raylib DLL to executable directory"
+)
+
+# Copy TracyClient DLL to executable directory
+add_custom_command(TARGET Executable POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:TracyClient>
+        $<TARGET_FILE_DIR:Executable>
+    COMMENT "Copy TracyClient DLL to executable directory"
 )
