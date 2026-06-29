@@ -97,7 +97,6 @@ add_custom_command(TARGET Executable POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:raylib>
         $<TARGET_FILE_DIR:Executable>
-    COMMENT "Copy raylib DLL to executable directory"
 )
 
 # Copy TracyClient DLL to executable directory
@@ -105,5 +104,4 @@ add_custom_command(TARGET Executable POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:TracyClient>
         $<TARGET_FILE_DIR:Executable>
-    COMMENT "Copy TracyClient DLL to executable directory"
 )
