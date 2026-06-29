@@ -20,8 +20,11 @@ struct GameLibrary {
 static GameLibrary load_library(const std::string& library_path) {
 	HMODULE handle = LoadLibraryA(library_path.c_str());
 	if (!handle) {
-		char message[256] = { 0 };
-		snprintf(message, 256, "Couldn't load %s\n", library_path.c_str());
+		DWORD error_code = GetLastError();
+		char error_detail[256] = { 0 };
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, error_code, 0, error_detail, sizeof(error_detail), nullptr);
+		char message[512] = { 0 };
+		snprintf(message, sizeof(message), "Couldn't load %s\nError code: %lu\nReason: %s", library_path.c_str(), error_code, error_detail);
 		Win32_show_error_message_box(message);
 		exit(1);
 	}
