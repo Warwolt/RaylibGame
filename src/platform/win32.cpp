@@ -1,9 +1,13 @@
 #include "platform/win32.h"
 
+#include <dbghelp.h>
 #include <raylib.h>
 #include <shlwapi.h>
 
+#include <chrono>
+#include <format>
 #include <stdio.h>
+#include <string>
 
 typedef struct RunCommandThreadArgs {
 	const char* command;
@@ -86,6 +90,74 @@ static DWORD WINAPI run_command_thread(LPVOID void_args) {
 	free((void*)args);
 
 	return 0;
+}
+
+static LONG WINAPI write_crash_dump(EXCEPTION_POINTERS* exception_pointers) {
+	auto now = std::chrono::system_clock::now();
+	std::time_t time = std::chrono::system_clock::to_time_t(now);
+	std::tm local_tm {};
+	localtime_s(&local_tm, &time);
+
+	std::ostringstream oss;
+	oss << std::put_time(&local_tm, "Win32Game_%Y-%m-%d_%H-%M") << ".dmp";
+	std::string dump_filename = oss.str();
+
+	/* Skip if dump file already exists */
+	if (GetFileAttributesA(dump_filename.c_str()) != INVALID_FILE_ATTRIBUTES) {
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+
+	/* Create dump file */
+	HANDLE file = CreateFileA(dump_filename.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (file == INVALID_HANDLE_VALUE) {
+		DWORD error = GetLastError();
+		fprintf(stderr, "Error: failed to create dump file \"%s\". GetLastError() = %lu\n", dump_filename.c_str(), error);
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+
+	/* Write dump file */
+	MINIDUMP_EXCEPTION_INFORMATION dump_info = {
+		.ThreadId = GetCurrentThreadId(),
+		.ExceptionPointers = exception_pointers,
+		.ClientPointers = FALSE,
+	};
+	BOOL success = MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpWithFullMemory, &dump_info, nullptr, nullptr);
+	DWORD error = GetLastError();
+
+	/* Close file */
+	FlushFileBuffers(file);
+	CloseHandle(file);
+	if (!success) {
+		fprintf(stderr, "Error: failed to write dump file \"%s\". GetLastError() = %lu\n", dump_filename.c_str(), error);
+		return EXCEPTION_EXECUTE_HANDLER;
+	}
+
+	fprintf(
+		stderr,
+		"win32.cpp:%d [FATAL]: Catastrophic error occured, created crash dump \"%s\"\n",
+		__LINE__,
+		dump_filename.c_str()
+	);
+
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+static LONG WINAPI vectored_crash_handler(EXCEPTION_POINTERS* exception_pointers) {
+	switch (exception_pointers->ExceptionRecord->ExceptionCode) {
+		case EXCEPTION_ACCESS_VIOLATION:
+		case EXCEPTION_STACK_OVERFLOW:
+		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+		case EXCEPTION_ILLEGAL_INSTRUCTION:
+		case EXCEPTION_INT_DIVIDE_BY_ZERO:
+		case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+			return write_crash_dump(exception_pointers);
+		default:
+			return EXCEPTION_CONTINUE_SEARCH;
+	}
+}
+
+void Win32_enable_crash_handler() {
+	AddVectoredExceptionHandler(1, vectored_crash_handler);
 }
 
 void Win32_set_process_dpi_aware(void) {
