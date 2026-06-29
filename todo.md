@@ -7,6 +7,7 @@
 - Bug: Fix clang format not formatting nested designated initializers
 
 # Done
+- Write crash dump file on fatal error
 - Integrate Tracy profiler so we can measure performance of UI system
 - Add first snapshot tests for UI layout code
 - Snapshot testing for UI
