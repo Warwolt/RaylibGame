@@ -30,7 +30,6 @@ Game* Game_initialize(int argc, char** argv) {
 	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
 	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
 	Raylib_SetExitKey(KEY_NULL);
-	Raylib_SetTargetFPS(120);
 
 	/* Initialize game */
 	Game* game = new Game {
@@ -65,9 +64,12 @@ void Game_update(Game* game) {
 }
 
 void Game_render(const Game& game) {
+	ZoneScoped;
+
 	/* Draw game onto viewport */
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
+		ZoneScopedN("Draw to viewport");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		game.scenes.render_current_scene(game);
 	}
@@ -76,6 +78,7 @@ void Game_render(const Game& game) {
 	/* Draw viewport onto application window */
 	Raylib_BeginDrawing();
 	{
+		ZoneScopedN("Draw to window");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		RenderTexture viewport = game.window.viewport();
 		Rectangle viewport_rect = { .width = (float)viewport.texture.width, .height = (float)-viewport.texture.height };
