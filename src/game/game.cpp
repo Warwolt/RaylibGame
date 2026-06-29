@@ -6,7 +6,6 @@
 
 #include <raylib.h>
 #include <raymath.h>
-#include <tracy/Tracy.hpp>
 
 // low resolution 16:9
 constexpr int SCREEN_WIDTH = 768;
@@ -85,11 +84,10 @@ void Game_render(const Game& game) {
 	}
 	Raylib_EndDrawing();
 
-	FrameMark; // tracy profiler
+	PROFILING_END_FRAME();
 }
 
 void Game_shutdown(Game* game) {
-	/* Raylib shutdown */
 	game->window.deinitialize();
 	Raylib_CloseWindow();
 

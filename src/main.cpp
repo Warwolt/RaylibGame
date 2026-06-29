@@ -100,6 +100,8 @@ int main(int argc, char** argv) {
 
 				/* Reload copied library */
 				game_library = load_library(library_copy_name);
+				LOG_INFO("Game library reloaded");
+				PROFILING_LOG("Game library reloaded");
 			}
 		}
 

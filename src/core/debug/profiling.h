@@ -12,3 +12,7 @@ namespace tracy {
 
 #define PROFILING_SCOPE() ZoneScoped
 #define PROFLING_SCOPE_LABELED(label) ZoneScopedN(label)
+#define PROFILING_END_FRAME() FrameMark
+
+// NOTE: `c_str` lifetime must extend until `PROFILING_SHUTDOWN_PROFILER` call
+#define PROFILING_LOG(c_str) TracyMessageL(c_str)
