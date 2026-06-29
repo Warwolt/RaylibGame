@@ -18,6 +18,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(gtest_force_shared_crt OFF CACHE BOOL "" FORCE)
 endif()
 
+# Tracy profiler
+option(TRACY_STATIC "" OFF) # Tracy as DLL
+option(TRACY_ENABLE "" ON)
+option(TRACY_ON_DEMAND "" ON)
+option(TRACY_DELAYED_INIT "" ON)
+option(TRACY_MANUAL_LIFETIME "" ON)
+add_subdirectory(lib/tracy)
+
 # Source files
 set(SRC
     src/core/debug/logging.cpp
@@ -33,6 +41,7 @@ set(SRC
 set(LIB
     raylib
     shlwapi
+    TracyClient
 )
 
 set(INC .)
@@ -66,7 +75,6 @@ add_executable(Tests
 target_include_directories(Tests PUBLIC src lib)
 target_link_libraries(Tests PUBLIC ${LIB} gtest gmock)
 
-
 # Set compilation options
 SET(TARGETS Executable Library Source Tests)
 foreach(TARGET IN ITEMS ${TARGETS})
@@ -90,4 +98,12 @@ add_custom_command(TARGET Executable POST_BUILD
         $<TARGET_FILE:raylib>
         $<TARGET_FILE_DIR:Executable>
     COMMENT "Copy raylib DLL to executable directory"
+)
+
+# Copy TracyClient DLL to executable directory
+add_custom_command(TARGET Executable POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:TracyClient>
+        $<TARGET_FILE_DIR:Executable>
+    COMMENT "Copy TracyClient DLL to executable directory"
 )

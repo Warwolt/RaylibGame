@@ -2,6 +2,7 @@
 #include "core/debug/logging.cpp"
 #include "platform/win32.cpp"
 
+#include "core/debug/profiling.h"
 #include "game/game.h"
 #include "platform/lean_mean_windows.h"
 
@@ -19,8 +20,11 @@ struct GameLibrary {
 static GameLibrary load_library(const std::string& library_path) {
 	HMODULE handle = LoadLibraryA(library_path.c_str());
 	if (!handle) {
-		char message[256] = { 0 };
-		snprintf(message, 256, "Couldn't load %s\n", library_path.c_str());
+		DWORD error_code = GetLastError();
+		char error_detail[256] = { 0 };
+		FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, nullptr, error_code, 0, error_detail, sizeof(error_detail), nullptr);
+		char message[512] = { 0 };
+		snprintf(message, sizeof(message), "Couldn't load %s\nError code: %lu\nReason: %s", library_path.c_str(), error_code, error_detail);
 		Win32_show_error_message_box(message);
 		exit(1);
 	}
@@ -34,9 +38,9 @@ static GameLibrary load_library(const std::string& library_path) {
 	};
 }
 
-static bool library_has_been_rebuilt = false;
+static bool g_library_has_been_rebuilt = false;
 static void on_build_command_done(int exit_code) {
-	library_has_been_rebuilt = exit_code == 0;
+	g_library_has_been_rebuilt = exit_code == 0;
 	if (exit_code != 0) {
 		LOG_ERROR("Build finished with errors!");
 	}
@@ -45,6 +49,9 @@ static void on_build_command_done(int exit_code) {
 int main(int argc, char** argv) {
 	initialize_logging();
 	Win32_set_process_dpi_aware();
+
+	/* Initialize Tracy */
+	PROFILING_STARTUP_PROFILER();
 
 	/* Get executable directory */
 	std::string executable_directory = Win32_get_executable_directory();
@@ -82,8 +89,8 @@ int main(int argc, char** argv) {
 			}
 
 			/* Reload library when modified */
-			if (library_has_been_rebuilt) {
-				library_has_been_rebuilt = false;
+			if (g_library_has_been_rebuilt) {
+				g_library_has_been_rebuilt = false;
 
 				/* Unload library */
 				FreeLibrary(game_library.handle);
@@ -93,6 +100,8 @@ int main(int argc, char** argv) {
 
 				/* Reload copied library */
 				game_library = load_library(library_copy_name);
+				LOG_INFO("Game library reloaded");
+				PROFILING_LOG("Game library reloaded");
 			}
 		}
 
@@ -104,5 +113,6 @@ int main(int argc, char** argv) {
 	/* Shutdown */
 	game_library.shutdown(game_state);
 	FreeLibrary(game_library.handle);
+	PROFILING_SHUTDOWN_PROFILER();
 	return 0;
 }

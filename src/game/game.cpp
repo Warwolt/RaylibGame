@@ -1,6 +1,7 @@
 #include "game/game.h"
 
 #include "core/debug/logging.h"
+#include "core/debug/profiling.h"
 #include "platform/win32.h"
 
 #include <raylib.h>
@@ -26,7 +27,6 @@ Game* Game_initialize(int argc, char** argv) {
 	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
 	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
 	Raylib_SetExitKey(KEY_NULL);
-	Raylib_SetTargetFPS(120);
 
 	/* Initialize game */
 	Game* game = new Game {
@@ -44,6 +44,8 @@ Game* Game_initialize(int argc, char** argv) {
 }
 
 void Game_update(Game* game) {
+	PROFILING_SCOPE();
+
 	/* Check input */
 	game->should_quit = Raylib_WindowShouldClose();
 
@@ -59,9 +61,12 @@ void Game_update(Game* game) {
 }
 
 void Game_render(const Game& game) {
+	PROFILING_SCOPE();
+
 	/* Draw game onto viewport */
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
+		PROFLING_SCOPE_LABELED("Draw to viewport");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		game.scenes.render_current_scene(game);
 	}
@@ -70,6 +75,7 @@ void Game_render(const Game& game) {
 	/* Draw viewport onto application window */
 	Raylib_BeginDrawing();
 	{
+		PROFLING_SCOPE_LABELED("Draw to window");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		RenderTexture viewport = game.window.viewport();
 		Rectangle viewport_rect = { .width = (float)viewport.texture.width, .height = (float)-viewport.texture.height };
@@ -77,11 +83,14 @@ void Game_render(const Game& game) {
 		DrawTexturePro(viewport.texture, viewport_rect, letterbox, Vector2Zero(), 0, WHITE);
 	}
 	Raylib_EndDrawing();
+
+	PROFILING_END_FRAME();
 }
 
 void Game_shutdown(Game* game) {
 	game->window.deinitialize();
 	Raylib_CloseWindow();
+
 	LOG_INFO("Game shutdown");
 	delete game;
 }
