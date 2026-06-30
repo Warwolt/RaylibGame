@@ -1,6 +1,8 @@
 #include "game/scene/main_menu_scene.h"
 
+#include "core/debug/profiling.h"
 #include "game/game.h"
+#include "game/scene/scene_id.h"
 #include "game/ui.h"
 
 #include <raylib.h>
@@ -13,6 +15,7 @@ void MainMenuScene::deinitialize(Game* /*game*/) {
 }
 
 void MainMenuScene::update(Game* game) {
+	PROFILING_SCOPE();
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
 		game->scenes.pop_scene(game);
 	}
@@ -22,6 +25,7 @@ void MainMenuScene::update(Game* game) {
 }
 
 void MainMenuScene::render(const Game& game) const {
+	PROFILING_SCOPE();
 	Raylib_ClearBackground(BLACK);
 
 	/* Input */

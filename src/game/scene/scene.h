@@ -3,17 +3,12 @@
 #include <vector>
 
 struct Game;
-
-enum class SceneID {
-	MainMenu,
-	Gameplay,
-};
-
 class Scene;
+enum class SceneID;
 
 class SceneManager {
 public:
-	SceneManager(SceneID start_scene_id);
+	SceneManager();
 	~SceneManager();
 
 	void push_scene(Game* game, SceneID scene_id);
