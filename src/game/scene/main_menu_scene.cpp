@@ -132,7 +132,6 @@ void MainMenuScene::deinitialize(Game* /*game*/) {
 
 void MainMenuScene::update(Game* game) {
 	PROFILING_SCOPE();
-
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
 		game->scenes.pop_scene(game);
 	}
