@@ -1,8 +1,8 @@
 #include "game/scene/scene.h"
 
 #include "game/game.h"
-#include "game/scene/gameplay.h"
-#include "game/scene/main_menu.h"
+#include "game/scene/gameplay_scene.h"
+#include "game/scene/main_menu_scene.h"
 
 #include <variant>
 
