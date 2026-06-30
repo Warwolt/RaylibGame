@@ -1,5 +1,6 @@
-#include "game/scene/gameplay.h"
+#include "game/scene/gameplay_scene.h"
 
+#include "core/debug/profiling.h"
 #include "game/game.h"
 
 #include <raylib.h>
@@ -11,12 +12,14 @@ void GameplayScene::deinitialize(Game* /*game*/) {
 }
 
 void GameplayScene::update(Game* game) {
+	PROFILING_SCOPE();
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
 		game->scenes.pop_scene(game);
 	}
 }
 
 void GameplayScene::render(const Game& game) const {
+	PROFILING_SCOPE();
 	const Font& font = game.resources.get_font(FontID::default_font());
 	const int font_size = 32;
 	const char* text = "Gameplay";

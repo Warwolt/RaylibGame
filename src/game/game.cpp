@@ -2,7 +2,7 @@
 
 #include "core/debug/logging.h"
 #include "core/debug/profiling.h"
-#include "platform/win32.h"
+#include "game/scene/scene_id.h"
 
 #include <raylib.h>
 #include <raymath.h>
@@ -31,8 +31,8 @@ Game* Game_initialize(int argc, char** argv) {
 	/* Initialize game */
 	Game* game = new Game {
 		.window = Window::initialize(SCREEN_WIDTH, SCREEN_HEIGHT),
-		.scenes = SceneManager(SceneID::MainMenu),
 	};
+	game->scenes.push_scene(game, SceneID::MainMenu);
 	if (start_fullscreen) {
 		game->window.toggle_fullscreen();
 	}
@@ -66,7 +66,6 @@ void Game_render(const Game& game) {
 	/* Draw game onto viewport */
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
-		PROFLING_SCOPE_LABELED("Draw to viewport");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		game.scenes.render_current_scene(game);
 	}
@@ -75,7 +74,6 @@ void Game_render(const Game& game) {
 	/* Draw viewport onto application window */
 	Raylib_BeginDrawing();
 	{
-		PROFLING_SCOPE_LABELED("Draw to window");
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		RenderTexture viewport = game.window.viewport();
 		Rectangle viewport_rect = { .width = (float)viewport.texture.width, .height = (float)-viewport.texture.height };
