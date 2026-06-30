@@ -45,6 +45,7 @@ namespace ui {
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
+			text->lines.clear();
 			text->lines.push_back("");
 			for (const std::string& word : util::split_text_into_words(text->text)) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, font_spacing).x;

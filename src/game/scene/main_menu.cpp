@@ -4,6 +4,7 @@
 #include "game/ui.h"
 
 #include "core/debug/logging.h"
+#include "core/debug/profiling.h"
 
 #include <raylib.h>
 #include <raymath.h>
@@ -165,9 +166,6 @@ void MainMenuScene::update(Game* game) {
 			LOG_DEBUG("Left mouse pressed");
 		}
 
-		// FIXME: Program gets sluggish after being fullscreen a while
-		// For some reason the game is much less responsive after idling a few seconds.
-		// I don't really know why, I don't think we're aggresively leaking memory?
 		if (m_root_element.box()->children[0].box()->children[0].state.is_clicked) {
 			game->scenes.push_scene(game, SceneID::Gameplay);
 		}
