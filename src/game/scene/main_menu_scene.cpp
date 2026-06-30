@@ -1,6 +1,7 @@
 #include "game/scene/main_menu_scene.h"
 
 #include "game/game.h"
+#include "game/scene/scene_id.h"
 #include "game/ui.h"
 
 #include "core/debug/logging.h"

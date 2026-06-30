@@ -3,6 +3,7 @@
 #include "game/game.h"
 #include "game/scene/gameplay_scene.h"
 #include "game/scene/main_menu_scene.h"
+#include "game/scene/scene_id.h"
 
 #include <variant>
 
@@ -13,6 +14,9 @@ using SceneInstance = std::variant<MainMenuScene, GameplayScene>;
 // To support DLL based hot reloading, we need to not store any DLL specific
 // memory addresses in program state between hot reloads. V-table based
 // polymorphism therefore doesn't work. Variants are stable between reloads.
+//
+// Scene class implemented in the cpp file to avoid re-compiling the entire
+// game when a new scene has been added.
 class Scene {
 public:
 	Scene(SceneID id) {
