@@ -6,42 +6,47 @@
 
 #include <variant>
 
-using SceneState = std::variant<MainMenuScene, GameplayScene>;
+using SceneInstance = std::variant<MainMenuScene, GameplayScene>;
 
+// Scene class implementing variant based polymorphism
+//
+// To support DLL based hot reloading, we need to not store any DLL specific
+// memory addresses in program state between hot reloads. V-table based
+// polymorphism therefore doesn't work. Variants are stable between reloads.
 class Scene {
 public:
 	Scene(SceneID id) {
 		m_id = id;
 		switch (id) {
 			case SceneID::MainMenu:
-				m_state = MainMenuScene();
+				m_instance = MainMenuScene();
 				break;
 
 			case SceneID::Gameplay:
-				m_state = GameplayScene();
+				m_instance = GameplayScene();
 				break;
 		}
 	}
 
 	void initialize(Game* game) {
-		std::visit([game](auto& scene) { scene.initialize(game); }, m_state);
+		std::visit([game](auto& scene) { scene.initialize(game); }, m_instance);
 	}
 
 	void deinitialize(Game* game) {
-		std::visit([game](auto& scene) { scene.deinitialize(game); }, m_state);
+		std::visit([game](auto& scene) { scene.deinitialize(game); }, m_instance);
 	}
 
 	void update(Game* game) {
-		std::visit([game](auto& scene) { scene.update(game); }, m_state);
+		std::visit([game](auto& scene) { scene.update(game); }, m_instance);
 	}
 
 	void render(const Game& game) const {
-		std::visit([&game](auto& scene) { scene.render(game); }, m_state);
+		std::visit([&game](auto& scene) { scene.render(game); }, m_instance);
 	}
 
 private:
 	SceneID m_id;
-	SceneState m_state;
+	SceneInstance m_instance;
 };
 
 SceneManager::SceneManager() = default;
