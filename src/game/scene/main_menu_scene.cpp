@@ -1,4 +1,4 @@
-#include "game/scene/main_menu.h"
+#include "game/scene/main_menu_scene.h"
 
 #include "game/game.h"
 #include "game/ui.h"

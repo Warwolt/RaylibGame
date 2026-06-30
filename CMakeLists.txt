@@ -33,8 +33,8 @@ set(SRC
     src/core/util.cpp
     src/game/game.cpp
     src/game/resource.cpp
-    src/game/scene/gameplay.cpp
-    src/game/scene/main_menu.cpp
+    src/game/scene/gameplay_scene.cpp
+    src/game/scene/main_menu_scene.cpp
     src/game/scene/scene.cpp
     src/game/ui.cpp
     src/platform/window.cpp

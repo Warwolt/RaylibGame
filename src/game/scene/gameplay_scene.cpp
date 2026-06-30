@@ -1,4 +1,4 @@
-#include "game/scene/gameplay.h"
+#include "game/scene/gameplay_scene.h"
 
 #include "core/debug/profiling.h"
 #include "game/game.h"
