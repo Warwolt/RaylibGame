@@ -118,9 +118,9 @@ TEST(UIInteractionTests, BoxElementWithChild_IsClicked) {
 	EXPECT_EQ(element.state.is_clicked, false);
 	EXPECT_EQ(child.state.is_clicked, false);
 
-	/* Mouse up while hovering child, only child is clicked */
+	/* Mouse up while hovering child, both child and parent is clicked */
 	ui::update_element(ui::Input { .mouse_pos = top_left, .left_mouse_button = ui::ButtonState::Released }, &element);
-	EXPECT_EQ(element.state.is_clicked, false);
+	EXPECT_EQ(element.state.is_clicked, true);
 	EXPECT_EQ(child.state.is_clicked, true);
 
 	/* Mouse down while hovering only parent, not clicked */

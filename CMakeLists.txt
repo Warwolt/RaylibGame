@@ -67,18 +67,26 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT E
 set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 
 # Tests
-add_executable(Tests
+add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
-    test/snapshots.cpp
-    test/ui_layout_tests.cpp
-    test/ui_interaction_tests.cpp
-    test/main.cpp
+    test/unit_tests/unit_test_main.cpp
+    test/unit_tests/util_tests.cpp
+    test/unit_tests/ui_interaction_tests.cpp
 )
-target_include_directories(Tests PUBLIC src lib)
-target_link_libraries(Tests PUBLIC ${LIB} gtest gmock)
+target_include_directories(UnitTests PUBLIC src lib)
+target_link_libraries(UnitTests PUBLIC ${LIB} gtest gmock)
+
+add_executable(SnapshotTests
+    $<TARGET_OBJECTS:Source>
+    test/snapshot_tests/snapshots_main.cpp
+    test/snapshot_tests/snapshots.cpp
+    test/snapshot_tests/ui_layout_tests.cpp
+)
+target_include_directories(SnapshotTests PUBLIC src lib)
+target_link_libraries(SnapshotTests PUBLIC ${LIB} gtest gmock)
 
 # Set compilation options
-SET(TARGETS Executable Library Source Tests)
+SET(TARGETS Executable Library Source UnitTests SnapshotTests)
 foreach(TARGET IN ITEMS ${TARGETS})
     target_include_directories(${TARGET} PRIVATE ${INC})
     target_compile_options(${TARGET} PUBLIC

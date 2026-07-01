@@ -1,4 +1,4 @@
-#include "test/snapshots.h"
+#include "test/snapshot_tests/snapshots.h"
 
 #include "core/debug/logging.h"
 
@@ -11,7 +11,7 @@
 namespace snapshots {
 
 	const std::filesystem::path REPORT_DIRECTORY = "snapshot_report";
-	const std::filesystem::path SNAPSHOT_DIRECTORY = "test\\snapshots";
+	const std::filesystem::path SNAPSHOT_DIRECTORY = "test\\snapshot_tests\\snapshots";
 
 	constexpr char HTML_TEMPLATE[] = R"(<!DOCTYPE html>
 <html lang="en">

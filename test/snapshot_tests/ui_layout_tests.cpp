@@ -1,13 +1,9 @@
 #include "game/ui.h"
 
-#include "core/debug/logging.h"
-#include "test/snapshots.h"
+#include "test/snapshot_tests/snapshots.h"
 
 #include <gtest/gtest.h>
 #include <raylib.h>
-
-#include <filesystem>
-#include <functional>
 
 constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
