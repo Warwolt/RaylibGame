@@ -1,7 +1,7 @@
 #include "game/ui.h"
 
 #include "core/debug/logging.h"
-#include "test/snapshots.h"
+#include "test/snapshot_tests/snapshots.h"
 
 #include <gtest/gtest.h>
 #include <raylib.h>

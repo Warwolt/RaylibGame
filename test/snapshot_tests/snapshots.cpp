@@ -1,4 +1,4 @@
-#include "test/snapshots.h"
+#include "test/snapshot_tests/snapshots.h"
 
 #include "core/debug/logging.h"
 
@@ -11,7 +11,7 @@
 namespace snapshots {
 
 	const std::filesystem::path REPORT_DIRECTORY = "snapshot_report";
-	const std::filesystem::path SNAPSHOT_DIRECTORY = "test\\snapshots";
+	const std::filesystem::path SNAPSHOT_DIRECTORY = "test\\snapshot_tests\\snapshots";
 
 	constexpr char HTML_TEMPLATE[] = R"(<!DOCTYPE html>
 <html lang="en">
@@ -248,11 +248,13 @@ namespace snapshots {
 			return suite.name == suite_name;
 		});
 		if (it == g_context.all_suites.end()) {
-			g_context.all_suites.push_back(SnapshotTestSuite {
-				.name = suite_name,
-				.path = suite_name + "/index.html",
-				.tests = { test_case },
-			});
+			g_context.all_suites.push_back(
+				SnapshotTestSuite {
+					.name = suite_name,
+					.path = suite_name + "/index.html",
+					.tests = { test_case },
+				}
+			);
 		} else {
 			it->tests.push_back(test_case);
 		}

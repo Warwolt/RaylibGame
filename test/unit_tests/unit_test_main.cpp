@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "snapshots.h"
-
 #include "core/debug/logging.h"
 
 int main(int argc, char** argv) {

@@ -69,17 +69,17 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 # Tests
 add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
-    test/util_tests.cpp
-    test/unit_test_main.cpp
+    test/unit_tests/unit_test_main.cpp
+    test/unit_tests/util_tests.cpp
 )
 target_include_directories(UnitTests PUBLIC src lib)
 target_link_libraries(UnitTests PUBLIC ${LIB} gtest gmock)
 
 add_executable(SnapshotTests
     $<TARGET_OBJECTS:Source>
-    test/snapshots.cpp
-    test/ui_layout_tests.cpp
-    test/snapshots_main.cpp
+    test/snapshot_tests/snapshots_main.cpp
+    test/snapshot_tests/snapshots.cpp
+    test/snapshot_tests/ui_layout_tests.cpp
 )
 target_include_directories(SnapshotTests PUBLIC src lib)
 target_link_libraries(SnapshotTests PUBLIC ${LIB} gtest gmock)
