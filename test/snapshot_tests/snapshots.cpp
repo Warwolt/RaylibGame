@@ -294,6 +294,17 @@ namespace snapshots {
 		Raylib_ExportImage(snapshot, snapshot_diff_filepath(suite_name, test_name).string().c_str());
 	}
 
+	Image render_image(Vector2 image_size, std::function<void()> render) {
+		RenderTexture2D texture = Raylib_LoadRenderTexture(image_size.x, image_size.y);
+		Raylib_BeginTextureMode(texture);
+		Raylib_ClearBackground(BLACK);
+		render();
+		Raylib_EndTextureMode();
+		Image image = Raylib_LoadImageFromTexture(texture.texture);
+		Raylib_ImageFlipVertical(&image);
+		return image;
+	}
+
 	std::vector<Color> image_pixels(const Image& image) {
 		Color* pixels_ptr = LoadImageColors(image);
 		std::vector<Color> pixels = std::vector<Color>(pixels_ptr, pixels_ptr + image.width * image.height);

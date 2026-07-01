@@ -1,13 +1,9 @@
 #include "game/ui.h"
 
-#include "core/debug/logging.h"
 #include "test/snapshot_tests/snapshots.h"
 
 #include <gtest/gtest.h>
 #include <raylib.h>
-
-#include <filesystem>
-#include <functional>
 
 constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
@@ -28,17 +24,6 @@ public:
 		Raylib_CloseWindow();
 	}
 };
-
-Image render_image(std::function<void()> render) {
-	RenderTexture2D texture = Raylib_LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
-	Raylib_BeginTextureMode(texture);
-	Raylib_ClearBackground(BLACK);
-	render();
-	Raylib_EndTextureMode();
-	Image image = Raylib_LoadImageFromTexture(texture.texture);
-	Raylib_ImageFlipVertical(&image);
-	return image;
-}
 
 TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
 	ui::Element root = {
@@ -62,7 +47,7 @@ TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[0].layout.margin_box.width, SCREEN_WIDTH / 2);
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[1].layout.margin_box.width, SCREEN_WIDTH / 2);
@@ -97,7 +82,7 @@ TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
 	EXPECT_EQ(std::get<ui::Box>(root.content).children[1].layout.margin_box.width, SCREEN_WIDTH * 0.25);
@@ -119,7 +104,7 @@ TEST_F(UILayoutTests, Text_LeftAligned) {
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
@@ -138,7 +123,7 @@ TEST_F(UILayoutTests, Text_CenterAligned) {
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
@@ -157,7 +142,7 @@ TEST_F(UILayoutTests, Text_RightAligned) {
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
@@ -217,7 +202,7 @@ TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &root);
-	Image image = render_image([&]() { ui::draw_element(m_resources, root); });
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, root); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
