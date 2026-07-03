@@ -4,6 +4,7 @@
 
 #include <raylib.h>
 
+#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -71,6 +72,12 @@ namespace ui {
 		bool show_content_outline = false;
 	};
 
+	struct StyleOverride {
+		std::optional<Color> border_color;
+		std::optional<Color> background_color;
+		std::optional<Color> font_color;
+	};
+
 	struct Style {
 		Size width = RelativeSize(100);
 		Size height = RelativeSize(100);
@@ -83,6 +90,8 @@ namespace ui {
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
+		StyleOverride hovered;
+		StyleOverride active;
 		StyleDebug debug;
 
 		inline float horizontal_spacing() const {
@@ -102,14 +111,51 @@ namespace ui {
 		Rectangle content_box;
 	};
 
+	/* State */
+	enum class ButtonState {
+		Up,
+		Released,
+		Down,
+		Pressed,
+	};
+
+	struct Input {
+		Vector2 mouse_pos;
+		ButtonState left_mouse_button;
+	};
+
+	struct State {
+		bool is_hovered;
+		bool is_active;
+		bool is_clicked;
+	};
+
 	/* Element */
 	struct Element {
 		Style style;
 		Content content;
 		Layout layout;
+		State state;
+
+		inline Box* box() {
+			return std::get_if<Box>(&this->content);
+		}
+
+		inline const Box* box() const {
+			return std::get_if<Box>(&this->content);
+		}
+
+		inline Text* text() {
+			return std::get_if<Text>(&this->content);
+		}
+
+		inline const Text* text() const {
+			return std::get_if<Text>(&this->content);
+		}
 	};
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
+	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
 
 } // namespace ui

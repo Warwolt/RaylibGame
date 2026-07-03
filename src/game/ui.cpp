@@ -37,7 +37,7 @@ namespace ui {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
-		if (Text* text = std::get_if<Text>(&element->content)) {
+		if (Text* text = element->text()) {
 			const Font& font = resources.get_font(style.font_id);
 			const float font_spacing = 0.0f;
 			const float max_text_width = max_size.x - style.horizontal_spacing();
@@ -45,6 +45,7 @@ namespace ui {
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
+			text->lines.clear();
 			text->lines.push_back("");
 			for (const std::string& word : util::split_text_into_words(text->text)) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, font_spacing).x;
@@ -73,7 +74,7 @@ namespace ui {
 			layout->content_box.height = std::min(max_text_height, cursor.y + style.font_size);
 		}
 
-		if (Box* box = std::get_if<Box>(&element->content)) {
+		if (Box* box = element->box()) {
 			/* Size content box */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
@@ -153,7 +154,7 @@ namespace ui {
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
 
 		/* Recurse into children */
-		if (Box* box = std::get_if<Box>(&element->content)) {
+		if (Box* box = element->box()) {
 			/* Compute padding for alignment */
 			int left_padding = 0;
 			int top_padding = 0;
@@ -208,12 +209,63 @@ namespace ui {
 		compute_element_positions(top_left, element);
 	}
 
+	static bool key_is_down(ButtonState state) {
+		return state == ButtonState::Down || state == ButtonState::Pressed;
+	}
+
+	bool update_element(const Input& input, Element* element) {
+		/* Hovered */
+		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
+
+		/* Active */
+		if (element->state.is_active) {
+			// element stays active as long as button is held down
+			element->state.is_active = key_is_down(input.left_mouse_button);
+		} else {
+			// element becomes active if pressed while hovered
+			element->state.is_active = element->state.is_hovered && input.left_mouse_button == ButtonState::Pressed;
+		}
+
+		/* Update children */
+		bool any_child_clicked = false;
+		if (ui::Box* box = element->box()) {
+			for (Element& child : box->children) {
+				any_child_clicked |= update_element(input, &child);
+			}
+		}
+
+		/* Clicked */
+		if (any_child_clicked) {
+			element->state.is_clicked = true; // propagate clicks
+		} else {
+			element->state.is_clicked = element->state.is_hovered && input.left_mouse_button == ButtonState::Released;
+		}
+		const bool click_handled = any_child_clicked || element->state.is_clicked;
+
+		return click_handled;
+	}
+
 	void draw_element(const ResourceManager& resources, const Element& element) {
 		const Style& style = element.style;
-		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background_color);
+
+		/* Draw padding box */
+		Color background_color = element.style.background_color;
+		if (element.state.is_active) {
+			background_color = element.style.active.background_color.value_or(background_color);
+		} else if (element.state.is_hovered) {
+			background_color = element.style.hovered.background_color.value_or(background_color);
+		}
+		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
 
 		/* Draw border */
 		{
+			Color border_color = element.style.border_color;
+			if (element.state.is_active) {
+				border_color = element.style.active.border_color.value_or(border_color);
+			} else if (element.state.is_hovered) {
+				border_color = element.style.hovered.border_color.value_or(border_color);
+			}
+
 			const Rectangle border_top = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.border_box.y,
@@ -238,10 +290,10 @@ namespace ui {
 				.width = element.style.border.right,
 				.height = element.layout.padding_box.height,
 			};
-			Raylib_DrawRectangleRec(border_top, element.style.border_color);
-			Raylib_DrawRectangleRec(border_bottom, element.style.border_color);
-			Raylib_DrawRectangleRec(border_left, element.style.border_color);
-			Raylib_DrawRectangleRec(border_right, element.style.border_color);
+			Raylib_DrawRectangleRec(border_top, border_color);
+			Raylib_DrawRectangleRec(border_bottom, border_color);
+			Raylib_DrawRectangleRec(border_left, border_color);
+			Raylib_DrawRectangleRec(border_right, border_color);
 		}
 
 		/* Debug draw box outlines */
@@ -256,7 +308,7 @@ namespace ui {
 		}
 
 		/* Draw content */
-		if (const ui::Text* text = std::get_if<ui::Text>(&element.content)) {
+		if (const ui::Text* text = element.text()) {
 			const Font& font = resources.get_font(style.font_id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
@@ -270,12 +322,18 @@ namespace ui {
 						.x = element.layout.content_box.x + left_padding,
 						.y = element.layout.content_box.y + line_num * style.font_size,
 					};
-					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, font_spacing, style.font_color);
+					Color font_color = style.font_color;
+					if (element.state.is_active) {
+						font_color = style.active.font_color.value_or(font_color);
+					} else if (element.state.is_hovered) {
+						font_color = style.hovered.font_color.value_or(font_color);
+					}
+					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, font_spacing, font_color);
 					line_num++;
 				}
 			}
 			Raylib_EndScissorMode();
-		} else if (const ui::Box* box = std::get_if<ui::Box>(&element.content)) {
+		} else if (const ui::Box* box = element.box()) {
 			for (const Element& child : box->children) {
 				draw_element(resources, child);
 			}
