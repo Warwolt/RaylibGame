@@ -164,10 +164,6 @@ void MainMenuScene::update(Game* game) {
 
 		ui::update_element(input, &m_root_element);
 
-		if (left_mouse_button == ui::ButtonState::Pressed) {
-			LOG_DEBUG("Left mouse pressed");
-		}
-
 		if (m_root_element.box()->children[0].box()->children[0].state.is_clicked) {
 			game->scenes.push_scene(game, SceneID::Gameplay);
 		}
