@@ -343,4 +343,21 @@ namespace ui {
 	void UserInterface::draw(const ResourceManager& resources) const {
 		draw_element(resources, m_tree);
 	}
+
+	void UserInterface::frame_begin() {
+		m_tree = {};
+	}
+
+	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
+		layout_element(resources, window_size, &m_tree);
+	}
+
+	void UserInterface::text(std::string_view text) {
+		m_tree.box()->children.push_back(
+			Element {
+				.content = Text { .text = std::string(text) },
+			}
+		);
+	}
+
 }

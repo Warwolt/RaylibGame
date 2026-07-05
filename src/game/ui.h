@@ -6,8 +6,10 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
+
 
 namespace ui {
 
@@ -162,13 +164,13 @@ namespace ui {
 	public:
 		void draw(const ResourceManager& resources) const;
 
-		void begin_ui();
-		void end_ui();
+		void frame_begin();
+		void frame_end(const ResourceManager& resources, Vector2 window_size);
 
-		void begin_box();
-		void end_box();
+		void box_begin();
+		void box_end();
 
-		void text();
+		void text(std::string_view text);
 		// void image();
 
 		void push_style();
