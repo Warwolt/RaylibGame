@@ -339,4 +339,8 @@ namespace ui {
 			}
 		}
 	}
+
+	void UserInterface::draw(const ResourceManager& resources) const {
+		draw_element(resources, m_tree);
+	}
 }

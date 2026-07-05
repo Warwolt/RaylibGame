@@ -158,4 +158,24 @@ namespace ui {
 	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
 
+	class UserInterface {
+	public:
+		void draw(const ResourceManager& resources) const;
+
+		void begin_ui();
+		void end_ui();
+
+		void begin_box();
+		void end_box();
+
+		void text();
+		// void image();
+
+		void push_style();
+		void pop_style();
+
+	private:
+		Element m_tree = {};
+	};
+
 } // namespace ui
