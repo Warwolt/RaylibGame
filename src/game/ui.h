@@ -10,7 +10,6 @@
 #include <variant>
 #include <vector>
 
-
 namespace ui {
 
 	/* Content */
@@ -170,10 +169,10 @@ namespace ui {
 		void box_begin();
 		void box_end();
 
-		void text(std::string_view text);
+		void text(std::string_view text, std::optional<Style> style = {});
 		// void image();
 
-		void push_style();
+		void push_style(const Style& style);
 		void pop_style();
 
 	private:

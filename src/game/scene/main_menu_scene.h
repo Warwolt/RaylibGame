@@ -13,5 +13,5 @@ public:
 	void render(const Game& game) const;
 
 private:
-	ui::Element m_root_element;
+	ui::UserInterface m_ui;
 };

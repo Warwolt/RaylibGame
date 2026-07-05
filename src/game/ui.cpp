@@ -352,9 +352,10 @@ namespace ui {
 		layout_element(resources, window_size, &m_tree);
 	}
 
-	void UserInterface::text(std::string_view text) {
+	void UserInterface::text(std::string_view text, std::optional<Style> style) {
 		m_tree.box()->children.push_back(
 			Element {
+				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
 			}
 		);
