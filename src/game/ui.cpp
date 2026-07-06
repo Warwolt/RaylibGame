@@ -25,11 +25,11 @@ namespace ui {
 
 	static float fit_size_to_parent(const Size& size, float parent_size) {
 		float pixels = 0.0f;
-		if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&size)) {
-			pixels = std::min<float>(absolute_width->pixels, parent_size);
+		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
+			pixels = std::min<float>(absolute_size->pixels, parent_size);
 		}
-		if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&size)) {
-			pixels = (relative_width->percentage / 100.0f) * parent_size;
+		if (const RelativeSize* relative_size = std::get_if<RelativeSize>(&size)) {
+			pixels = (relative_size->percentage / 100.0f) * parent_size;
 		}
 		return pixels;
 	}
@@ -91,11 +91,27 @@ namespace ui {
 				std::vector<IndexedVector2> desired_sizes;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
-					const Vector2 desired_size = {
-						.x = fit_size_to_parent(child.style.width, content_box.width),
-						.y = fit_size_to_parent(child.style.height, content_box.height),
-					};
-					desired_sizes.push_back({ i, desired_size });
+					if (child.text()) {
+						// FIXME: Write tests that properly cover this code:
+						// - Multiple single-line text elements in a Box
+						// - Multiple multi-line text elements in a Box
+
+						// NOTE: This is code is a best-effort heuristic right now.
+						// Assume text wants to fit all its text onto a single line.
+						const Vector2 desired_size = {
+							.x = content_box.width,
+							.y = (float)child.style.font_size + child.style.vertical_spacing(),
+						};
+						desired_sizes.push_back({ i, desired_size });
+					} else if (child.box()) {
+						const Vector2 desired_size = {
+							.x = fit_size_to_parent(child.style.width, content_box.width),
+							.y = fit_size_to_parent(child.style.height, content_box.height),
+						};
+						desired_sizes.push_back({ i, desired_size });
+					} else {
+						ABORT("Unhandled ui element Content case!");
+					}
 				}
 				// 2. sort desired sizes from smallest to biggest
 				auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
@@ -300,7 +316,7 @@ namespace ui {
 		/* Debug draw box outlines */
 		{
 			if (element.style.debug.show_margin_outline) {
-				Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN);
+				Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, ORANGE);
 			}
 
 			if (element.style.debug.show_content_outline) {

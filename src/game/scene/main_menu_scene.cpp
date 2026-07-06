@@ -27,27 +27,27 @@ void MainMenuScene::update(Game* game) {
 
 	m_ui.frame_begin();
 	{
-		m_ui.box_begin(
-			ui::Style {
-				.padding = ui::Spacing::uniform(20),
-				.alignment = ui::Alignment::Center,
-			}
-		);
+		ui::Style menu_style = {
+			.alignment = ui::Alignment::Center,
+		};
+		ui::Style item_style = {
+			.padding = ui::Spacing { .bottom = 2 },
+			.alignment = ui::Alignment::Center,
+			.font_size = 32,
+		};
+		ui::Style title_style = {
+			.padding = ui::Spacing { .bottom = 32 },
+			.alignment = ui::Alignment::Center,
+			.font_size = 64,
+		};
+		m_ui.box_begin(menu_style);
 		{
-			ui::Style style = {
-				.padding =
-					ui::Spacing {
-						.top = 2,
-						.left = 10,
-					},
-				.alignment = ui::Alignment::Center,
-				.font_size = 32,
-			};
-			m_ui.text("Continue", style);
-			m_ui.text("Load Game", style);
-			m_ui.text("New Game", style);
-			m_ui.text("Settings", style);
-			m_ui.text("Quit", style);
+			m_ui.text("Raylib Game ", title_style);
+
+			m_ui.text("Continue", item_style);
+			m_ui.text("Load Game", item_style);
+			m_ui.text("Settings", item_style);
+			m_ui.text("Quit", item_style);
 		}
 		m_ui.box_end();
 	}
