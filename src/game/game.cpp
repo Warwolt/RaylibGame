@@ -27,6 +27,7 @@ Game* Game_initialize(int argc, char** argv) {
 	Raylib_SetTraceLogLevel(LOG_WARNING); // disable verbose raylib output
 	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
 	Raylib_SetExitKey(KEY_NULL);
+	Raylib_SetTargetFPS(144);
 
 	/* Initialize game */
 	Game* game = new Game {
