@@ -29,6 +29,7 @@ add_subdirectory(lib/tracy)
 
 # Source files
 set(SRC
+    src/core/debug/assert.cpp
     src/core/debug/logging.cpp
     src/core/util.cpp
     src/game/game.cpp
@@ -38,10 +39,12 @@ set(SRC
     src/game/scene/scene.cpp
     src/game/ui.cpp
     src/platform/window.cpp
+    src/platform/win32.cpp
 )
 set(LIB
     raylib
     shlwapi
+    dbghelp
     TracyClient
 )
 
@@ -61,7 +64,7 @@ set_target_properties(Library PROPERTIES OUTPUT_NAME "GameLib")
 # Executable
 add_executable(Executable src/main.cpp)
 target_include_directories(Executable PUBLIC src lib)
-target_link_libraries(Executable ${LIB} dbghelp)
+target_link_libraries(Executable ${LIB})
 set_property(TARGET Executable PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Executable)
 set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
