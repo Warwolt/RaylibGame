@@ -27,20 +27,29 @@ void MainMenuScene::update(Game* game) {
 
 	m_ui.frame_begin();
 	{
-		ui::Style style = {
-			.padding =
-				ui::Spacing {
-					.top = 2,
-					.left = 10,
-				},
-			.alignment = ui::Alignment::Center,
-			.font_size = 32,
-		};
-		m_ui.text("Continue", style);
-		m_ui.text("Load Game", style);
-		m_ui.text("New Game", style);
-		m_ui.text("Settings", style);
-		m_ui.text("Quit", style);
+		m_ui.box_begin(
+			ui::Style {
+				.padding = ui::Spacing::uniform(20),
+				.alignment = ui::Alignment::Center,
+			}
+		);
+		{
+			ui::Style style = {
+				.padding =
+					ui::Spacing {
+						.top = 2,
+						.left = 10,
+					},
+				.alignment = ui::Alignment::Center,
+				.font_size = 32,
+			};
+			m_ui.text("Continue", style);
+			m_ui.text("Load Game", style);
+			m_ui.text("New Game", style);
+			m_ui.text("Settings", style);
+			m_ui.text("Quit", style);
+		}
+		m_ui.box_end();
 	}
 	m_ui.frame_end(game->resources, game->window.size());
 }
@@ -48,7 +57,5 @@ void MainMenuScene::update(Game* game) {
 void MainMenuScene::render(const Game& game) const {
 	PROFILING_SCOPE();
 	Raylib_ClearBackground(BLACK);
-
-	/* Render elements */
 	m_ui.draw(game.resources);
 }

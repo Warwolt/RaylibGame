@@ -166,17 +166,17 @@ namespace ui {
 		void frame_begin();
 		void frame_end(const ResourceManager& resources, Vector2 window_size);
 
-		void box_begin();
+		void box_begin(std::optional<Style> style = {});
 		void box_end();
 
 		void text(std::string_view text, std::optional<Style> style = {});
 		// void image();
 
-		void push_style(const Style& style);
-		void pop_style();
-
 	private:
 		Element m_tree = {};
+		std::vector<Element*> m_parent_stack;
+
+		Element* _current_parent();
 	};
 
 } // namespace ui

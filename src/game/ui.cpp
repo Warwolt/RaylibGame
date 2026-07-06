@@ -1,5 +1,6 @@
 #include "game/ui.h"
 
+#include "core/debug/assert.h"
 #include "core/util.h"
 
 #include <algorithm>
@@ -346,19 +347,51 @@ namespace ui {
 
 	void UserInterface::frame_begin() {
 		m_tree = {};
+		m_parent_stack = { &m_tree };
 	}
 
 	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
+		ASSERT(m_parent_stack.size() == 1, "Missing call to UserInterface::box_end?");
 		layout_element(resources, window_size, &m_tree);
 	}
 
+	void UserInterface::box_begin(std::optional<Style> style) {
+		Element* parent = _current_parent();
+		ASSERT(parent != nullptr, "Missing call to UserInterface::frame_begin?");
+		ASSERT(parent->box() != nullptr, "Missing call to UserInterface::box_begin?");
+		parent->box()->children.push_back(
+			Element {
+				.style = style.value_or(Style {}),
+				.content = Box {},
+			}
+		);
+		m_parent_stack.push_back(&parent->box()->children.back());
+	}
+
+	void UserInterface::box_end() {
+		Element* parent = _current_parent();
+		ASSERT(parent != nullptr, "Missing call to UserInterface::box_begin?");
+		ASSERT(parent->box() != nullptr, "Missing call to UserInterface::box_begin?");
+		m_parent_stack.pop_back();
+	}
+
 	void UserInterface::text(std::string_view text, std::optional<Style> style) {
-		m_tree.box()->children.push_back(
+		Element* parent = _current_parent();
+		ASSERT(parent != nullptr, "Missing call to UserInterface::frame_begin?");
+		ASSERT(parent->box() != nullptr, "Missing call to UserInterface::box_begin?");
+		parent->box()->children.push_back(
 			Element {
 				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
 			}
 		);
+	}
+
+	Element* UserInterface::_current_parent() {
+		if (m_parent_stack.empty()) {
+			return nullptr;
+		}
+		return m_parent_stack.back();
 	}
 
 }
