@@ -92,12 +92,34 @@ namespace ui {
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
 					if (child.text()) {
+						// NOTE: This is code is a best-effort heuristic right now.
+						// Assume text wants to fit all its text onto a single line.
+
 						// FIXME: Write tests that properly cover this code:
 						// - Multiple single-line text elements in a Box
 						// - Multiple multi-line text elements in a Box
 
-						// NOTE: This is code is a best-effort heuristic right now.
-						// Assume text wants to fit all its text onto a single line.
+						// FIXME: The sizing situation is very tricky for Text elements.
+						// Text elements with 100% relative size, should want to
+						// fit the height to the font size if the text can fit
+						// on a single row. If the text has to split into
+						// multiple lines, we want to use more height.
+						//
+						// The text box height depends on the number of lines.
+						// The number of lines depends on the text box width.
+						// The text box width would nominally be the full parent box.
+						//
+						// 1. Set the text box width equal to the parent box width
+						// 2. Compute how many lines are produced with the text, font size and content width.
+						// 3. Compute the desired height
+						//
+						// Now we should be able to figure out what actual max
+						// height the text element gets relative to the other
+						// children in this Box.
+						//
+						// If we have a VERY long text, and there isn't enough
+						// height to allocate, we'll just have to clip the
+						// bottom of the text to make it fit.
 						const Vector2 desired_size = {
 							.x = content_box.width,
 							.y = (float)child.style.font_size + child.style.vertical_spacing(),
