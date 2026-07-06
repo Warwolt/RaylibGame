@@ -173,6 +173,7 @@ namespace ui {
 		// void image();
 
 	private:
+		bool m_within_frame = false;
 		Element m_tree = {};
 		std::vector<Element*> m_parent_stack;
 

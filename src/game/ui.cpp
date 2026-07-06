@@ -346,17 +346,22 @@ namespace ui {
 	}
 
 	void UserInterface::frame_begin() {
+		ASSERT(!m_within_frame, "Missing call to UserInterface::frame_end?");
+		m_within_frame = true;
 		m_tree = {};
 		m_parent_stack = { &m_tree };
 	}
 
 	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(m_parent_stack.size() == 1, "Missing call to UserInterface::box_end?");
+		m_within_frame = false;
 		layout_element(resources, window_size, &m_tree);
 	}
 
 	void UserInterface::box_begin(std::optional<Style> style) {
 		Element* parent = _current_parent();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(parent != nullptr, "Missing call to UserInterface::frame_begin?");
 		ASSERT(parent->box() != nullptr, "Missing call to UserInterface::box_begin?");
 		parent->box()->children.push_back(
@@ -370,6 +375,7 @@ namespace ui {
 
 	void UserInterface::box_end() {
 		Element* parent = _current_parent();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(parent != nullptr, "Missing call to UserInterface::box_begin?");
 		ASSERT(parent->box() != nullptr, "Missing call to UserInterface::box_begin?");
 		m_parent_stack.pop_back();
@@ -377,6 +383,7 @@ namespace ui {
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style) {
 		Element* parent = _current_parent();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(parent != nullptr, "Missing call to UserInterface::frame_begin?");
 		ASSERT(parent->box() != nullptr, "Missing call to UserInterface::box_begin?");
 		parent->box()->children.push_back(
