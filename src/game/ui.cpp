@@ -95,16 +95,17 @@ namespace ui {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
+		/* Compute size of content box */
 		if (Text* text = element->text()) {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
-			/* Size content box */
+			/* Size parent content  */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
 			content_box.height = max_size.y - style.vertical_spacing();
 
-			/* Size all children */
+			/* Recursively size all box children */
 			{
 				// 1. compute desired size of each child
 				struct IndexedVector2 {
@@ -155,6 +156,7 @@ namespace ui {
 			ABORT("Unhandled ui::Content case!");
 		}
 
+		/* Size padding, border, and margin boxes */
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
 		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
 		layout->border_box.width = layout->padding_box.width + style.border.left + style.border.right;
