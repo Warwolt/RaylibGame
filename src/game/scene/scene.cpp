@@ -58,12 +58,12 @@ SceneManager::SceneManager() = default;
 SceneManager::~SceneManager() = default;
 
 void SceneManager::push_scene(Game* game, SceneID scene_id) {
-	m_scenes.push_back(Scene(scene_id));
-	m_scenes.back().initialize(game);
+	m_scenes.push_back(std::make_unique<Scene>(scene_id));
+	m_scenes.back()->initialize(game);
 }
 
 void SceneManager::pop_scene(Game* game) {
-	m_scenes.back().deinitialize(game);
+	m_scenes.back()->deinitialize(game);
 	if (m_scenes.size() == 1) {
 		game->should_quit = true;
 	} else {
@@ -73,12 +73,12 @@ void SceneManager::pop_scene(Game* game) {
 
 void SceneManager::update_current_scene(Game* game) {
 	if (!m_scenes.empty()) {
-		m_scenes.back().update(game);
+		m_scenes.back()->update(game);
 	}
 }
 
 void SceneManager::render_current_scene(const Game& game) const {
 	if (!m_scenes.empty()) {
-		m_scenes.back().render(game);
+		m_scenes.back()->render(game);
 	}
 }

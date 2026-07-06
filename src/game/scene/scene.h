@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 struct Game;
 class Scene;
@@ -18,5 +19,6 @@ public:
 	void render_current_scene(const Game& game) const;
 
 private:
-	std::vector<Scene> m_scenes;
+	// heap allocate scenes so they remain stable on vector re-allocation
+	std::vector<std::unique_ptr<Scene>> m_scenes;
 };
