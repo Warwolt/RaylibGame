@@ -34,23 +34,25 @@ namespace ui {
 		return pixels;
 	}
 
-	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
+		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
-		Layout* layout = &element->layout;
 
 		if (Text* text = element->text()) {
 			const Font& font = resources.get_font(style.font_id);
 			const float font_spacing = 0.0f;
-			const float max_text_width = max_size.x - style.horizontal_spacing();
-			const float max_text_height = max_size.y - style.vertical_spacing();
+			const float element_width = fit_size_to_parent(style.width, parent_size.x);
+			const float element_height = fit_size_to_parent(style.height, parent_size.y);
+			const float max_text_width = element_width - style.horizontal_spacing();
+			const float max_text_height = element_height - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
-			text->lines.clear();
-			text->lines.push_back("");
+			text->lines = { "" }; // reset to empty line to append to
 			for (const std::string& word : util::split_text_into_words(text->text)) {
 				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, font_spacing).x;
 				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
+				// check if word fits on remainder of current line
 				if (cursor.x + needed_length <= max_text_width) {
 					// add word to current line
 					if (cursor.x > 0) {
@@ -59,6 +61,7 @@ namespace ui {
 					}
 					text->lines.back() += word;
 					cursor.x += word_length;
+
 				} else {
 					// switch to new line
 					cursor.x = 0;
@@ -71,11 +74,31 @@ namespace ui {
 					cursor.x = word_length;
 				}
 			}
-			layout->content_box.width = max_text_width;
-			layout->content_box.height = std::min(max_text_height, cursor.y + style.font_size);
+			const float paragraph_height = cursor.y + style.font_size;
+			desired_size = {
+				.x = element_width,
+				.y = paragraph_height + style.vertical_spacing(),
+			};
+		} else if (Box* box = element->box()) {
+			desired_size = {
+				.x = fit_size_to_parent(style.width, parent_size.x),
+				.y = fit_size_to_parent(style.height, parent_size.y),
+			};
+		} else {
+			ABORT("Unhandled ui::Content case!");
 		}
 
-		if (Box* box = element->box()) {
+		return desired_size;
+	}
+
+	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+		const Style& style = element->style;
+		Layout* layout = &element->layout;
+
+		if (Text* text = element->text()) {
+			layout->content_box.width = max_size.x - style.horizontal_spacing();
+			layout->content_box.height = max_size.y - style.vertical_spacing();
+		} else if (Box* box = element->box()) {
 			/* Size content box */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
@@ -91,49 +114,9 @@ namespace ui {
 				std::vector<IndexedVector2> desired_sizes;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
-					if (child.text()) {
-						// NOTE: This is code is a best-effort heuristic right now.
-						// Assume text wants to fit all its text onto a single line.
-
-						// FIXME: Write tests that properly cover this code:
-						// - Multiple single-line text elements in a Box
-						// - Multiple multi-line text elements in a Box
-
-						// FIXME: The sizing situation is very tricky for Text elements.
-						// Text elements with 100% relative size, should want to
-						// fit the height to the font size if the text can fit
-						// on a single row. If the text has to split into
-						// multiple lines, we want to use more height.
-						//
-						// The text box height depends on the number of lines.
-						// The number of lines depends on the text box width.
-						// The text box width would nominally be the full parent box.
-						//
-						// 1. Set the text box width equal to the parent box width
-						// 2. Compute how many lines are produced with the text, font size and content width.
-						// 3. Compute the desired height
-						//
-						// Now we should be able to figure out what actual max
-						// height the text element gets relative to the other
-						// children in this Box.
-						//
-						// If we have a VERY long text, and there isn't enough
-						// height to allocate, we'll just have to clip the
-						// bottom of the text to make it fit.
-						const Vector2 desired_size = {
-							.x = content_box.width,
-							.y = (float)child.style.font_size + child.style.vertical_spacing(),
-						};
-						desired_sizes.push_back({ i, desired_size });
-					} else if (child.box()) {
-						const Vector2 desired_size = {
-							.x = fit_size_to_parent(child.style.width, content_box.width),
-							.y = fit_size_to_parent(child.style.height, content_box.height),
-						};
-						desired_sizes.push_back({ i, desired_size });
-					} else {
-						ABORT("Unhandled ui element Content case!");
-					}
+					Vector2 parent_size = { content_box.width, content_box.height };
+					Vector2 desired_size = compute_desired_element_size(resources, parent_size, &child);
+					desired_sizes.push_back({ i, desired_size });
 				}
 				// 2. sort desired sizes from smallest to biggest
 				auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
@@ -168,6 +151,8 @@ namespace ui {
 					}
 				}
 			}
+		} else {
+			ABORT("Unhandled ui::Content case!");
 		}
 
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
@@ -240,11 +225,8 @@ namespace ui {
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		const Vector2 top_left = { 0, 0 };
-		const Vector2 element_size = {
-			.x = fit_size_to_parent(element->style.width, window_size.x),
-			.y = fit_size_to_parent(element->style.height, window_size.y),
-		};
-		compute_element_sizes(resources, element_size, element);
+		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
+		compute_element_sizes(resources, desired_size, element);
 		compute_element_positions(top_left, element);
 	}
 

@@ -42,10 +42,11 @@ void MainMenuScene::update(Game* game) {
 		};
 		m_ui.box_begin(menu_style);
 		{
-			m_ui.text("Raylib Game ", title_style);
+			m_ui.text("Raylib Game", title_style);
 
 			m_ui.text("Continue", item_style);
 			m_ui.text("Load Game", item_style);
+			m_ui.text("New Game", item_style);
 			m_ui.text("Settings", item_style);
 			m_ui.text("Quit", item_style);
 		}
