@@ -1,16 +1,19 @@
 #include "game/scene/main_menu_scene.h"
 
+#include "core/debug/profiling.h"
+
 #include "game/game.h"
+#include "game/resource.h"
 #include "game/scene/scene_id.h"
 #include "game/ui.h"
-
-#include "core/debug/logging.h"
-#include "core/debug/profiling.h"
 
 #include <raylib.h>
 #include <raymath.h>
 
-void MainMenuScene::initialize(Game* /*game*/) {
+ImageID utah_teapot_id;
+
+void MainMenuScene::initialize(Game* game) {
+	utah_teapot_id = game->resources.load_image("resource/image/utah_teapot.png").value();
 }
 
 void MainMenuScene::deinitialize(Game* /*game*/) {
@@ -59,4 +62,6 @@ void MainMenuScene::render(const Game& game) const {
 	PROFILING_SCOPE();
 	Raylib_ClearBackground(BLACK);
 	m_ui.draw(game.resources);
+
+	Raylib_DrawTexture(game.resources.get_image(utah_teapot_id), 0, 0, WHITE);
 }
