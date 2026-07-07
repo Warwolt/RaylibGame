@@ -103,7 +103,25 @@ namespace ui {
 				.x = element_width,
 				.y = paragraph_height + style.vertical_spacing(),
 			};
-		} else if (Box* box = element->box()) {
+		} else if (Image* image = element->image()) {
+			const Texture2D texture = resources.get_image(image->image);
+			Size image_width = style.width;
+			if (auto* abs_size = std::get_if<AbsoluteSize>(&style.width)) {
+				if (abs_size->pixels == 0) {
+					image_width = AbsoluteSize(texture.width);
+				}
+			}
+			Size image_height = style.height;
+			if (auto* abs_size = std::get_if<AbsoluteSize>(&style.height)) {
+				if (abs_size->pixels == 0) {
+					image_height = AbsoluteSize(texture.height);
+				}
+			}
+			desired_size = {
+				.x = fit_size_to_parent(image_width, parent_size.x),
+				.y = fit_size_to_parent(image_height, parent_size.y),
+			};
+		} else if (element->is_image() || element->is_box()) {
 			desired_size = {
 				.x = fit_size_to_parent(style.width, parent_size.x),
 				.y = fit_size_to_parent(style.height, parent_size.y),
@@ -115,12 +133,12 @@ namespace ui {
 		return desired_size;
 	}
 
-	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+	static void compute_constrained_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
 		/* Compute size of content box */
-		if (Text* text = element->text()) {
+		if (element->is_text() || element->is_image()) {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
@@ -165,13 +183,13 @@ namespace ui {
 							.y = content_box.height,
 						};
 						remaining_width -= child_size.x;
-						compute_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, child_size, &child);
 					} else {
 						const Vector2 child_size = {
 							.x = content_box.width,
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
-						compute_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, child_size, &child);
 						remaining_height -= child.layout.margin_box.height;
 					}
 				}
@@ -253,7 +271,7 @@ namespace ui {
 		PROFILING_SCOPE();
 		const Vector2 top_left = { 0, 0 };
 		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
-		compute_element_sizes(resources, desired_size, element);
+		compute_constrained_element_sizes(resources, desired_size, element);
 		compute_element_positions(top_left, element);
 	}
 
@@ -382,10 +400,21 @@ namespace ui {
 				}
 			}
 			Raylib_EndScissorMode();
-		} else if (const ui::Box* box = element.box()) {
+		} else if (const Image* image = element.image()) {
+			Texture2D texture = resources.get_image(image->image);
+			Rectangle source = {
+				.x = 0,
+				.y = 0,
+				.width = (float)texture.width,
+				.height = (float)texture.height,
+			};
+			DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+		} else if (const Box* box = element.box()) {
 			for (const Element& child : box->children) {
 				draw_element(resources, child);
 			}
+		} else {
+			ABORT("Unhandled ui::Content case!");
 		}
 	}
 
@@ -437,6 +466,17 @@ namespace ui {
 			Element {
 				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
+			}
+		);
+	}
+
+	void UserInterface::image(ImageID image, std::optional<Style> style) {
+		Element* parent = _current_parent();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		parent->box()->children.push_back(
+			Element {
+				.style = style.value_or(Style {}),
+				.content = Image { .image = image },
 			}
 		);
 	}

@@ -34,15 +34,19 @@ void MainMenuScene::update(Game* game) {
 		ui::Style item_style = {
 			.padding = ui::Spacing { .bottom = 2 },
 			.alignment = ui::Alignment::Center,
+			.font_color = GREEN,
 			.font_size = 32,
 		};
 		ui::Style title_style = {
 			.padding = ui::Spacing { .bottom = 32 },
 			.alignment = ui::Alignment::Center,
+			.font_color = GREEN,
 			.font_size = 64,
 		};
 		m_ui.box_begin(menu_style);
 		{
+			m_ui.image(m_images.utah_teapot);
+
 			m_ui.text("Raylib Game", title_style);
 
 			m_ui.text("Continue", item_style);
@@ -60,6 +64,4 @@ void MainMenuScene::render(const Game& game) const {
 	PROFILING_SCOPE();
 	Raylib_ClearBackground(BLACK);
 	m_ui.draw(game.resources);
-
-	Raylib_DrawTexture(game.resources.get_image(m_images.utah_teapot), 0, 0, WHITE);
 }

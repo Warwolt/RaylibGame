@@ -1,3 +1,5 @@
+#pragma once
+
 struct FontID {
 	int value = 0;
 
