@@ -35,6 +35,26 @@ namespace ui {
 		return pixels;
 	}
 
+	// based on Raylib MeasureTextEx in rtext.c
+	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
+		if (font.texture.id == 0) {
+			return 0;
+		}
+
+		int word_width = 0;
+		for (char letter : word) {
+			const int index = GetGlyphIndex(font, letter);
+			if (font.glyphs[index].advanceX > 0) {
+				word_width += font.glyphs[index].advanceX;
+			} else {
+				word_width += (font.recs[index].width + font.glyphs[index].offsetX);
+			}
+		}
+
+		const float scale_factor = font_size / (float)font.baseSize;
+		return word_width * scale_factor + font_spacing * word.length() - 1;
+	}
+
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		PROFILING_SCOPE();
 		Vector2 desired_size = { 0, 0 };
@@ -53,7 +73,8 @@ namespace ui {
 			Vector2 cursor = { 0, 0 };
 			text->lines = { "" }; // reset to empty line to append to
 			for (const std::string_view word : util::split_text_into_words(text->text)) {
-				const int word_length = Raylib_MeasureTextEx(font, std::string(word).c_str(), style.font_size, font_spacing).x;
+				PROFILING_SCOPE();
+				const int word_length = measure_word_width(word, font, style.font_size, font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
 				// check if word fits on remainder of current line
 				if (cursor.x + needed_length <= max_text_width) {
