@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 struct Game;
@@ -18,5 +19,5 @@ public:
 	void render_current_scene(const Game& game) const;
 
 private:
-	std::vector<Scene> m_scenes;
+	std::vector<std::unique_ptr<Scene>> m_scenes;
 };
