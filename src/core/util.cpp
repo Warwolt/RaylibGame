@@ -13,8 +13,9 @@ namespace util {
 			while (start < text.size() && text[start] == ' ') {
 				start++;
 			}
-			if (start >= text.size())
+			if (start >= text.size()) {
 				break;
+			}
 			// find end of word
 			size_t end = text.find(' ', start);
 			if (end == std::string_view::npos) {
