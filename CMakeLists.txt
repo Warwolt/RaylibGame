@@ -24,6 +24,7 @@ option(TRACY_ENABLE "" ON)
 option(TRACY_ON_DEMAND "" ON)
 option(TRACY_DELAYED_INIT "" ON)
 option(TRACY_MANUAL_LIFETIME "" ON)
+option(TRACY_NO_CALLSTACK "" ON)
 add_subdirectory(lib/tracy)
 
 # Source files
