@@ -17,7 +17,7 @@ namespace ui {
 
 	struct Text {
 		std::string text;
-		std::vector<std::string_view> lines; // computed during layout
+		std::vector<std::string_view> lines; // computed during layout, views into `text` member
 	};
 
 	enum class Direction {
