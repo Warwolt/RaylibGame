@@ -72,7 +72,7 @@ namespace ui {
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
-			for (const std::string_view word : util::get_string_views_per_word(text->text)) {
+			for (const std::string_view word : util::get_string_view_per_word(text->text)) {
 				PROFILING_SCOPE();
 				const int word_width = measure_word_width(word, font, style.font_size, font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
