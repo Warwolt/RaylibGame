@@ -32,7 +32,7 @@ const ui::Style button_style = {
 		},
 	};
 
-class UILayoutTests : public ::testing::Test {
+class UIElementSnapshotTests : public ::testing::Test {
 public:
 	ResourceManager m_resources;
 
@@ -48,7 +48,7 @@ public:
 	}
 };
 
-TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
+TEST_F(UIElementSnapshotTests, BoxLayout_100_100_Gives_50_50) {
 	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -77,7 +77,7 @@ TEST_F(UILayoutTests, BoxLayout_100_100_Gives_50_50) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
+TEST_F(UIElementSnapshotTests, BoxLayout_100_25_100_Gives_37_25_37) {
 	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -113,7 +113,7 @@ TEST_F(UILayoutTests, BoxLayout_100_25_100_Gives_37_25_37) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, BoxLayout_DefaultStyle) {
+TEST_F(UIElementSnapshotTests, BoxLayout_DefaultStyle) {
 	ui::Element element = {
 		.style = button_style,
 		.content = ui::Text { .text = "Press Me" },
@@ -127,7 +127,7 @@ TEST_F(UILayoutTests, BoxLayout_DefaultStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, BoxLayout_HoveredStyle) {
+TEST_F(UIElementSnapshotTests, BoxLayout_HoveredStyle) {
 	ui::Element element = {
 		.style = button_style,
 		.content = ui::Text { .text = "Press Me" },
@@ -141,7 +141,7 @@ TEST_F(UILayoutTests, BoxLayout_HoveredStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, BoxLayout_ActiveStyle) {
+TEST_F(UIElementSnapshotTests, BoxLayout_ActiveStyle) {
 	ui::Element element = {
 		.style = button_style,
 		.content = ui::Text { .text = "Press Me" },
@@ -155,7 +155,7 @@ TEST_F(UILayoutTests, BoxLayout_ActiveStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, Text_LeftAligned) {
+TEST_F(UIElementSnapshotTests, Text_LeftAligned) {
 	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
@@ -174,7 +174,7 @@ TEST_F(UILayoutTests, Text_LeftAligned) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, Text_CenterAligned) {
+TEST_F(UIElementSnapshotTests, Text_CenterAligned) {
 	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
@@ -193,7 +193,7 @@ TEST_F(UILayoutTests, Text_CenterAligned) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, Text_RightAligned) {
+TEST_F(UIElementSnapshotTests, Text_RightAligned) {
 	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
@@ -212,7 +212,7 @@ TEST_F(UILayoutTests, Text_RightAligned) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UILayoutTests, Text_MultipleParagraphs_WithTitle) {
+TEST_F(UIElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 	ui::Element element = {
 		.style = {
 			.width = ui::RelativeSize(100),
