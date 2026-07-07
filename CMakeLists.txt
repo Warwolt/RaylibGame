@@ -24,14 +24,13 @@ option(TRACY_ENABLE "" ON)
 option(TRACY_ON_DEMAND "" ON)
 option(TRACY_DELAYED_INIT "" ON)
 option(TRACY_MANUAL_LIFETIME "" ON)
-option(TRACY_NO_CALLSTACK "" ON)
+# option(TRACY_NO_CALLSTACK "" ON)
 add_subdirectory(lib/tracy)
 
 # Source files
 set(SRC
     src/core/debug/assert.cpp
     src/core/debug/logging.cpp
-    src/core/util.cpp
     src/game/game.cpp
     src/game/resource.cpp
     src/game/scene/gameplay_scene.cpp
@@ -73,7 +72,6 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
     test/unit_tests/unit_test_main.cpp
-    test/unit_tests/util_tests.cpp
     test/unit_tests/ui_element_tests.cpp
     test/unit_tests/user_interface_tests.cpp
 )

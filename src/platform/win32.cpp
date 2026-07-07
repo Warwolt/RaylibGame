@@ -172,7 +172,7 @@ void Win32_show_error_message_box(const std::string& text) {
 
 bool Win32_show_assert_message_box(const std::string& text) {
 	HWND handle = (HWND)Raylib_GetWindowHandle();
-	int result = MessageBoxA(nullptr, text.c_str(), "Assertion Failed", MB_ABORTRETRYIGNORE | MB_ICONHAND | MB_TASKMODAL);
+	int result = MessageBoxA(handle, text.c_str(), "Assertion Failed", MB_ABORTRETRYIGNORE | MB_ICONHAND | MB_TASKMODAL);
 	if (result == IDABORT) {
 		std::exit(1);
 	}
