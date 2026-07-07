@@ -56,12 +56,10 @@ namespace ui {
 	}
 
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
-		PROFILING_SCOPE();
 		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
 
 		if (Text* text = element->text()) {
-			PROFILING_LOG("Text");
 			const Font& font = resources.get_font(style.font_id);
 			const float font_spacing = 0.0f;
 			const float element_width = fit_size_to_parent(style.width, parent_size.x);
@@ -73,7 +71,6 @@ namespace ui {
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
 			for (const std::string_view word : util::get_string_view_per_word(text->text)) {
-				PROFILING_SCOPE();
 				const int word_width = measure_word_width(word, font, style.font_size, font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
 				// check if word fits on remainder of current line
@@ -107,7 +104,6 @@ namespace ui {
 				.y = paragraph_height + style.vertical_spacing(),
 			};
 		} else if (Box* box = element->box()) {
-			PROFILING_LOG("Box");
 			desired_size = {
 				.x = fit_size_to_parent(style.width, parent_size.x),
 				.y = fit_size_to_parent(style.height, parent_size.y),
@@ -120,17 +116,14 @@ namespace ui {
 	}
 
 	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
-		PROFILING_SCOPE();
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
 		/* Compute size of content box */
 		if (Text* text = element->text()) {
-			PROFILING_LOG("Text");
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
-			PROFILING_LOG("Box");
 			/* Size parent content  */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
@@ -197,7 +190,6 @@ namespace ui {
 	}
 
 	static void compute_element_positions(Vector2 position, Element* element) {
-		PROFILING_SCOPE();
 		const Style style = element->style;
 		Layout* layout = &element->layout;
 
@@ -406,7 +398,6 @@ namespace ui {
 	}
 
 	void UserInterface::frame_begin() {
-		PROFILING_SCOPE();
 		ASSERT(!m_within_frame, "Missing call to UserInterface::frame_end?");
 		m_within_frame = true;
 		m_root_element = {};
@@ -422,7 +413,6 @@ namespace ui {
 	}
 
 	void UserInterface::box_begin(std::optional<Style> style) {
-		PROFILING_SCOPE();
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
@@ -435,14 +425,12 @@ namespace ui {
 	}
 
 	void UserInterface::box_end() {
-		PROFILING_SCOPE();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(m_parent_stack.size() > 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_parent_stack.pop_back();
 	}
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style) {
-		PROFILING_SCOPE();
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(

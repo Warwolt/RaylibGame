@@ -62,11 +62,10 @@ void Game_update(Game* game) {
 }
 
 void Game_render(const Game& game) {
-	PROFILING_SCOPE();
-
 	/* Draw game onto viewport */
 	Raylib_BeginTextureMode(game.window.viewport());
 	{
+		PROFILING_SCOPE(); // anything worth measuring is in the scene
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		game.scenes.render_current_scene(game);
 	}
