@@ -42,5 +42,5 @@
 		}                                                                          \
 	} while (0)
 
-void enable_skip_assert_message_box();
+void disable_assert_message_box();
 bool should_skip_assert_message_box();

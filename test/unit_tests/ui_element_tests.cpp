@@ -41,7 +41,7 @@ ui::Element box_element_with_child() {
 	};
 }
 
-TEST(UIInteractionTests, BoxElementWithChild_IsHovered) {
+TEST(UIElementTests, BoxElementWithChild_IsHovered) {
 	ResourceManager resources;
 	ui::Element element = box_element_with_child();
 	const ui::Element& child = element.box()->children[0];
@@ -72,7 +72,7 @@ TEST(UIInteractionTests, BoxElementWithChild_IsHovered) {
 	EXPECT_EQ(child.state.is_hovered, false);
 }
 
-TEST(UIInteractionTests, BoxElementWithChild_IsActive) {
+TEST(UIElementTests, BoxElementWithChild_IsActive) {
 	ResourceManager resources;
 	ui::Element element = box_element_with_child();
 	const ui::Element& child = element.box()->children[0];
@@ -103,7 +103,7 @@ TEST(UIInteractionTests, BoxElementWithChild_IsActive) {
 	EXPECT_EQ(child.state.is_active, false);
 }
 
-TEST(UIInteractionTests, BoxElementWithChild_IsClicked) {
+TEST(UIElementTests, BoxElementWithChild_IsClicked) {
 	ResourceManager resources;
 	ui::Element element = box_element_with_child();
 	const ui::Element& child = element.box()->children[0];
@@ -134,7 +134,7 @@ TEST(UIInteractionTests, BoxElementWithChild_IsClicked) {
 	EXPECT_EQ(child.state.is_clicked, false);
 }
 
-TEST(UIInteractionTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
+TEST(UIElementTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
 	ResourceManager resources;
 	ui::Element element = box_element_with_child();
 	const ui::Element& child = element.box()->children[0];

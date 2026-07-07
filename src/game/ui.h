@@ -138,12 +138,20 @@ namespace ui {
 		Layout layout;
 		State state;
 
+		inline bool is_box() const {
+			return std::holds_alternative<Box>(this->content);
+		}
+
 		inline Box* box() {
 			return std::get_if<Box>(&this->content);
 		}
 
 		inline const Box* box() const {
 			return std::get_if<Box>(&this->content);
+		}
+
+		inline bool is_text() const {
+			return std::holds_alternative<Text>(this->content);
 		}
 
 		inline Text* text() {
@@ -162,6 +170,7 @@ namespace ui {
 	class UserInterface {
 	public:
 		void draw(const ResourceManager& resources) const;
+		const Element& root_element() const;
 
 		void frame_begin();
 		void frame_end(const ResourceManager& resources, Vector2 window_size);
@@ -174,7 +183,7 @@ namespace ui {
 
 	private:
 		bool m_within_frame = false;
-		Element m_tree = {};
+		Element m_root_element = {};
 		std::vector<Element*> m_parent_stack;
 
 		Element* _current_parent();

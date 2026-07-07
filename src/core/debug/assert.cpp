@@ -4,7 +4,7 @@
 
 static bool g_skip_assert_message_box = false;
 
-void enable_skip_assert_message_box() {
+void disable_assert_message_box() {
 	g_skip_assert_message_box = true;
 }
 
