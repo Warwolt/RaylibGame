@@ -9,7 +9,6 @@
 namespace util {
 
 	inline std::vector<std::string_view> get_string_views_per_word(std::string_view text) {
-		PROFILING_SCOPE();
 		std::vector<std::string_view> words;
 		size_t start = 0;
 		while (start < text.size()) {
