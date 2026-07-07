@@ -2,22 +2,32 @@
 
 #include "core/debug/profiling.h"
 
-#include <iostream>
-#include <ranges>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace util {
 
-	auto split_text_into_words(std::string_view text) {
+	inline std::vector<std::string_view> get_string_views_per_word(std::string_view text) {
 		PROFILING_SCOPE();
-		// clang-format off
-		return  text
-			| std::views::split(' ')
-			| std::views::transform([](auto&& r) {
-					return std::string_view(&*r.begin(), std::ranges::distance(r));
-				});
-		// clang-format on
+		std::vector<std::string_view> words;
+		size_t start = 0;
+		while (start < text.size()) {
+			// skip spaces
+			while (start < text.size() && text[start] == ' ') {
+				start++;
+			}
+			if (start >= text.size())
+				break;
+			// find end of word
+			size_t end = text.find(' ', start);
+			if (end == std::string_view::npos) {
+				end = text.size();
+			}
+			words.push_back(text.substr(start, end - start));
+			start = end;
+		}
+		return words;
 	}
 
 } // namespace util

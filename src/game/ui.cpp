@@ -71,20 +71,24 @@ namespace ui {
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
-			text->lines = { "" }; // reset to empty line to append to
-			for (const std::string_view word : util::split_text_into_words(text->text)) {
+			text->lines.clear();
+			for (const std::string_view word : util::get_string_views_per_word(text->text)) {
 				PROFILING_SCOPE();
-				const int word_length = measure_word_width(word, font, style.font_size, font_spacing);
-				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
+				const int word_width = measure_word_width(word, font, style.font_size, font_spacing);
+				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
 				// check if word fits on remainder of current line
 				if (cursor.x + needed_length <= max_text_width) {
-					// add word to current line
+					// extend current line view to include word
 					if (cursor.x > 0) {
-						text->lines.back() += " ";
 						cursor.x += space_width;
 					}
-					text->lines.back() += word;
-					cursor.x += word_length;
+					if (text->lines.empty()) {
+						text->lines.push_back(word);
+					} else {
+						const char* start = text->lines.back().data();
+						text->lines.back() = std::string_view(start, (word.data() + word.size()) - start);
+					}
+					cursor.x += word_width;
 
 				} else {
 					// switch to new line
@@ -93,9 +97,8 @@ namespace ui {
 					if (cursor.y + style.font_size > max_text_height) {
 						break;
 					}
-					text->lines.push_back("");
-					text->lines.back() += word;
-					cursor.x = word_length;
+					text->lines.push_back(word);
+					cursor.x = word_width;
 				}
 			}
 			const float paragraph_height = cursor.y + style.font_size;
@@ -367,9 +370,9 @@ namespace ui {
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
-				for (const std::string& line : text->lines) {
+				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
-					const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, font_spacing).x;
+					const int line_length = measure_word_width(line, font, style.font_size, font_spacing);
 					const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
@@ -381,7 +384,8 @@ namespace ui {
 					} else if (element.state.is_hovered) {
 						font_color = style.hovered.font_color.value_or(font_color);
 					}
-					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, font_spacing, font_color);
+					const std::string line_str(line);
+					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, style.font_size, font_spacing, font_color);
 					line_num++;
 				}
 			}
