@@ -10,10 +10,8 @@
 #include <raylib.h>
 #include <raymath.h>
 
-ImageID utah_teapot_id;
-
 void MainMenuScene::initialize(Game* game) {
-	utah_teapot_id = game->resources.load_image("resource/image/utah_teapot.png").value();
+	m_images.utah_teapot = game->resources.load_image("resource/image/utah_teapot.png").value();
 }
 
 void MainMenuScene::deinitialize(Game* /*game*/) {
@@ -63,5 +61,5 @@ void MainMenuScene::render(const Game& game) const {
 	Raylib_ClearBackground(BLACK);
 	m_ui.draw(game.resources);
 
-	Raylib_DrawTexture(game.resources.get_image(utah_teapot_id), 0, 0, WHITE);
+	Raylib_DrawTexture(game.resources.get_image(m_images.utah_teapot), 0, 0, WHITE);
 }

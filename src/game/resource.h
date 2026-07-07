@@ -1,21 +1,11 @@
 #pragma once
 
+#include "game/resource_id.h"
+
 #include <optional>
 #include <raylib.h>
 #include <string>
 #include <unordered_map>
-
-struct FontID {
-	int value = 0;
-
-	static FontID default_font() {
-		return FontID { 0 };
-	};
-};
-
-struct ImageID {
-	int value = 0;
-};
 
 class ResourceManager {
 public:
