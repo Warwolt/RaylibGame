@@ -30,6 +30,7 @@ add_subdirectory(lib/tracy)
 # Source files
 set(SRC
     src/core/debug/logging.cpp
+    src/core/debug/assert.cpp
     src/core/util.cpp
     src/game/game.cpp
     src/game/resource.cpp
