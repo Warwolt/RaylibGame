@@ -1,4 +1,5 @@
 // include these as cpp files since they're not part of the public DLL interface
+#include "core/debug/assert.cpp"
 #include "core/debug/logging.cpp"
 #include "platform/win32.cpp"
 
@@ -62,9 +63,7 @@ int main(int argc, char** argv) {
 
 	/* Check library exists */
 	if (!Win32_file_exists(library_path)) {
-		std::string message = std::format("Can't find {}", library_name);
-		Win32_show_error_message_box(message);
-		exit(1);
+		ABORT("Can't find %s", library_name.c_str());
 	}
 
 	/* Copy library */
