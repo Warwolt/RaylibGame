@@ -6,6 +6,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
@@ -16,7 +17,7 @@ namespace ui {
 
 	struct Text {
 		std::string text;
-		std::vector<std::string> lines; // computed during layout
+		std::vector<std::string_view> lines; // computed during layout, views into `text` member
 	};
 
 	enum class Direction {
@@ -137,12 +138,20 @@ namespace ui {
 		Layout layout;
 		State state;
 
+		inline bool is_box() const {
+			return std::holds_alternative<Box>(this->content);
+		}
+
 		inline Box* box() {
 			return std::get_if<Box>(&this->content);
 		}
 
 		inline const Box* box() const {
 			return std::get_if<Box>(&this->content);
+		}
+
+		inline bool is_text() const {
+			return std::holds_alternative<Text>(this->content);
 		}
 
 		inline Text* text() {
@@ -157,5 +166,27 @@ namespace ui {
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
 	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
+
+	class UserInterface {
+	public:
+		void draw(const ResourceManager& resources) const;
+		const Element& root_element() const;
+
+		void frame_begin();
+		void frame_end(const ResourceManager& resources, Vector2 window_size);
+
+		void box_begin(std::optional<Style> style = {});
+		void box_end();
+
+		void text(std::string_view text, std::optional<Style> style = {});
+		// void image();
+
+	private:
+		bool m_within_frame = false;
+		Element m_root_element = {};
+		std::vector<Element*> m_parent_stack;
+
+		Element* _current_parent();
+	};
 
 } // namespace ui

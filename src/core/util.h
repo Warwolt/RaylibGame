@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace util {
 
-	std::vector<std::string> split_text_into_words(const std::string& text);
+	std::vector<std::string_view> get_string_view_per_word(std::string_view text);
 
 } // namespace util

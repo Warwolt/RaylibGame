@@ -19,5 +19,6 @@ public:
 	void render_current_scene(const Game& game) const;
 
 private:
+	// heap allocate scenes so they remain stable on vector re-allocation
 	std::vector<std::unique_ptr<Scene>> m_scenes;
 };

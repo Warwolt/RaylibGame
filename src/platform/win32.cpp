@@ -1,12 +1,13 @@
 #include "platform/win32.h"
 
+#include "platform/lean_mean_windows.h"
+
 #include <dbghelp.h>
 #include <raylib.h>
 #include <shlwapi.h>
 
 #include <chrono>
-#include <format>
-#include <stdio.h>
+#include <processthreadsapi.h>
 #include <string>
 
 typedef struct RunCommandThreadArgs {
@@ -166,7 +167,7 @@ void Win32_set_process_dpi_aware(void) {
 
 void Win32_show_error_message_box(const std::string& text) {
 	HWND handle = (HWND)Raylib_GetWindowHandle();
-	MessageBoxA(handle, text.c_str(), "Error", MB_OK | MB_ICONERROR);
+	MessageBoxA(handle, text.c_str(), "Fatal Error", MB_OK | MB_ICONERROR);
 }
 
 bool Win32_show_assert_message_box(const std::string& text) {

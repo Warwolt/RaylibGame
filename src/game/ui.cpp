@@ -1,5 +1,7 @@
 #include "game/ui.h"
 
+#include "core/debug/assert.h"
+#include "core/debug/profiling.h"
 #include "core/util.h"
 
 #include <algorithm>
@@ -24,40 +26,67 @@ namespace ui {
 
 	static float fit_size_to_parent(const Size& size, float parent_size) {
 		float pixels = 0.0f;
-		if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&size)) {
-			pixels = std::min<float>(absolute_width->pixels, parent_size);
+		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
+			pixels = std::min<float>(absolute_size->pixels, parent_size);
 		}
-		if (const RelativeSize* relative_width = std::get_if<RelativeSize>(&size)) {
-			pixels = (relative_width->percentage / 100.0f) * parent_size;
+		if (const RelativeSize* relative_size = std::get_if<RelativeSize>(&size)) {
+			pixels = (relative_size->percentage / 100.0f) * parent_size;
 		}
 		return pixels;
 	}
 
-	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+	// based on Raylib MeasureTextEx in rtext.c
+	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
+		if (font.texture.id == 0) {
+			return 0;
+		}
+
+		int word_width = 0;
+		for (char letter : word) {
+			const int index = GetGlyphIndex(font, letter);
+			if (font.glyphs[index].advanceX > 0) {
+				word_width += font.glyphs[index].advanceX;
+			} else {
+				word_width += (font.recs[index].width + font.glyphs[index].offsetX);
+			}
+		}
+
+		const float scale_factor = font_size / (float)font.baseSize;
+		return word_width * scale_factor + font_spacing * word.length() - 1;
+	}
+
+	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
+		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
-		Layout* layout = &element->layout;
 
 		if (Text* text = element->text()) {
 			const Font& font = resources.get_font(style.font_id);
 			const float font_spacing = 0.0f;
-			const float max_text_width = max_size.x - style.horizontal_spacing();
-			const float max_text_height = max_size.y - style.vertical_spacing();
+			const float element_width = fit_size_to_parent(style.width, parent_size.x);
+			const float element_height = fit_size_to_parent(style.height, parent_size.y);
+			const float max_text_width = element_width - style.horizontal_spacing();
+			const float max_text_height = element_height - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
-			text->lines.push_back("");
-			for (const std::string& word : util::split_text_into_words(text->text)) {
-				const int word_length = Raylib_MeasureTextEx(font, word.c_str(), style.font_size, font_spacing).x;
-				const int needed_length = cursor.x > 0 ? space_width + word_length : word_length;
+			for (const std::string_view word : util::get_string_view_per_word(text->text)) {
+				const int word_width = measure_word_width(word, font, style.font_size, font_spacing);
+				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
+				// check if word fits on remainder of current line
 				if (cursor.x + needed_length <= max_text_width) {
-					// add word to current line
+					// extend current line view to include word
 					if (cursor.x > 0) {
-						text->lines.back() += " ";
 						cursor.x += space_width;
 					}
-					text->lines.back() += word;
-					cursor.x += word_length;
+					if (text->lines.empty()) {
+						text->lines.push_back(word);
+					} else {
+						const char* start = text->lines.back().data();
+						text->lines.back() = std::string_view(start, (word.data() + word.size()) - start);
+					}
+					cursor.x += word_width;
+
 				} else {
 					// switch to new line
 					cursor.x = 0;
@@ -65,22 +94,42 @@ namespace ui {
 					if (cursor.y + style.font_size > max_text_height) {
 						break;
 					}
-					text->lines.push_back("");
-					text->lines.back() += word;
-					cursor.x = word_length;
+					text->lines.push_back(word);
+					cursor.x = word_width;
 				}
 			}
-			layout->content_box.width = max_text_width;
-			layout->content_box.height = std::min(max_text_height, cursor.y + style.font_size);
+			const float paragraph_height = cursor.y + style.font_size;
+			desired_size = {
+				.x = element_width,
+				.y = paragraph_height + style.vertical_spacing(),
+			};
+		} else if (Box* box = element->box()) {
+			desired_size = {
+				.x = fit_size_to_parent(style.width, parent_size.x),
+				.y = fit_size_to_parent(style.height, parent_size.y),
+			};
+		} else {
+			ABORT("Unhandled ui::Content case!");
 		}
 
-		if (Box* box = element->box()) {
-			/* Size content box */
+		return desired_size;
+	}
+
+	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+		const Style& style = element->style;
+		Layout* layout = &element->layout;
+
+		/* Compute size of content box */
+		if (Text* text = element->text()) {
+			layout->content_box.width = max_size.x - style.horizontal_spacing();
+			layout->content_box.height = max_size.y - style.vertical_spacing();
+		} else if (Box* box = element->box()) {
+			/* Size parent content  */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
 			content_box.height = max_size.y - style.vertical_spacing();
 
-			/* Size all children */
+			/* Recursively size all box children */
 			{
 				// 1. compute desired size of each child
 				struct IndexedVector2 {
@@ -90,10 +139,8 @@ namespace ui {
 				std::vector<IndexedVector2> desired_sizes;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
-					const Vector2 desired_size = {
-						.x = fit_size_to_parent(child.style.width, content_box.width),
-						.y = fit_size_to_parent(child.style.height, content_box.height),
-					};
+					Vector2 parent_size = { content_box.width, content_box.height };
+					Vector2 desired_size = compute_desired_element_size(resources, parent_size, &child);
 					desired_sizes.push_back({ i, desired_size });
 				}
 				// 2. sort desired sizes from smallest to biggest
@@ -129,8 +176,11 @@ namespace ui {
 					}
 				}
 			}
+		} else {
+			ABORT("Unhandled ui::Content case!");
 		}
 
+		/* Size padding, border, and margin boxes */
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
 		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
 		layout->border_box.width = layout->padding_box.width + style.border.left + style.border.right;
@@ -200,12 +250,10 @@ namespace ui {
 	}
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
+		PROFILING_SCOPE();
 		const Vector2 top_left = { 0, 0 };
-		const Vector2 element_size = {
-			.x = fit_size_to_parent(element->style.width, window_size.x),
-			.y = fit_size_to_parent(element->style.height, window_size.y),
-		};
-		compute_element_sizes(resources, element_size, element);
+		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
+		compute_element_sizes(resources, desired_size, element);
 		compute_element_positions(top_left, element);
 	}
 
@@ -299,7 +347,7 @@ namespace ui {
 		/* Debug draw box outlines */
 		{
 			if (element.style.debug.show_margin_outline) {
-				Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, GREEN);
+				Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, ORANGE);
 			}
 
 			if (element.style.debug.show_content_outline) {
@@ -314,9 +362,9 @@ namespace ui {
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
-				for (const std::string& line : text->lines) {
+				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
-					const int line_length = Raylib_MeasureTextEx(font, line.c_str(), style.font_size, font_spacing).x;
+					const int line_length = measure_word_width(line, font, style.font_size, font_spacing);
 					const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
@@ -328,7 +376,8 @@ namespace ui {
 					} else if (element.state.is_hovered) {
 						font_color = style.hovered.font_color.value_or(font_color);
 					}
-					Raylib_DrawTextEx(font, line.c_str(), line_pos, style.font_size, font_spacing, font_color);
+					const std::string line_str(line);
+					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, style.font_size, font_spacing, font_color);
 					line_num++;
 				}
 			}
@@ -339,4 +388,62 @@ namespace ui {
 			}
 		}
 	}
+
+	void UserInterface::draw(const ResourceManager& resources) const {
+		draw_element(resources, m_root_element);
+	}
+
+	const Element& UserInterface::root_element() const {
+		return m_root_element;
+	}
+
+	void UserInterface::frame_begin() {
+		ASSERT(!m_within_frame, "Missing call to UserInterface::frame_end?");
+		m_within_frame = true;
+		m_root_element = {};
+		m_parent_stack = { &m_root_element };
+	}
+
+	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
+		PROFILING_SCOPE();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		ASSERT(m_parent_stack.size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		m_within_frame = false;
+		layout_element(resources, window_size, &m_root_element);
+	}
+
+	void UserInterface::box_begin(std::optional<Style> style) {
+		Element* parent = _current_parent();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		parent->box()->children.push_back(
+			Element {
+				.style = style.value_or(Style {}),
+				.content = Box {},
+			}
+		);
+		m_parent_stack.push_back(&parent->box()->children.back());
+	}
+
+	void UserInterface::box_end() {
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		ASSERT(m_parent_stack.size() > 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		m_parent_stack.pop_back();
+	}
+
+	void UserInterface::text(std::string_view text, std::optional<Style> style) {
+		Element* parent = _current_parent();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		parent->box()->children.push_back(
+			Element {
+				.style = style.value_or(Style {}),
+				.content = Text { .text = std::string(text) },
+			}
+		);
+	}
+
+	Element* UserInterface::_current_parent() {
+		ASSERT(!m_parent_stack.empty(), "Forgot to add root element to parent stack?");
+		return m_parent_stack.back();
+	}
+
 }

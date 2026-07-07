@@ -1,18 +1,29 @@
-#include "core/util.h"
+#pragma once
 
-#include <sstream>
+#include "core/util.h"
 
 namespace util {
 
-	std::vector<std::string> split_text_into_words(const std::string& text) {
-		std::vector<std::string> words;
-
-		std::istringstream iss(text);
-		std::string word;
-		while (iss >> word) {
-			words.push_back(word);
+	// LLM written
+	std::vector<std::string_view> get_string_view_per_word(std::string_view text) {
+		std::vector<std::string_view> words;
+		size_t start = 0;
+		while (start < text.size()) {
+			// skip spaces
+			while (start < text.size() && text[start] == ' ') {
+				start++;
+			}
+			if (start >= text.size()) {
+				break;
+			}
+			// find end of word
+			size_t end = text.find(' ', start);
+			if (end == std::string_view::npos) {
+				end = text.size();
+			}
+			words.push_back(text.substr(start, end - start));
+			start = end;
 		}
-
 		return words;
 	}
 

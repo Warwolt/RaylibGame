@@ -1,10 +1,5 @@
 #pragma once
 
-#include "platform/lean_mean_windows.h"
-
-#include <processthreadsapi.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <string>
 
 // window

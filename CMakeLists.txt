@@ -29,6 +29,7 @@ add_subdirectory(lib/tracy)
 
 # Source files
 set(SRC
+    src/core/debug/assert.cpp
     src/core/debug/logging.cpp
     src/core/debug/assert.cpp
     src/core/util.cpp
@@ -39,10 +40,12 @@ set(SRC
     src/game/scene/scene.cpp
     src/game/ui.cpp
     src/platform/window.cpp
+    src/platform/win32.cpp
 )
 set(LIB
     raylib
     shlwapi
+    dbghelp
     TracyClient
 )
 
@@ -62,7 +65,7 @@ set_target_properties(Library PROPERTIES OUTPUT_NAME "GameLib")
 # Executable
 add_executable(Executable src/main.cpp)
 target_include_directories(Executable PUBLIC src lib)
-target_link_libraries(Executable ${LIB} dbghelp)
+target_link_libraries(Executable ${LIB})
 set_property(TARGET Executable PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Executable)
 set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
@@ -71,8 +74,8 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
     test/unit_tests/unit_test_main.cpp
-    test/unit_tests/util_tests.cpp
-    test/unit_tests/ui_interaction_tests.cpp
+    test/unit_tests/ui_element_unit_tests.cpp
+    test/unit_tests/user_interface_tests.cpp
 )
 target_include_directories(UnitTests PUBLIC src lib)
 target_link_libraries(UnitTests PUBLIC ${LIB} gtest gmock)
@@ -81,7 +84,7 @@ add_executable(SnapshotTests
     $<TARGET_OBJECTS:Source>
     test/snapshot_tests/snapshots_main.cpp
     test/snapshot_tests/snapshots.cpp
-    test/snapshot_tests/ui_layout_tests.cpp
+    test/snapshot_tests/ui_element_snapshot_tests.cpp
 )
 target_include_directories(SnapshotTests PUBLIC src lib)
 target_link_libraries(SnapshotTests PUBLIC ${LIB} gtest gmock)
