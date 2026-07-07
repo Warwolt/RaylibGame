@@ -24,6 +24,13 @@ namespace ui {
 		return 0;
 	}
 
+	static bool size_is_100_percent(Size size) {
+		if (RelativeSize* relative_size = std::get_if<RelativeSize>(&size)) {
+			return relative_size->percentage == 100;
+		}
+		return false;
+	}
+
 	static float fit_size_to_parent(const Size& size, float parent_size) {
 		float pixels = 0.0f;
 		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
@@ -105,18 +112,9 @@ namespace ui {
 			};
 		} else if (Image* image = element->image()) {
 			const Texture2D texture = resources.get_image(image->image);
-			Size image_width = style.width;
-			if (auto* abs_size = std::get_if<AbsoluteSize>(&style.width)) {
-				if (abs_size->pixels == 0) {
-					image_width = AbsoluteSize(texture.width);
-				}
-			}
-			Size image_height = style.height;
-			if (auto* abs_size = std::get_if<AbsoluteSize>(&style.height)) {
-				if (abs_size->pixels == 0) {
-					image_height = AbsoluteSize(texture.height);
-				}
-			}
+			// Unless we specify a size in the Style, use the size of the image itself
+			Size image_width = size_is_100_percent(style.width) ? AbsoluteSize(texture.width) : style.width;
+			Size image_height = size_is_100_percent(style.height) ? AbsoluteSize(texture.height) : style.height;
 			desired_size = {
 				.x = fit_size_to_parent(image_width, parent_size.x),
 				.y = fit_size_to_parent(image_height, parent_size.y),
@@ -138,9 +136,21 @@ namespace ui {
 		Layout* layout = &element->layout;
 
 		/* Compute size of content box */
-		if (element->is_text() || element->is_image()) {
+		if (element->is_text()) {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
+		} else if (Image* image = element->image()) {
+			if (size_is_100_percent(style.width) && size_is_100_percent(style.height)) {
+				const Texture2D texture = resources.get_image(image->image);
+				const float available_width = max_size.x - style.horizontal_spacing();
+				const float available_height = max_size.y - style.vertical_spacing();
+				const float scale = std::min(available_width / texture.width, available_height / texture.height);
+				layout->content_box.width = texture.width * scale;
+				layout->content_box.height = texture.height * scale;
+			} else {
+				layout->content_box.width = max_size.x - style.horizontal_spacing();
+				layout->content_box.height = max_size.y - style.vertical_spacing();
+			}
 		} else if (Box* box = element->box()) {
 			/* Size parent content  */
 			Rectangle& content_box = layout->content_box;
@@ -441,13 +451,13 @@ namespace ui {
 		layout_element(resources, window_size, &m_root_element);
 	}
 
-	void UserInterface::box_begin(std::optional<Style> style) {
+	void UserInterface::box_begin(Direction direction, std::optional<Style> style) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
 				.style = style.value_or(Style {}),
-				.content = Box {},
+				.content = Box { .direction = direction },
 			}
 		);
 		m_parent_stack.push_back(&parent->box()->children.back());

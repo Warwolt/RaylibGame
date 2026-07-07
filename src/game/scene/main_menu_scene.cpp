@@ -43,9 +43,13 @@ void MainMenuScene::update(Game* game) {
 			.font_color = GREEN,
 			.font_size = 64,
 		};
-		m_ui.box_begin(menu_style);
+		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
-			m_ui.image(m_images.utah_teapot);
+			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
+			{
+				m_ui.image(m_images.utah_teapot);
+			}
+			m_ui.box_end();
 
 			m_ui.text("Raylib Game", title_style);
 
