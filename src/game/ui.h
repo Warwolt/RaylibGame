@@ -90,11 +90,16 @@ namespace ui {
 		Spacing border;
 		Spacing padding;
 		Alignment alignment;
+
 		Color border_color;
 		Color background_color;
+
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
+
+		ImageID background_image = ImageID(0);
+
 		StyleOverride hovered;
 		StyleOverride active;
 		StyleDebug debug;

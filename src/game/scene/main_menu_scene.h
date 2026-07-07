@@ -15,6 +15,7 @@ public:
 
 private:
 	struct Images {
+		ImageID mario64_skybox;
 		ImageID utah_teapot;
 	} m_images;
 	ui::UserInterface m_ui;

@@ -322,8 +322,6 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
-		const Style& style = element.style;
-
 		/* Draw padding box */
 		Color background_color = element.style.background_color;
 		if (element.state.is_active) {
@@ -383,29 +381,41 @@ namespace ui {
 			}
 		}
 
+		/* Draw background image */
+		if (element.style.background_image.value != 0) {
+			Texture2D texture = resources.get_image(element.style.background_image);
+			Rectangle source = {
+				.x = 0,
+				.y = 0,
+				.width = (float)texture.width,
+				.height = (float)texture.height,
+			};
+			DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+		}
+
 		/* Draw content */
 		if (const ui::Text* text = element.text()) {
-			const Font& font = resources.get_font(style.font_id);
+			const Font& font = resources.get_font(element.style.font_id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
 				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
-					const int line_length = measure_word_width(line, font, style.font_size, font_spacing);
-					const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
+					const int line_length = measure_word_width(line, font, element.style.font_size, font_spacing);
+					const int left_padding = alignment_padding(element.style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
-						.y = element.layout.content_box.y + line_num * style.font_size,
+						.y = element.layout.content_box.y + line_num * element.style.font_size,
 					};
-					Color font_color = style.font_color;
+					Color font_color = element.style.font_color;
 					if (element.state.is_active) {
-						font_color = style.active.font_color.value_or(font_color);
+						font_color = element.style.active.font_color.value_or(font_color);
 					} else if (element.state.is_hovered) {
-						font_color = style.hovered.font_color.value_or(font_color);
+						font_color = element.style.hovered.font_color.value_or(font_color);
 					}
 					const std::string line_str(line);
-					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, style.font_size, font_spacing, font_color);
+					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font_size, font_spacing, font_color);
 					line_num++;
 				}
 			}
