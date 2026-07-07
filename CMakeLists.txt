@@ -31,6 +31,7 @@ add_subdirectory(lib/tracy)
 set(SRC
     src/core/debug/assert.cpp
     src/core/debug/logging.cpp
+    src/core/util.cpp
     src/game/game.cpp
     src/game/resource.cpp
     src/game/scene/gameplay_scene.cpp
