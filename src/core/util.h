@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/debug/profiling.h"
-
 #include <string_view>
 #include <vector>
 

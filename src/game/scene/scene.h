@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 
-
 struct Game;
 class Scene;
 enum class SceneID;
