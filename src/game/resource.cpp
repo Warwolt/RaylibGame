@@ -29,7 +29,7 @@ Texture2D ResourceManager::get_image(ImageID image_id) const {
 	if (auto it = m_images.find(image_id.value); it != m_images.end()) {
 		return it->second;
 	}
-	
+
 	LOG_ERROR("Missing image for ID %d", image_id.value);
 	return {};
 }
