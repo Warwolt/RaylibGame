@@ -290,6 +290,72 @@ TEST_F(UIElementSnapshotTests, Image_DefaultStyle_FillsParentContainer) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
+	ui::Element element = {
+		.style = {
+			.height = ui::RelativeSize(50)
+		},
+		.content = ui::Box {
+			.direction = ui::Direction::Horizontal,
+			.children = {
+				ui::Element {
+					.content = ui::Image {
+						.image = m_test_image,
+					}
+				},
+				ui::Element {
+					.content = ui::Image {
+						.image = m_test_image,
+					}
+				},
+				ui::Element {
+					.content = ui::Image {
+						.image = m_test_image,
+					}
+				},
+			},
+		},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
+	ui::Element element = {
+		.style = {
+			.width = ui::RelativeSize(50)
+		},
+		.content = ui::Box {
+			.direction = ui::Direction::Vertical,
+			.children = {
+				ui::Element {
+					.content = ui::Image {
+						.image = m_test_image,
+					}
+				},
+				ui::Element {
+					.content = ui::Image {
+						.image = m_test_image,
+					}
+				},
+				ui::Element {
+					.content = ui::Image {
+						.image = m_test_image,
+					}
+				},
+			},
+		},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
 TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_BigImage_Clipped) {
 	Texture2D texture = m_resources.get_image(m_test_image);
 	ui::Element element = {
