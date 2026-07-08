@@ -24,13 +24,6 @@ namespace ui {
 		return 0;
 	}
 
-	static bool size_is_100_percent(Size size) {
-		if (RelativeSize* relative_size = std::get_if<RelativeSize>(&size)) {
-			return relative_size->percentage == 100;
-		}
-		return false;
-	}
-
 	static float fit_size_to_parent(const Size& size, float parent_size) {
 		float pixels = 0.0f;
 		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
