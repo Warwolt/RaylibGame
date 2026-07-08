@@ -105,7 +105,7 @@ namespace ui {
 		int font_size = 16;
 
 		ImageID background_image = ImageID(0);
-		Fill background_fill = Fill::Repeat;
+		Fill background_fill = Fill::Stretch;
 
 		ImageID border_image = ImageID(0);
 		Spacing border_image_slices;
