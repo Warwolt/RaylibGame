@@ -20,6 +20,10 @@ namespace ui {
 		std::vector<std::string_view> lines; // computed during layout, views into `text` member
 	};
 
+	struct Image {
+		ImageID image;
+	};
+
 	enum class Direction {
 		Horizontal,
 		Vertical,
@@ -30,11 +34,11 @@ namespace ui {
 		std::vector<Element> children;
 	};
 
-	using Content = std::variant<Box, Text>;
+	using Content = std::variant<Box, Text, Image>;
 
 	/* Style */
 	struct AbsoluteSize {
-		int pixels;
+		int pixels = 0;
 	};
 
 	struct RelativeSize {
@@ -68,6 +72,11 @@ namespace ui {
 		End,
 	};
 
+	enum class Fill {
+		Repeat,
+		Stretch,
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
@@ -86,11 +95,17 @@ namespace ui {
 		Spacing border;
 		Spacing padding;
 		Alignment alignment;
+
 		Color border_color;
 		Color background_color;
+
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
+
+		ImageID background_image = ImageID(0);
+		Fill background_fill = Fill::Repeat;
+
 		StyleOverride hovered;
 		StyleOverride active;
 		StyleDebug debug;
@@ -135,8 +150,8 @@ namespace ui {
 	struct Element {
 		Style style;
 		Content content;
-		Layout layout;
-		State state;
+		Layout layout; // computed with layout_element()
+		State state; // computed with update_element()
 
 		inline bool is_box() const {
 			return std::holds_alternative<Box>(this->content);
@@ -161,6 +176,18 @@ namespace ui {
 		inline const Text* text() const {
 			return std::get_if<Text>(&this->content);
 		}
+
+		inline bool is_image() const {
+			return std::holds_alternative<Image>(this->content);
+		}
+
+		inline Image* image() {
+			return std::get_if<Image>(&this->content);
+		}
+
+		inline const Image* image() const {
+			return std::get_if<Image>(&this->content);
+		}
 	};
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
@@ -175,11 +202,11 @@ namespace ui {
 		void frame_begin();
 		void frame_end(const ResourceManager& resources, Vector2 window_size);
 
-		void box_begin(std::optional<Style> style = {});
+		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {});
 		void box_end();
 
 		void text(std::string_view text, std::optional<Style> style = {});
-		// void image();
+		void image(ImageID image, std::optional<Style> style = {});
 
 	private:
 		bool m_within_frame = false;

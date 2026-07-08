@@ -2,6 +2,7 @@
 
 struct Game;
 
+#include "game/resource_id.h"
 #include "game/ui.h"
 
 class MainMenuScene {
@@ -13,5 +14,9 @@ public:
 	void render(const Game& game) const;
 
 private:
+	struct Images {
+		ImageID mario64_skybox;
+		ImageID utah_teapot;
+	} m_images;
 	ui::UserInterface m_ui;
 };

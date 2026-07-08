@@ -52,7 +52,7 @@ namespace ui {
 		}
 
 		const float scale_factor = font_size / (float)font.baseSize;
-		return word_width * scale_factor + font_spacing * word.length() - 1;
+		return word_width * scale_factor + font_spacing * (word.length() - 1);
 	}
 
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
@@ -103,7 +103,12 @@ namespace ui {
 				.x = element_width,
 				.y = paragraph_height + style.vertical_spacing(),
 			};
-		} else if (Box* box = element->box()) {
+		} else if (element->is_image()) {
+			desired_size = {
+				.x = fit_size_to_parent(style.width, parent_size.x),
+				.y = fit_size_to_parent(style.height, parent_size.y),
+			};
+		} else if (element->is_box()) {
 			desired_size = {
 				.x = fit_size_to_parent(style.width, parent_size.x),
 				.y = fit_size_to_parent(style.height, parent_size.y),
@@ -115,12 +120,15 @@ namespace ui {
 		return desired_size;
 	}
 
-	static void compute_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+	static void compute_constrained_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
 		/* Compute size of content box */
-		if (Text* text = element->text()) {
+		if (element->is_text()) {
+			layout->content_box.width = max_size.x - style.horizontal_spacing();
+			layout->content_box.height = max_size.y - style.vertical_spacing();
+		} else if (element->is_image()) {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
@@ -165,13 +173,13 @@ namespace ui {
 							.y = content_box.height,
 						};
 						remaining_width -= child_size.x;
-						compute_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, child_size, &child);
 					} else {
 						const Vector2 child_size = {
 							.x = content_box.width,
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
-						compute_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, child_size, &child);
 						remaining_height -= child.layout.margin_box.height;
 					}
 				}
@@ -253,7 +261,7 @@ namespace ui {
 		PROFILING_SCOPE();
 		const Vector2 top_left = { 0, 0 };
 		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
-		compute_element_sizes(resources, desired_size, element);
+		compute_constrained_element_sizes(resources, desired_size, element);
 		compute_element_positions(top_left, element);
 	}
 
@@ -294,8 +302,6 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
-		const Style& style = element.style;
-
 		/* Draw padding box */
 		Color background_color = element.style.background_color;
 		if (element.state.is_active) {
@@ -355,37 +361,89 @@ namespace ui {
 			}
 		}
 
+		/* Draw background image */
+		if (element.style.background_image.value != 0) {
+			Texture2D texture = resources.get_image(element.style.background_image);
+			switch (element.style.background_fill) {
+				case Fill::Repeat: {
+					Rectangle source = {
+						.x = 0,
+						.y = 0,
+						.width = element.layout.content_box.width,
+						.height = element.layout.content_box.height,
+					};
+					Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+				} break;
+
+				case Fill::Stretch: {
+					Rectangle source = {
+						.x = 0,
+						.y = 0,
+						.width = (float)texture.width,
+						.height = (float)texture.height,
+					};
+					Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+				} break;
+			}
+		}
+
 		/* Draw content */
 		if (const ui::Text* text = element.text()) {
-			const Font& font = resources.get_font(style.font_id);
+			const Font& font = resources.get_font(element.style.font_id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
 				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
-					const int line_length = measure_word_width(line, font, style.font_size, font_spacing);
-					const int left_padding = alignment_padding(style.alignment, content_box.width - line_length);
+					const int line_length = measure_word_width(line, font, element.style.font_size, font_spacing);
+					const int left_padding = alignment_padding(element.style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
-						.y = element.layout.content_box.y + line_num * style.font_size,
+						.y = element.layout.content_box.y + line_num * element.style.font_size,
 					};
-					Color font_color = style.font_color;
+					Color font_color = element.style.font_color;
 					if (element.state.is_active) {
-						font_color = style.active.font_color.value_or(font_color);
+						font_color = element.style.active.font_color.value_or(font_color);
 					} else if (element.state.is_hovered) {
-						font_color = style.hovered.font_color.value_or(font_color);
+						font_color = element.style.hovered.font_color.value_or(font_color);
 					}
 					const std::string line_str(line);
-					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, style.font_size, font_spacing, font_color);
+					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font_size, font_spacing, font_color);
 					line_num++;
 				}
 			}
 			Raylib_EndScissorMode();
-		} else if (const ui::Box* box = element.box()) {
+		} else if (const Image* image = element.image()) {
+			Texture2D texture = resources.get_image(image->image);
+			float source_width = 0;
+			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&element.style.width)) {
+				source_width = std::min((float)absolute_width->pixels, element.layout.content_box.width);
+			}
+			if (std::holds_alternative<RelativeSize>(element.style.width)) {
+				source_width = texture.width;
+			}
+			float source_height = 0;
+			if (const AbsoluteSize* absolute_height = std::get_if<AbsoluteSize>(&element.style.height)) {
+				source_height = std::min((float)absolute_height->pixels, element.layout.content_box.height);
+			}
+			if (std::holds_alternative<RelativeSize>(element.style.height)) {
+				source_height = texture.height;
+			}
+
+			Rectangle source = {
+				.x = 0,
+				.y = 0,
+				.width = source_width,
+				.height = source_height,
+			};
+			DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+		} else if (const Box* box = element.box()) {
 			for (const Element& child : box->children) {
 				draw_element(resources, child);
 			}
+		} else {
+			ABORT("Unhandled ui::Content case!");
 		}
 	}
 
@@ -412,13 +470,13 @@ namespace ui {
 		layout_element(resources, window_size, &m_root_element);
 	}
 
-	void UserInterface::box_begin(std::optional<Style> style) {
+	void UserInterface::box_begin(Direction direction, std::optional<Style> style) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
 				.style = style.value_or(Style {}),
-				.content = Box {},
+				.content = Box { .direction = direction },
 			}
 		);
 		m_parent_stack.push_back(&parent->box()->children.back());
@@ -441,9 +499,19 @@ namespace ui {
 		);
 	}
 
+	void UserInterface::image(ImageID image, std::optional<Style> style) {
+		Element* parent = _current_parent();
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		parent->box()->children.push_back(
+			Element {
+				.style = style.value_or(Style {}),
+				.content = Image { .image = image },
+			}
+		);
+	}
+
 	Element* UserInterface::_current_parent() {
 		ASSERT(!m_parent_stack.empty(), "Forgot to add root element to parent stack?");
 		return m_parent_stack.back();
 	}
-
 }

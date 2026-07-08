@@ -1,16 +1,18 @@
 #include "game/scene/main_menu_scene.h"
 
+#include "core/debug/profiling.h"
+
 #include "game/game.h"
+#include "game/resource.h"
 #include "game/scene/scene_id.h"
 #include "game/ui.h"
-
-#include "core/debug/logging.h"
-#include "core/debug/profiling.h"
 
 #include <raylib.h>
 #include <raymath.h>
 
-void MainMenuScene::initialize(Game* /*game*/) {
+void MainMenuScene::initialize(Game* game) {
+	m_images.mario64_skybox = game->resources.load_image("resource/image/mario64_skybox.jpg").value();
+	m_images.utah_teapot = game->resources.load_image("resource/image/test/utah_teapot_1000_818.png").value();
 }
 
 void MainMenuScene::deinitialize(Game* /*game*/) {
@@ -29,26 +31,44 @@ void MainMenuScene::update(Game* game) {
 	{
 		ui::Style menu_style = {
 			.alignment = ui::Alignment::Center,
+			.background_image = m_images.mario64_skybox,
+		};
+		ui::Style image_style = {
+			.padding = {
+					.bottom = 16,
+				},
+			.alignment = ui::Alignment::Center,
 		};
 		ui::Style item_style = {
-			.padding = ui::Spacing { .bottom = 2 },
+			.padding = {
+					.bottom = 2,
+				},
 			.alignment = ui::Alignment::Center,
+			.font_color = WHITE,
 			.font_size = 32,
 		};
-		ui::Style title_style = {
-			.padding = ui::Spacing { .bottom = 32 },
-			.alignment = ui::Alignment::Center,
-			.font_size = 64,
-		};
-		m_ui.box_begin(menu_style);
+		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
-			m_ui.text("Raylib Game", title_style);
+			m_ui.box_begin(ui::Direction::Horizontal, image_style);
+			{
+				m_ui.image(m_images.utah_teapot);
+			}
+			m_ui.box_end();
 
-			m_ui.text("Continue", item_style);
-			m_ui.text("Load Game", item_style);
-			m_ui.text("New Game", item_style);
-			m_ui.text("Settings", item_style);
-			m_ui.text("Quit", item_style);
+			m_ui.box_begin(
+				ui::Direction::Vertical,
+				ui::Style {
+					.padding = ui::Spacing::uniform(16),
+				}
+			);
+			{
+				m_ui.text("Continue", item_style);
+				m_ui.text("Load Game", item_style);
+				m_ui.text("New Game", item_style);
+				m_ui.text("Settings", item_style);
+				m_ui.text("Quit", item_style);
+			}
+			m_ui.box_end();
 		}
 		m_ui.box_end();
 	}
