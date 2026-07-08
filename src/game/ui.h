@@ -108,7 +108,7 @@ namespace ui {
 		Fill background_fill = Fill::Stretch;
 
 		ImageID border_image = ImageID(0);
-		Spacing border_image_slices;
+		Spacing border_image_slicing;
 		bool border_image_fill_center = false;
 
 		StyleOverride hovered;

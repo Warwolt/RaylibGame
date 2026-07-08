@@ -11,8 +11,11 @@
 #include <raymath.h>
 
 void MainMenuScene::initialize(Game* game) {
+	// clang-format off
 	m_images.mario64_skybox = game->resources.load_image("resource/image/mario64_skybox.jpg").value();
 	m_images.utah_teapot = game->resources.load_image("resource/image/test/utah_teapot_1000_818.png").value();
+	m_images.final_fantasy_menu_border = game->resources.load_image("resource/image/final_fantasy_menu_border_15_15.png").value();
+	// clang-format on
 }
 
 void MainMenuScene::deinitialize(Game* /*game*/) {
@@ -33,11 +36,17 @@ void MainMenuScene::update(Game* game) {
 			.alignment = ui::Alignment::Center,
 			.background_image = m_images.mario64_skybox,
 		};
-		ui::Style image_style = {
-			.padding = {
-					.bottom = 16,
-				},
+		ui::Style image_container_style = {
+			.border = ui::Spacing::uniform(16),
 			.alignment = ui::Alignment::Center,
+			.background_color = Color { 20, 37, 136, 255 },
+			.border_image = m_images.final_fantasy_menu_border,
+			.border_image_slicing = ui::Spacing::uniform(5),
+		};
+		ui::Style image_style {
+			// FIXME: bug, if we set a small absolute size here the image just gets clipped instead of resized
+			.width = ui::RelativeSize(33),
+			.height = ui::RelativeSize(100),
 		};
 		ui::Style item_style = {
 			.padding = {
@@ -49,9 +58,9 @@ void MainMenuScene::update(Game* game) {
 		};
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
-			m_ui.box_begin(ui::Direction::Horizontal, image_style);
+			m_ui.box_begin(ui::Direction::Horizontal, image_container_style);
 			{
-				m_ui.image(m_images.utah_teapot);
+				m_ui.image(m_images.utah_teapot, image_style);
 			}
 			m_ui.box_end();
 

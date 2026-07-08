@@ -378,7 +378,7 @@ namespace ui {
 		/* Draw border image */
 		if (element.style.border_image.value != 0) {
 			const Texture2D texture = resources.get_image(element.style.border_image);
-			const Spacing& slice_spacing = element.style.border_image_slices;
+			const Spacing& slice_spacing = element.style.border_image_slicing;
 			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
 			const auto source_rects = spacing_to_9_slices(slice_spacing, texture_rect);
 			const auto destination_rects = spacing_to_9_slices(element.style.border, element.layout.border_box);

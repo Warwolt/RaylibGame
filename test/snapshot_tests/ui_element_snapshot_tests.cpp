@@ -417,7 +417,7 @@ TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 			.border = ui::Spacing::uniform(64),
 			.border_color = WHITE, // testing
 			.border_image = m_nine_slice_image,
-			.border_image_slices = ui::Spacing::uniform(16),
+			.border_image_slicing = ui::Spacing::uniform(16),
 			.border_image_fill_center = true,
 		},
 		.content = ui::Box {},
@@ -435,7 +435,7 @@ TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
 			.border = ui::Spacing::uniform(64),
 			.border_color = WHITE, // testing
 			.border_image = m_nine_slice_image,
-			.border_image_slices = ui::Spacing::uniform(16),
+			.border_image_slicing = ui::Spacing::uniform(16),
 			.border_image_fill_center = false,
 		},
 		.content = ui::Box {},
