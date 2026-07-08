@@ -110,16 +110,12 @@ namespace ui {
 				.x = element_width,
 				.y = paragraph_height + style.vertical_spacing(),
 			};
-		} else if (Image* image = element->image()) {
-			const Texture2D texture = resources.get_image(image->image);
-			// Unless we specify a size in the Style, use the size of the image itself
-			Size image_width = size_is_100_percent(style.width) ? AbsoluteSize(texture.width) : style.width;
-			Size image_height = size_is_100_percent(style.height) ? AbsoluteSize(texture.height) : style.height;
+		} else if (element->is_image()) {
 			desired_size = {
-				.x = fit_size_to_parent(image_width, parent_size.x),
-				.y = fit_size_to_parent(image_height, parent_size.y),
+				.x = fit_size_to_parent(style.width, parent_size.x),
+				.y = fit_size_to_parent(style.height, parent_size.y),
 			};
-		} else if (element->is_image() || element->is_box()) {
+		} else if (element->is_box()) {
 			desired_size = {
 				.x = fit_size_to_parent(style.width, parent_size.x),
 				.y = fit_size_to_parent(style.height, parent_size.y),
@@ -139,18 +135,9 @@ namespace ui {
 		if (element->is_text()) {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
-		} else if (Image* image = element->image()) {
-			if (size_is_100_percent(style.width) && size_is_100_percent(style.height)) {
-				const Texture2D texture = resources.get_image(image->image);
-				const float available_width = max_size.x - style.horizontal_spacing();
-				const float available_height = max_size.y - style.vertical_spacing();
-				const float scale = std::min(available_width / texture.width, available_height / texture.height);
-				layout->content_box.width = texture.width * scale;
-				layout->content_box.height = texture.height * scale;
-			} else {
-				layout->content_box.width = max_size.x - style.horizontal_spacing();
-				layout->content_box.height = max_size.y - style.vertical_spacing();
-			}
+		} else if (element->is_image()) {
+			layout->content_box.width = max_size.x - style.horizontal_spacing();
+			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
 			/* Size parent content  */
 			Rectangle& content_box = layout->content_box;
@@ -422,11 +409,26 @@ namespace ui {
 			Raylib_EndScissorMode();
 		} else if (const Image* image = element.image()) {
 			Texture2D texture = resources.get_image(image->image);
+			float source_width = 0;
+			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&element.style.width)) {
+				source_width = std::min((float)absolute_width->pixels, element.layout.content_box.width);
+			}
+			if (std::holds_alternative<RelativeSize>(element.style.width)) {
+				source_width = texture.width;
+			}
+			float source_height = 0;
+			if (const AbsoluteSize* absolute_height = std::get_if<AbsoluteSize>(&element.style.height)) {
+				source_height = std::min((float)absolute_height->pixels, element.layout.content_box.height);
+			}
+			if (std::holds_alternative<RelativeSize>(element.style.height)) {
+				source_height = texture.height;
+			}
+
 			Rectangle source = {
 				.x = 0,
 				.y = 0,
-				.width = (float)texture.width,
-				.height = (float)texture.height,
+				.width = source_width,
+				.height = source_height,
 			};
 			DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
 		} else if (const Box* box = element.box()) {
@@ -505,5 +507,4 @@ namespace ui {
 		ASSERT(!m_parent_stack.empty(), "Forgot to add root element to parent stack?");
 		return m_parent_stack.back();
 	}
-
 }

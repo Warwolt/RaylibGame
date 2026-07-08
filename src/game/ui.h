@@ -144,8 +144,8 @@ namespace ui {
 	struct Element {
 		Style style;
 		Content content;
-		Layout layout;
-		State state;
+		Layout layout; // computed with layout_element()
+		State state; // computed with update_element()
 
 		inline bool is_box() const {
 			return std::holds_alternative<Box>(this->content);
