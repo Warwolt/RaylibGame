@@ -52,7 +52,7 @@ namespace ui {
 		}
 
 		const float scale_factor = font_size / (float)font.baseSize;
-		return word_width * scale_factor + font_spacing * word.length() - 1;
+		return word_width * scale_factor + font_spacing * (word.length() - 1);
 	}
 
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
