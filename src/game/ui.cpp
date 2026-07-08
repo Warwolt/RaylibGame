@@ -5,6 +5,7 @@
 #include "core/util.h"
 
 #include <algorithm>
+#include <array>
 #include <memory>
 
 namespace ui {
@@ -22,6 +23,25 @@ namespace ui {
 				break;
 		}
 		return 0;
+	}
+
+	// returns slices of box with given spacing
+	static std::array<Rectangle, 9> spacing_to_9_slices(const Spacing& spacing, const Rectangle& box) {
+		const float center_width = box.width - spacing.left - spacing.right;
+		const float center_height = box.height - spacing.top - spacing.bottom;
+		return {
+			Rectangle { box.x + spacing.left, box.y, center_width, spacing.top }, // top left
+			Rectangle {}, // top center
+			Rectangle {}, // top right
+
+			Rectangle {}, // middle left
+			Rectangle {}, // middle center
+			Rectangle {}, // middle right
+
+			Rectangle {}, // bottom left
+			Rectangle {}, // bottom center
+			Rectangle {}, // bottom right
+		};
 	}
 
 	static float fit_size_to_parent(const Size& size, float parent_size) {
@@ -348,6 +368,18 @@ namespace ui {
 			Raylib_DrawRectangleRec(border_bottom, border_color);
 			Raylib_DrawRectangleRec(border_left, border_color);
 			Raylib_DrawRectangleRec(border_right, border_color);
+		}
+
+		/* Draw border image */
+		if (element.style.border_image.value != 0) {
+			const Texture2D texture = resources.get_image(element.style.border_image);
+			const Spacing& slice_spacing = element.style.border_image_slices;
+			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
+			const std::array<Rectangle, 9> source_rects = spacing_to_9_slices(slice_spacing, texture_rect);
+			const std::array<Rectangle, 9> destination_rects = spacing_to_9_slices(slice_spacing, texture_rect);
+			for (size_t i = 0; i < 9; i++) {
+				Raylib_DrawTexturePro(texture, source_rects[i], destination_rects[i], Vector2 { 0, 0 }, 0.0f, WHITE);
+			}
 		}
 
 		/* Debug draw box outlines */

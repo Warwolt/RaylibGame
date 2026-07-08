@@ -47,6 +47,7 @@ namespace ui {
 
 	using Size = std::variant<AbsoluteSize, RelativeSize>;
 
+	// in pixels
 	struct Spacing {
 		float top;
 		float bottom;
@@ -105,6 +106,9 @@ namespace ui {
 
 		ImageID background_image = ImageID(0);
 		Fill background_fill = Fill::Repeat;
+
+		ImageID border_image = ImageID(0);
+		Spacing border_image_slices;
 
 		StyleOverride hovered;
 		StyleOverride active;

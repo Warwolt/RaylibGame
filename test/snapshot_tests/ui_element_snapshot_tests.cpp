@@ -37,6 +37,7 @@ public:
 	ResourceManager m_resources;
 	ImageID m_big_test_image;
 	ImageID m_small_test_image;
+	ImageID m_nine_slice_image;
 
 	void SetUp() {
 		Raylib_SetTraceLogLevel(LOG_WARNING);
@@ -45,6 +46,7 @@ public:
 		m_resources.load_default_font("resource/font/ModernDOS8x16.ttf");
 		m_big_test_image = m_resources.load_image("resource/image/test/utah_teapot_1000_818.png").value_or(ImageID(0));
 		m_small_test_image = m_resources.load_image("resource/image/test/chess_board_145_145.png").value_or(ImageID(0));
+		m_nine_slice_image = m_resources.load_image("resource/image/test/nine_slice_48_48.png").value_or(ImageID(0));
 	}
 
 	void TearDown() {
@@ -399,6 +401,23 @@ TEST_F(UIElementSnapshotTests, BackgroundImage_FillByStretch) {
 		.style = {
 			.background_image = m_small_test_image,
 			.background_fill = ui::Fill::Stretch,
+		},
+		.content = ui::Box {},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, BorderImage_NineSlice) {
+	ui::Element element = {
+		.style = {
+			.border = ui::Spacing::uniform(64),
+			.border_color = WHITE, // testing
+			.border_image = m_nine_slice_image,
+			.border_image_slices = ui::Spacing::uniform(16),
 		},
 		.content = ui::Box {},
 	};
