@@ -12,7 +12,7 @@
 
 void MainMenuScene::initialize(Game* game) {
 	m_images.mario64_skybox = game->resources.load_image("resource/image/mario64_skybox.jpg").value();
-	m_images.utah_teapot = game->resources.load_image("resource/image/utah_teapot.png").value();
+	m_images.utah_teapot = game->resources.load_image("resource/image/test/utah_teapot_1000_818.png").value();
 }
 
 void MainMenuScene::deinitialize(Game* /*game*/) {

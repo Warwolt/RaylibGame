@@ -35,14 +35,16 @@ const ui::Style button_style = {
 class UIElementSnapshotTests : public ::testing::Test {
 public:
 	ResourceManager m_resources;
-	ImageID m_test_image;
+	ImageID m_big_test_image;
+	ImageID m_small_test_image;
 
 	void SetUp() {
 		Raylib_SetTraceLogLevel(LOG_WARNING);
 		Raylib_SetConfigFlags(FLAG_WINDOW_HIDDEN);
 		Raylib_InitWindow(1, 1, "Unit Test");
 		m_resources.load_default_font("resource/font/ModernDOS8x16.ttf");
-		m_test_image = m_resources.load_image("resource/image/utah_teapot.png").value_or(ImageID(0));
+		m_big_test_image = m_resources.load_image("resource/image/test/utah_teapot_1000_818.png").value_or(ImageID(0));
+		m_small_test_image = m_resources.load_image("resource/image/test/chess_board_145_145.png").value_or(ImageID(0));
 	}
 
 	void TearDown() {
@@ -278,7 +280,7 @@ TEST_F(UIElementSnapshotTests, Image_DefaultStyle_FillsParentContainer) {
 	ui::Element element = {
 		.content =
 			ui::Image {
-				.image = m_test_image,
+				.image = m_big_test_image,
 			},
 	};
 
@@ -300,17 +302,17 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
 			.children = {
 				ui::Element {
 					.content = ui::Image {
-						.image = m_test_image,
+						.image = m_big_test_image,
 					}
 				},
 				ui::Element {
 					.content = ui::Image {
-						.image = m_test_image,
+						.image = m_big_test_image,
 					}
 				},
 				ui::Element {
 					.content = ui::Image {
-						.image = m_test_image,
+						.image = m_big_test_image,
 					}
 				},
 			},
@@ -333,17 +335,17 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
 			.children = {
 				ui::Element {
 					.content = ui::Image {
-						.image = m_test_image,
+						.image = m_big_test_image,
 					}
 				},
 				ui::Element {
 					.content = ui::Image {
-						.image = m_test_image,
+						.image = m_big_test_image,
 					}
 				},
 				ui::Element {
 					.content = ui::Image {
-						.image = m_test_image,
+						.image = m_big_test_image,
 					}
 				},
 			},
@@ -357,7 +359,7 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
 }
 
 TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_BigImage_Clipped) {
-	Texture2D texture = m_resources.get_image(m_test_image);
+	Texture2D texture = m_resources.get_image(m_big_test_image);
 	ui::Element element = {
 		.style = {
 			.width = ui::AbsoluteSize(texture.width),
@@ -365,7 +367,7 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_BigImage_Clipped) {
 		},
 		.content =
 			ui::Image {
-				.image = m_test_image,
+				.image = m_big_test_image,
 			},
 	};
 
@@ -374,5 +376,35 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_BigImage_Clipped) {
 
 	EXPECT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
 	EXPECT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, BackgroundImage_FillByRepeat) {
+	ui::Element element = {
+		.style = {
+			.background_image = m_small_test_image,
+			.background_fill = ui::Fill::Repeat,
+		},
+		.content = ui::Box {},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, BackgroundImage_FillByStretch) {
+	ui::Element element = {
+		.style = {
+			.background_image = m_small_test_image,
+			.background_fill = ui::Fill::Stretch,
+		},
+		.content = ui::Box {},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
 	EXPECT_SNAPSHOT_EQ(image);
 }

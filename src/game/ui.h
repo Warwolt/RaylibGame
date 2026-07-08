@@ -72,6 +72,11 @@ namespace ui {
 		End,
 	};
 
+	enum class Fill {
+		Repeat,
+		Stretch,
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
@@ -99,6 +104,7 @@ namespace ui {
 		int font_size = 16;
 
 		ImageID background_image = ImageID(0);
+		Fill background_fill = Fill::Repeat;
 
 		StyleOverride hovered;
 		StyleOverride active;

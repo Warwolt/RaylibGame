@@ -364,13 +364,27 @@ namespace ui {
 		/* Draw background image */
 		if (element.style.background_image.value != 0) {
 			Texture2D texture = resources.get_image(element.style.background_image);
-			Rectangle source = {
-				.x = 0,
-				.y = 0,
-				.width = (float)texture.width,
-				.height = (float)texture.height,
-			};
-			DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+			switch (element.style.background_fill) {
+				case Fill::Repeat: {
+					Rectangle source = {
+						.x = 0,
+						.y = 0,
+						.width = element.layout.content_box.width,
+						.height = element.layout.content_box.height,
+					};
+					Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+				} break;
+
+				case Fill::Stretch: {
+					Rectangle source = {
+						.x = 0,
+						.y = 0,
+						.width = (float)texture.width,
+						.height = (float)texture.height,
+					};
+					Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+				} break;
+			}
 		}
 
 		/* Draw content */
