@@ -27,20 +27,25 @@ namespace ui {
 
 	// returns slices of box with given spacing
 	static std::array<Rectangle, 9> spacing_to_9_slices(const Spacing& spacing, const Rectangle& box) {
+		const float top_height = spacing.top;
+		const float middle_height = box.height - spacing.top - spacing.bottom;
+		const float bottom_height = spacing.bottom;
 		const float center_width = box.width - spacing.left - spacing.right;
-		const float center_height = box.height - spacing.top - spacing.bottom;
+		const float top_y = box.y;
+		const float middle_y = box.y + spacing.top;
+		const float bottom_y = box.height - spacing.bottom;
 		return {
-			Rectangle { box.x + spacing.left, box.y, center_width, spacing.top }, // top left
-			Rectangle {}, // top center
-			Rectangle {}, // top right
+			Rectangle { box.x, top_y, spacing.left, top_height }, // top left
+			Rectangle { box.x + spacing.left, top_y, center_width, top_height }, // top center
+			Rectangle { box.width - spacing.right, top_y, spacing.right, top_height }, // top right
 
-			Rectangle {}, // middle left
-			Rectangle {}, // middle center
-			Rectangle {}, // middle right
+			Rectangle { box.x, middle_y, spacing.left, middle_height }, // middle left
+			Rectangle { box.x + spacing.left, middle_y, center_width, middle_height }, // middle center
+			Rectangle { box.width - spacing.right, middle_y, spacing.right, middle_height }, // middle right
 
-			Rectangle {}, // bottom left
-			Rectangle {}, // bottom center
-			Rectangle {}, // bottom right
+			Rectangle { box.x, bottom_y, spacing.left, bottom_height }, // bottom left
+			Rectangle { box.x + spacing.left, bottom_y, center_width, bottom_height }, // bottom center
+			Rectangle { box.width - spacing.right, bottom_y, spacing.right, bottom_height }, // bottom right
 		};
 	}
 
@@ -375,9 +380,12 @@ namespace ui {
 			const Texture2D texture = resources.get_image(element.style.border_image);
 			const Spacing& slice_spacing = element.style.border_image_slices;
 			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
-			const std::array<Rectangle, 9> source_rects = spacing_to_9_slices(slice_spacing, texture_rect);
-			const std::array<Rectangle, 9> destination_rects = spacing_to_9_slices(slice_spacing, texture_rect);
-			for (size_t i = 0; i < 9; i++) {
+			const auto source_rects = spacing_to_9_slices(slice_spacing, texture_rect);
+			const auto destination_rects = spacing_to_9_slices(element.style.border, element.layout.border_box);
+			for (size_t i = 0; i < source_rects.size(); i++) {
+				if (i == 4 && !element.style.border_image_fill_center) {
+					continue;
+				}
 				Raylib_DrawTexturePro(texture, source_rects[i], destination_rects[i], Vector2 { 0, 0 }, 0.0f, WHITE);
 			}
 		}

@@ -109,6 +109,7 @@ namespace ui {
 
 		ImageID border_image = ImageID(0);
 		Spacing border_image_slices;
+		bool border_image_fill_center = false;
 
 		StyleOverride hovered;
 		StyleOverride active;

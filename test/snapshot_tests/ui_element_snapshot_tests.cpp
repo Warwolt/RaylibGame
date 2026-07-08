@@ -411,13 +411,32 @@ TEST_F(UIElementSnapshotTests, BackgroundImage_FillByStretch) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BorderImage_NineSlice) {
+TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 	ui::Element element = {
 		.style = {
 			.border = ui::Spacing::uniform(64),
 			.border_color = WHITE, // testing
 			.border_image = m_nine_slice_image,
 			.border_image_slices = ui::Spacing::uniform(16),
+			.border_image_fill_center = true,
+		},
+		.content = ui::Box {},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
+	ui::Element element = {
+		.style = {
+			.border = ui::Spacing::uniform(64),
+			.border_color = WHITE, // testing
+			.border_image = m_nine_slice_image,
+			.border_image_slices = ui::Spacing::uniform(16),
+			.border_image_fill_center = false,
 		},
 		.content = ui::Box {},
 	};
