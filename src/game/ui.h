@@ -37,14 +37,18 @@ namespace ui {
 	using Content = std::variant<Box, Text, Image>;
 
 	/* Style */
+	// struct StaticPosition {};
+	// struct RelativePosition {
+	// 	float value; // Percentage or Pixels
+	// };
+	// using Position = std::variant<StaticPosition, RelativePosition>;
+
 	struct AbsoluteSize {
 		int pixels = 0;
 	};
-
 	struct RelativeSize {
 		float percentage; // relative parent size, range [0, 100]
 	};
-
 	using Size = std::variant<AbsoluteSize, RelativeSize>;
 
 	// in pixels
@@ -95,6 +99,8 @@ namespace ui {
 	// border_image -> border.image
 	// etc. etc.
 	struct Style {
+		// position
+		// StaticPosition(), RelativePosition(float), AbsolutePosition(float)
 		Size width = RelativeSize(100);
 		Size height = RelativeSize(100);
 		Spacing margin;
@@ -104,7 +110,6 @@ namespace ui {
 		Alignment cross_alignment;
 
 		Color background_color;
-
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;

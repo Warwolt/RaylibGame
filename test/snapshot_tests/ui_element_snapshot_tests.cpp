@@ -247,27 +247,42 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 				ui::Element {
 					.style = {
 						.width = ui::AbsoluteSize(100),
-						.height = ui::AbsoluteSize(100),
+						.height= ui::AbsoluteSize(100),
+						.margin = ui::Spacing::uniform(2),
+						.border = ui::Spacing::uniform(2),
+						.alignment = ui::Alignment::Center,
+						.cross_alignment = ui::Alignment::Center,
 						.background_color = BLUE,
+						.font_color = WHITE,
+						.border_color = DARKBLUE,
 					},
-					.content = ui::Box {}
 				},
 				ui::Element {
 					.style = {
 						.width = ui::AbsoluteSize(100),
-						.height = ui::AbsoluteSize(100),
+						.height= ui::AbsoluteSize(100),
+						.margin = ui::Spacing::uniform(2),
+						.border = ui::Spacing::uniform(2),
+						.alignment = ui::Alignment::Center,
+						.cross_alignment = ui::Alignment::Center,
 						.background_color = YELLOW,
+						.font_color = WHITE,
+						.border_color = GOLD,
 					},
-					.content = ui::Box {}
 				},
-				// ui::Element {
-				// 	.style = {
-				// 		.width = ui::AbsoluteSize(100),
-				// 		.height = ui::AbsoluteSize(100),
-				// 		.background_color = BLUE,
-				// 	},
-				// 	.content = ui::Box {}
-				// },
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(100),
+						.height= ui::AbsoluteSize(100),
+						.margin = ui::Spacing::uniform(2),
+						.border = ui::Spacing::uniform(2),
+						.alignment = ui::Alignment::Center,
+						.cross_alignment = ui::Alignment::Center,
+						.background_color = BLUE,
+						.font_color = WHITE,
+						.border_color = DARKBLUE,
+					},
+				},
 			}
 		}
 	};
