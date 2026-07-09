@@ -227,9 +227,27 @@ namespace ui {
 		const Style style = element->style;
 		Layout* layout = &element->layout;
 
+		/* Compute position offsets */
+		Vector2 offset = { 0, 0 };
+		if (const RelativePosition* relative_position = element->style.position.relative_position()) {
+			if (const Pixels* x_pixels = relative_position->x.pixels()) {
+				offset.x = x_pixels->value;
+			}
+			if (const Percentage* x_percentage = relative_position->x.percentage()) {
+				offset.x = x_percentage->value / 100.f * element->layout.border_box.width;
+			}
+
+			if (const Pixels* y_pixels = relative_position->y.pixels()) {
+				offset.y = y_pixels->value;
+			}
+			if (const Percentage* y_percentage = relative_position->y.percentage()) {
+				offset.y = y_percentage->value / 100.f * element->layout.border_box.height;
+			}
+		}
+
 		/* Position all boxes relative to each other */
-		layout->margin_box.x = position.x;
-		layout->margin_box.y = position.y;
+		layout->margin_box.x = position.x + offset.x;
+		layout->margin_box.y = position.y + offset.y;
 		layout->border_box.x = layout->margin_box.x + style.margin.left;
 		layout->border_box.y = layout->margin_box.y + style.margin.top;
 		layout->padding_box.x = layout->border_box.x + style.border.left;

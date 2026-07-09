@@ -40,11 +40,9 @@ namespace ui {
 	struct Pixels {
 		float value;
 	};
-
 	struct Percentage {
 		float value;
 	};
-
 	struct Measure {
 		std::variant<Pixels, Percentage> value;
 
@@ -70,6 +68,35 @@ namespace ui {
 
 		inline const Percentage* percentage() const {
 			return std::get_if<Percentage>(&this->value);
+		}
+	};
+
+	struct StaticPosition {};
+	struct RelativePosition {
+		Measure x;
+		Measure y;
+	};
+	struct Position {
+		std::variant<StaticPosition, RelativePosition> value;
+
+		Position(StaticPosition static_position)
+			: value(static_position) {
+		}
+
+		Position(RelativePosition relative_position)
+			: value(relative_position) {
+		}
+
+		inline bool is_static_position() const {
+			return std::holds_alternative<StaticPosition>(this->value);
+		}
+
+		inline bool is_relative_position() const {
+			return std::holds_alternative<RelativePosition>(this->value);
+		}
+
+		inline const RelativePosition* relative_position() const {
+			return std::get_if<RelativePosition>(&this->value);
 		}
 	};
 
@@ -121,8 +148,7 @@ namespace ui {
 	// border_image -> border.image
 	// etc. etc.
 	struct Style {
-		// position
-		// StaticPosition(), RelativePosition(float), AbsolutePosition(float)
+		Position position = StaticPosition();
 		Measure width = Percentage(100);
 		Measure height = Percentage(100);
 		Spacing margin;

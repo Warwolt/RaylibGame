@@ -235,6 +235,8 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+// FIXME: use parameterized tests to get better coverage
+// e.g. should test alignment with both vertical and horizontal directions on the containing box
 TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 	ui::Element element = {
 		.style = {
@@ -259,8 +261,12 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 				},
 				ui::Element {
 					.style = {
+						.position = ui::RelativePosition {
+							.x = ui::Percentage(-50),
+							.y = ui::Percentage(-50),
+						},
 						.width = ui::Pixels(100),
-						.height= ui::Pixels(100),
+						.height = ui::Pixels(100),
 						.margin = ui::Spacing::uniform(2),
 						.border = ui::Spacing::uniform(2),
 						.alignment = ui::Alignment::Center,
