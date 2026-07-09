@@ -96,6 +96,7 @@ namespace ui {
 		Spacing border;
 		Spacing padding;
 		Alignment alignment;
+		Alignment cross_alignment;
 
 		Color background_color;
 

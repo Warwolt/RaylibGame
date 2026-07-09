@@ -16,6 +16,7 @@ const ui::Style button_style = {
 		.border = ui::Spacing::uniform(10),
 		.padding = ui::Spacing::uniform(10),
 		.alignment = ui::Alignment::Center,
+		.cross_alignment = ui::Alignment::Center,
 		.background_color = GREEN,
 		.font_color = DARKGREEN,
 		.border_color = DARKGREEN,
@@ -116,6 +117,102 @@ TEST_F(UIElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 	EXPECT_EQ(std::get<ui::Box>(element.content).children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
 	EXPECT_EQ(std::get<ui::Box>(element.content).children[1].layout.margin_box.width, SCREEN_WIDTH * 0.25);
 	EXPECT_EQ(std::get<ui::Box>(element.content).children[2].layout.margin_box.width, SCREEN_WIDTH * 0.375);
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart) {
+	ui::Element element = {
+		.style = {
+			.alignment = ui::Alignment::Start,
+			.cross_alignment = ui::Alignment::Start,
+		},
+		.content = ui::Box {
+			.direction = ui::Direction::Horizontal,
+			.children = {
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(100),
+						.height= ui::AbsoluteSize(100),
+						.alignment = ui::Alignment::Center,
+						.cross_alignment = ui::Alignment::Center,
+						.background_color = GREEN,
+						.font_color = WHITE,
+					},
+					.content = ui::Text {
+						.text = "Start",
+					},
+				},
+			},
+		},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter) {
+	ui::Element element = {
+		.style = {
+			.alignment = ui::Alignment::Center,
+			.cross_alignment = ui::Alignment::Center,
+		},
+		.content = ui::Box {
+			.direction = ui::Direction::Horizontal,
+			.children = {
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(100),
+						.height= ui::AbsoluteSize(100),
+						.alignment = ui::Alignment::Center,
+						.cross_alignment = ui::Alignment::Center,
+						.background_color = GREEN,
+						.font_color = WHITE,
+					},
+					.content = ui::Text {
+						.text = "Center",
+					},
+				},
+			},
+		},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd) {
+	ui::Element element = {
+		.style = {
+			.alignment = ui::Alignment::End,
+			.cross_alignment = ui::Alignment::End,
+		},
+		.content = ui::Box {
+			.direction = ui::Direction::Horizontal,
+			.children = {
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(100),
+						.height= ui::AbsoluteSize(100),
+						.alignment = ui::Alignment::Center,
+						.cross_alignment = ui::Alignment::Center,
+						.background_color = GREEN,
+						.font_color = WHITE,
+					},
+					.content = ui::Text {
+						.text = "End",
+					},
+				},
+			},
+		},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
 	EXPECT_SNAPSHOT_EQ(image);
 }
 

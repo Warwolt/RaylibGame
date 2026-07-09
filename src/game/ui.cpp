@@ -6,7 +6,7 @@
 
 #include <algorithm>
 #include <array>
-#include <memory>
+#include <numeric>
 
 namespace ui {
 
@@ -131,9 +131,10 @@ namespace ui {
 				}
 			}
 			const float paragraph_height = cursor.y + style.font_size;
+			const bool has_absolute_height = std::holds_alternative<AbsoluteSize>(style.height);
 			desired_size = {
 				.x = element_width,
-				.y = paragraph_height + style.vertical_spacing(),
+				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
 			};
 		} else if (element->is_image()) {
 			desired_size = {
@@ -248,21 +249,21 @@ namespace ui {
 			/* Compute padding for alignment */
 			int left_padding = 0;
 			int top_padding = 0;
+			int total_element_widths = 0;
+			int total_element_heights = 0;
+			for (Element& child : box->children) {
+				total_element_widths += child.layout.margin_box.width;
+				total_element_heights += child.layout.margin_box.height;
+			}
+			const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
+			const int vertical_remainder = element->layout.content_box.height - total_element_heights;
 			switch (box->direction) {
 				case Direction::Horizontal: {
-					int total_element_widths = 0;
-					for (Element& child : box->children) {
-						total_element_widths += child.layout.margin_box.width;
-					}
-					const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
 					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
+					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
 				case Direction::Vertical: {
-					int total_element_heights = 0;
-					for (Element& child : box->children) {
-						total_element_heights += child.layout.margin_box.height;
-					}
-					const int vertical_remainder = element->layout.content_box.height - total_element_heights;
+					left_padding = alignment_padding(element->style.cross_alignment, horizontal_remainder);
 					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
 				} break;
 			}
@@ -441,13 +442,15 @@ namespace ui {
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
+				const int text_height = (int)text->lines.size() * element.style.font_size;
+				const int top_padding = alignment_padding(element.style.cross_alignment, content_box.height - text_height);
 				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
 					const int line_length = measure_word_width(line, font, element.style.font_size, font_spacing);
 					const int left_padding = alignment_padding(element.style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
-						.y = element.layout.content_box.y + line_num * element.style.font_size,
+						.y = element.layout.content_box.y + line_num * element.style.font_size + top_padding,
 					};
 					Color font_color = element.style.font_color;
 					if (element.state.is_active) {
