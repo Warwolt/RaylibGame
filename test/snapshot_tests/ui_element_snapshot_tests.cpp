@@ -54,7 +54,7 @@ public:
 	}
 };
 
-TEST_F(UIElementSnapshotTests, BoxLayout_100_100_Gives_50_50) {
+TEST_F(UIElementSnapshotTests, Box_100_100_Gives_50_50) {
 	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -83,7 +83,7 @@ TEST_F(UIElementSnapshotTests, BoxLayout_100_100_Gives_50_50) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BoxLayout_100_25_100_Gives_37_25_37) {
+TEST_F(UIElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -119,7 +119,7 @@ TEST_F(UIElementSnapshotTests, BoxLayout_100_25_100_Gives_37_25_37) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BoxLayout_DefaultStyle) {
+TEST_F(UIElementSnapshotTests, Box_DefaultStyle) {
 	ui::Element element = {
 		.style = button_style,
 		.content = ui::Text { .text = "Press Me" },
@@ -133,7 +133,7 @@ TEST_F(UIElementSnapshotTests, BoxLayout_DefaultStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BoxLayout_HoveredStyle) {
+TEST_F(UIElementSnapshotTests, Box_HoveredStyle) {
 	ui::Element element = {
 		.style = button_style,
 		.content = ui::Text { .text = "Press Me" },
@@ -147,7 +147,7 @@ TEST_F(UIElementSnapshotTests, BoxLayout_HoveredStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BoxLayout_ActiveStyle) {
+TEST_F(UIElementSnapshotTests, Box_ActiveStyle) {
 	ui::Element element = {
 		.style = button_style,
 		.content = ui::Text { .text = "Press Me" },
