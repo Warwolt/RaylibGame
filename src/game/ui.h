@@ -45,9 +45,33 @@ namespace ui {
 		float value;
 	};
 
-	// FIXME: struct Measure { std::variant<Pixels, Percentage> value }
-	// with helpers pixels() and percentage()
-	using Measure = std::variant<Pixels, Percentage>;
+	struct Measure {
+		std::variant<Pixels, Percentage> value;
+
+		Measure(Pixels pixels)
+			: value(pixels) {
+		}
+
+		Measure(Percentage percentage)
+			: value(percentage) {
+		}
+
+		inline bool is_pixels() {
+			return std::holds_alternative<Pixels>(this->value);
+		}
+
+		inline Pixels* pixels() {
+			return std::get_if<Pixels>(&this->value);
+		}
+
+		inline bool is_percentage() {
+			return std::holds_alternative<Percentage>(this->value);
+		}
+
+		inline Percentage* percentage() {
+			return std::get_if<Percentage>(&this->value);
+		}
+	};
 
 	// in pixels
 	struct Spacing {

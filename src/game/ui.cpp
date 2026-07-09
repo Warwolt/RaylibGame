@@ -50,7 +50,7 @@ namespace ui {
 	}
 
 	static float get_pixels(Measure size) {
-		if (const Pixels* pixels = std::get_if<Pixels>(&size)) {
+		if (const Pixels* pixels = std::get_if<Pixels>(&size.value)) {
 			return pixels->value;
 		}
 		return 0.0f;
@@ -58,10 +58,10 @@ namespace ui {
 
 	static float fit_size_to_parent(const Measure& size, float parent_size) {
 		float pixels = 0.0f;
-		if (const Pixels* absolute_size = std::get_if<Pixels>(&size)) {
+		if (const Pixels* absolute_size = std::get_if<Pixels>(&size.value)) {
 			pixels = std::min<float>(absolute_size->value, parent_size);
 		}
-		if (const Percentage* relative_size = std::get_if<Percentage>(&size)) {
+		if (const Percentage* relative_size = std::get_if<Percentage>(&size.value)) {
 			pixels = (relative_size->value / 100.0f) * parent_size;
 		}
 		return pixels;
@@ -131,7 +131,7 @@ namespace ui {
 				}
 			}
 			const float paragraph_height = cursor.y + style.font_size;
-			const bool has_absolute_height = std::holds_alternative<Pixels>(style.height);
+			const bool has_absolute_height = std::holds_alternative<Pixels>(style.height.value);
 			desired_size = {
 				.x = element_width,
 				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
