@@ -97,7 +97,6 @@ namespace ui {
 		Spacing padding;
 		Alignment alignment;
 
-		Color border_color;
 		Color background_color;
 
 		Color font_color = WHITE;
@@ -107,6 +106,7 @@ namespace ui {
 		ImageID background_image = ImageID(0);
 		Fill background_fill = Fill::Stretch;
 
+		Color border_color;
 		ImageID border_image = ImageID(0);
 		Spacing border_image_slicing;
 		bool border_image_fill_center = false;

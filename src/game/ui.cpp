@@ -37,15 +37,15 @@ namespace ui {
 		return {
 			Rectangle { box.x, top_y, spacing.left, top_height }, // top left
 			Rectangle { box.x + spacing.left, top_y, center_width, top_height }, // top center
-			Rectangle { box.width - spacing.right, top_y, spacing.right, top_height }, // top right
+			Rectangle { box.x + box.width - spacing.right, top_y, spacing.right, top_height }, // top right
 
 			Rectangle { box.x, middle_y, spacing.left, middle_height }, // middle left
 			Rectangle { box.x + spacing.left, middle_y, center_width, middle_height }, // middle center
-			Rectangle { box.width - spacing.right, middle_y, spacing.right, middle_height }, // middle right
+			Rectangle { box.x + box.width - spacing.right, middle_y, spacing.right, middle_height }, // middle right
 
 			Rectangle { box.x, bottom_y, spacing.left, bottom_height }, // bottom left
 			Rectangle { box.x + spacing.left, bottom_y, center_width, bottom_height }, // bottom center
-			Rectangle { box.width - spacing.right, bottom_y, spacing.right, bottom_height }, // bottom right
+			Rectangle { box.x + box.width - spacing.right, bottom_y, spacing.right, bottom_height }, // bottom right
 		};
 	}
 

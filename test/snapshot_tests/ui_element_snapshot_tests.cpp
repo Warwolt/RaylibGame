@@ -16,9 +16,9 @@ const ui::Style button_style = {
 		.border = ui::Spacing::uniform(10),
 		.padding = ui::Spacing::uniform(10),
 		.alignment = ui::Alignment::Center,
-		.border_color = DARKGREEN,
 		.background_color = GREEN,
 		.font_color = DARKGREEN,
+		.border_color = DARKGREEN,
 
 		.hovered = {
 			.border_color = GREEN,
