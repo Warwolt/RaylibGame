@@ -16,7 +16,7 @@ public:
 private:
 	struct Images {
 		ImageID mario64_skybox;
-		ImageID utah_teapot;
+		ImageID developer_face;
 		ImageID final_fantasy_menu_border;
 	} m_images;
 	ui::UserInterface m_ui;
