@@ -263,8 +263,8 @@ namespace ui {
 						total_element_heights += child.layout.margin_box.height;
 						max_element_width = std::max(max_element_width, child.layout.margin_box.width);
 					}
-					const int horizontal_remainder = element->layout.content_box.height - max_element_width;
-					const int vertical_remainder = element->layout.content_box.width - total_element_heights;
+					const int horizontal_remainder = element->layout.content_box.width - max_element_width;
+					const int vertical_remainder = element->layout.content_box.height - total_element_heights;
 					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
 					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
