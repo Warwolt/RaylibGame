@@ -406,24 +406,71 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_FitsInContainer) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_BiggerThanContainer_GetsClipped) {
+TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_HorizontalOverflow_GetsClipped) {
 	Texture2D texture = m_resources.get_image(m_big_test_image);
+	ASSERT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
+	ASSERT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
+
 	ui::Element element = {
 		.style = {
-			.width = ui::AbsoluteSize(texture.width),
-			.height = ui::AbsoluteSize(texture.height),
+			.width = ui::RelativeSize(50),
+			.border = ui::Spacing::uniform(2),
+			.border_color = GREEN,
 		},
-		.content =
-			ui::Image {
-				.image = m_big_test_image,
+		.content = ui::Box {
+			.direction = ui::Direction::Horizontal,
+			.children = {
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(texture.width / 2),
+						.height = ui::AbsoluteSize(texture.height / 2),
+					},
+					.content =
+						ui::Image {
+							.image = m_big_test_image,
+						},
+				},
 			},
+		},
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
-	EXPECT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
-	EXPECT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_VerticalOverflow_GetsClipped) {
+	Texture2D texture = m_resources.get_image(m_big_test_image);
+	ASSERT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
+	ASSERT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
+
+	ui::Element element = {
+		.style = {
+			.height = ui::RelativeSize(50),
+			.border = ui::Spacing::uniform(2),
+			.border_color = GREEN,
+		},
+		.content = ui::Box {
+			.direction = ui::Direction::Vertical,
+			.children = {
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(texture.width / 2),
+						.height = ui::AbsoluteSize(texture.height / 2),
+					},
+					.content =
+						ui::Image {
+							.image = m_big_test_image,
+						},
+				},
+			},
+		},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
 	EXPECT_SNAPSHOT_EQ(image);
 }
 

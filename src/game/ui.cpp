@@ -49,6 +49,13 @@ namespace ui {
 		};
 	}
 
+	static float get_absolute_size(Size size) {
+		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
+			return absolute_size->pixels;
+		}
+		return 0.0f;
+	}
+
 	static float fit_size_to_parent(const Size& size, float parent_size) {
 		float pixels = 0.0f;
 		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
@@ -456,18 +463,25 @@ namespace ui {
 			Raylib_EndScissorMode();
 		} else if (const Image* image = element.image()) {
 			const Texture2D texture = resources.get_image(image->image);
+
+			// Handle overflow of absolutely sized images
+			//
+			// Depending on the size of the content box and the desired size of
+			// the image, we have to sample either the whole image texture or
+			// just a portion of it (in case of an overflow).
+			const float absolute_image_width = get_absolute_size(element.style.width);
+			const float absolute_image_height = get_absolute_size(element.style.height);
 			float source_width = (float)texture.width;
-			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&element.style.width)) {
-				if (absolute_width->pixels > element.layout.content_box.width) {
-					source_width = element.layout.content_box.width;
-				}
-			}
 			float source_height = (float)texture.height;
-			if (const AbsoluteSize* absolute_height = std::get_if<AbsoluteSize>(&element.style.height)) {
-				if (absolute_height->pixels > element.layout.content_box.height) {
-					source_height = element.layout.content_box.height;
-				}
+			if (absolute_image_width > element.layout.content_box.width) {
+				const float scale = texture.width / absolute_image_width;
+				source_width = scale * element.layout.content_box.width;
 			}
+			if (absolute_image_height > element.layout.content_box.height) {
+				const float scale = texture.height / absolute_image_height;
+				source_height = scale * element.layout.content_box.height;
+			}
+
 			const Rectangle source = {
 				.x = 0,
 				.y = 0,

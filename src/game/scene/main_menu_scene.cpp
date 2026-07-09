@@ -44,9 +44,8 @@ void MainMenuScene::update(Game* game) {
 			.border_image_slicing = ui::Spacing::uniform(5),
 		};
 		ui::Style image_style {
-			// FIXME: bug, if we set a small absolute size here the image just gets clipped instead of resized
-			.width = ui::RelativeSize(33),
-			.height = ui::RelativeSize(100),
+			.width = ui::AbsoluteSize(250),
+			.height = ui::AbsoluteSize(200),
 		};
 		ui::Style item_style = {
 			.padding = {
