@@ -38,22 +38,16 @@ namespace ui {
 
 	/* Style */
 	struct Pixels {
-		float pixels;
+		float value;
 	};
 
 	struct Percentage {
-		float percentage; // range [0, 100]
+		float value;
 	};
 
-	// struct StaticPosition {};
-	// struct RelativePosition {
-	// 	float value; // Percentage or Pixels
-	// };
-	// using Position = std::variant<StaticPosition, RelativePosition>;
-
-	using AbsoluteSize = Pixels;
-	using RelativeSize = Percentage;
-	using Size = std::variant<AbsoluteSize, RelativeSize>;
+	// FIXME: struct Measure { std::variant<Pixels, Percentage> value }
+	// with helpers pixels() and percentage()
+	using Measure = std::variant<Pixels, Percentage>;
 
 	// in pixels
 	struct Spacing {
@@ -105,8 +99,8 @@ namespace ui {
 	struct Style {
 		// position
 		// StaticPosition(), RelativePosition(float), AbsolutePosition(float)
-		Size width = RelativeSize(100);
-		Size height = RelativeSize(100);
+		Measure width = Percentage(100);
+		Measure height = Percentage(100);
 		Spacing margin;
 		Spacing border;
 		Spacing padding;

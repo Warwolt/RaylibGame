@@ -49,20 +49,20 @@ namespace ui {
 		};
 	}
 
-	static float get_absolute_size(Size size) {
-		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
-			return absolute_size->pixels;
+	static float get_pixels(Measure size) {
+		if (const Pixels* pixels = std::get_if<Pixels>(&size)) {
+			return pixels->value;
 		}
 		return 0.0f;
 	}
 
-	static float fit_size_to_parent(const Size& size, float parent_size) {
+	static float fit_size_to_parent(const Measure& size, float parent_size) {
 		float pixels = 0.0f;
-		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
-			pixels = std::min<float>(absolute_size->pixels, parent_size);
+		if (const Pixels* absolute_size = std::get_if<Pixels>(&size)) {
+			pixels = std::min<float>(absolute_size->value, parent_size);
 		}
-		if (const RelativeSize* relative_size = std::get_if<RelativeSize>(&size)) {
-			pixels = (relative_size->percentage / 100.0f) * parent_size;
+		if (const Percentage* relative_size = std::get_if<Percentage>(&size)) {
+			pixels = (relative_size->value / 100.0f) * parent_size;
 		}
 		return pixels;
 	}
@@ -131,7 +131,7 @@ namespace ui {
 				}
 			}
 			const float paragraph_height = cursor.y + style.font_size;
-			const bool has_absolute_height = std::holds_alternative<AbsoluteSize>(style.height);
+			const bool has_absolute_height = std::holds_alternative<Pixels>(style.height);
 			desired_size = {
 				.x = element_width,
 				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
@@ -165,7 +165,7 @@ namespace ui {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
-			/* Size parent content  */
+			/* Measure parent content  */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
 			content_box.height = max_size.y - style.vertical_spacing();
@@ -221,7 +221,7 @@ namespace ui {
 			ABORT("Unhandled ui::Content case!");
 		}
 
-		/* Size padding, border, and margin boxes */
+		/* Measure padding, border, and margin boxes */
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
 		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
 		layout->border_box.width = layout->padding_box.width + style.border.left + style.border.right;
@@ -481,8 +481,8 @@ namespace ui {
 			// Depending on the size of the content box and the desired size of
 			// the image, we have to sample either the whole image texture or
 			// just a portion of it (in case of an overflow).
-			const float absolute_image_width = get_absolute_size(element.style.width);
-			const float absolute_image_height = get_absolute_size(element.style.height);
+			const float absolute_image_width = get_pixels(element.style.width);
+			const float absolute_image_height = get_pixels(element.style.height);
 			float source_width = (float)texture.width;
 			float source_height = (float)texture.height;
 			if (absolute_image_width > element.layout.content_box.width) {

@@ -13,8 +13,8 @@ constexpr Vector2 SCREEN_SIZE = { SCREEN_WIDTH, SCREEN_HEIGHT };
 #define LIGHTGREEN Color(191, 240, 172, 255)
 
 const ui::Style button_style = {
-		.width = ui::AbsoluteSize(200),
-		.height = ui::AbsoluteSize(100),
+		.width = ui::Pixels(200),
+		.height = ui::Pixels(100),
 		.border = ui::Spacing::uniform(10),
 		.padding = ui::Spacing::uniform(10),
 		.alignment = ui::Alignment::Center,
@@ -64,13 +64,13 @@ TEST_F(UIElementSnapshotTests, Box_100_100_Gives_50_50) {
 			.children = {
 				ui::Element {
 					.style = {
-						.width = ui::RelativeSize(100),
+						.width = ui::Percentage(100),
 						.background_color = RED,
 					},
 				},
 				ui::Element {
 					.style = {
-						.width = ui::RelativeSize(100),
+						.width = ui::Percentage(100),
 						.background_color = GREEN,
 					},
 				}
@@ -93,19 +93,19 @@ TEST_F(UIElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 			.children = {
 				ui::Element {
 					.style = {
-						.width = ui::RelativeSize(100),
+						.width = ui::Percentage(100),
 						.background_color = RED,
 					},
 				},
 				ui::Element {
 					.style = {
-						.width = ui::RelativeSize(25),
+						.width = ui::Percentage(25),
 						.background_color = GREEN,
 					},
 				},
 				ui::Element {
 					.style = {
-						.width = ui::RelativeSize(100),
+						.width = ui::Percentage(100),
 						.background_color = BLUE,
 					},
 				}
@@ -137,8 +137,8 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart) {
 		element.box()->children.push_back(
 			ui::Element {
 				.style = {
-					.width = ui::AbsoluteSize(100),
-					.height= ui::AbsoluteSize(100),
+					.width = ui::Pixels(100),
+					.height= ui::Pixels(100),
 					.margin = ui::Spacing::uniform(2),
 					.border = ui::Spacing::uniform(2),
 					.alignment = ui::Alignment::Center,
@@ -174,8 +174,8 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter) {
 		element.box()->children.push_back(
 			ui::Element {
 				.style = {
-					.width = ui::AbsoluteSize(100),
-					.height= ui::AbsoluteSize(100),
+					.width = ui::Pixels(100),
+					.height= ui::Pixels(100),
 					.margin = ui::Spacing::uniform(2),
 					.border = ui::Spacing::uniform(2),
 					.alignment = ui::Alignment::Center,
@@ -212,8 +212,8 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd) {
 		element.box()->children.push_back(
 			ui::Element {
 				.style = {
-					.width = ui::AbsoluteSize(100),
-					.height= ui::AbsoluteSize(100),
+					.width = ui::Pixels(100),
+					.height= ui::Pixels(100),
 					.margin = ui::Spacing::uniform(2),
 					.border = ui::Spacing::uniform(2),
 					.alignment = ui::Alignment::Center,
@@ -246,8 +246,8 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 			.children = {
 				ui::Element {
 					.style = {
-						.width = ui::AbsoluteSize(100),
-						.height= ui::AbsoluteSize(100),
+						.width = ui::Pixels(100),
+						.height= ui::Pixels(100),
 						.margin = ui::Spacing::uniform(2),
 						.border = ui::Spacing::uniform(2),
 						.alignment = ui::Alignment::Center,
@@ -259,8 +259,8 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 				},
 				ui::Element {
 					.style = {
-						.width = ui::AbsoluteSize(100),
-						.height= ui::AbsoluteSize(100),
+						.width = ui::Pixels(100),
+						.height= ui::Pixels(100),
 						.margin = ui::Spacing::uniform(2),
 						.border = ui::Spacing::uniform(2),
 						.alignment = ui::Alignment::Center,
@@ -272,8 +272,8 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 				},
 				ui::Element {
 					.style = {
-						.width = ui::AbsoluteSize(100),
-						.height= ui::AbsoluteSize(100),
+						.width = ui::Pixels(100),
+						.height= ui::Pixels(100),
 						.margin = ui::Spacing::uniform(2),
 						.border = ui::Spacing::uniform(2),
 						.alignment = ui::Alignment::Center,
@@ -338,7 +338,7 @@ TEST_F(UIElementSnapshotTests, Box_ActiveStyle) {
 TEST_F(UIElementSnapshotTests, Text_LeftAligned) {
 	ui::Element element = {
 		.style = {
-			.width = ui::RelativeSize(100),
+			.width = ui::Percentage(100),
 			.padding = ui::Spacing::uniform(20),
 			.alignment = ui::Alignment::Start,
 			.font_size = 32,
@@ -357,7 +357,7 @@ TEST_F(UIElementSnapshotTests, Text_LeftAligned) {
 TEST_F(UIElementSnapshotTests, Text_CenterAligned) {
 	ui::Element element = {
 		.style = {
-			.width = ui::RelativeSize(100),
+			.width = ui::Percentage(100),
 			.padding = ui::Spacing::uniform(20),
 			.alignment = ui::Alignment::Center,
 			.font_size = 32,
@@ -376,7 +376,7 @@ TEST_F(UIElementSnapshotTests, Text_CenterAligned) {
 TEST_F(UIElementSnapshotTests, Text_RightAligned) {
 	ui::Element element = {
 		.style = {
-			.width = ui::RelativeSize(100),
+			.width = ui::Percentage(100),
 			.padding = ui::Spacing::uniform(20),
 			.alignment = ui::Alignment::End,
 			.font_size = 32,
@@ -395,7 +395,7 @@ TEST_F(UIElementSnapshotTests, Text_RightAligned) {
 TEST_F(UIElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 	ui::Element element = {
 		.style = {
-			.width = ui::RelativeSize(100),
+			.width = ui::Percentage(100),
 			.padding = ui::Spacing::uniform(20),
 		},
 		.content = ui::Box {
@@ -471,7 +471,7 @@ TEST_F(UIElementSnapshotTests, Image_DefaultStyle_FillsParentContainer) {
 TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
 	ui::Element element = {
 		.style = {
-			.height = ui::RelativeSize(50)
+			.height = ui::Percentage(50)
 		},
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -504,7 +504,7 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
 TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
 	ui::Element element = {
 		.style = {
-			.width = ui::RelativeSize(50)
+			.width = ui::Percentage(50)
 		},
 		.content = ui::Box {
 			.direction = ui::Direction::Vertical,
@@ -534,7 +534,7 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_FitsInContainer) {
+TEST_F(UIElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 	ui::Element element = {
 		.content =
 			ui::Box {
@@ -542,8 +542,8 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_FitsInContainer) {
 				.children = {
 						ui::Element {
 						.style = ui::Style {
-							.width = ui::AbsoluteSize(64),
-							.height = ui::AbsoluteSize(50),
+							.width = ui::Pixels(64),
+							.height = ui::Pixels(50),
 						},
 						.content =
 							ui::Image {
@@ -552,8 +552,8 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_FitsInContainer) {
 					},
 					ui::Element {
 					.style = ui::Style {
-						.width = ui::AbsoluteSize(128),
-						.height = ui::AbsoluteSize(100),
+						.width = ui::Pixels(128),
+						.height = ui::Pixels(100),
 					},
 					.content =
 						ui::Image {
@@ -562,8 +562,8 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_FitsInContainer) {
 					},
 					ui::Element {
 					.style = ui::Style {
-						.width = ui::AbsoluteSize(256),
-						.height = ui::AbsoluteSize(200),
+						.width = ui::Pixels(256),
+						.height = ui::Pixels(200),
 					},
 					.content =
 						ui::Image {
@@ -580,14 +580,14 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_FitsInContainer) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_HorizontalOverflow_GetsClipped) {
+TEST_F(UIElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 	Texture2D texture = m_resources.get_image(m_big_test_image);
 	ASSERT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
 	ASSERT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
 
 	ui::Element element = {
 		.style = {
-			.width = ui::RelativeSize(50),
+			.width = ui::Percentage(50),
 			.border = ui::Spacing::uniform(2),
 			.border_color = GREEN,
 		},
@@ -596,8 +596,8 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_HorizontalOverflow_GetsClipped
 			.children = {
 				ui::Element {
 					.style = {
-						.width = ui::AbsoluteSize(texture.width / 2),
-						.height = ui::AbsoluteSize(texture.height / 2),
+						.width = ui::Pixels(texture.width / 2),
+						.height = ui::Pixels(texture.height / 2),
 					},
 					.content =
 						ui::Image {
@@ -614,14 +614,14 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_HorizontalOverflow_GetsClipped
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_VerticalOverflow_GetsClipped) {
+TEST_F(UIElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 	Texture2D texture = m_resources.get_image(m_big_test_image);
 	ASSERT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
 	ASSERT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
 
 	ui::Element element = {
 		.style = {
-			.height = ui::RelativeSize(50),
+			.height = ui::Percentage(50),
 			.border = ui::Spacing::uniform(2),
 			.border_color = GREEN,
 		},
@@ -630,8 +630,8 @@ TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_VerticalOverflow_GetsClipped) 
 			.children = {
 				ui::Element {
 					.style = {
-						.width = ui::AbsoluteSize(texture.width / 2),
-						.height = ui::AbsoluteSize(texture.height / 2),
+						.width = ui::Pixels(texture.width / 2),
+						.height = ui::Pixels(texture.height / 2),
 					},
 					.content =
 						ui::Image {
