@@ -247,24 +247,33 @@ namespace ui {
 		/* Recurse into children */
 		if (Box* box = element->box()) {
 			/* Compute padding for alignment */
-			int left_padding = 0;
-			int top_padding = 0;
-			int total_element_widths = 0;
-			int total_element_heights = 0;
-			for (Element& child : box->children) {
-				total_element_widths += child.layout.margin_box.width;
-				total_element_heights += child.layout.margin_box.height;
-			}
-			const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
-			const int vertical_remainder = element->layout.content_box.height - total_element_heights;
+			float left_padding = 0;
+			float top_padding = 0;
 			switch (box->direction) {
 				case Direction::Horizontal: {
+					float total_element_widths = 0;
+					float max_element_height = 0;
+					for (Element& child : box->children) {
+						total_element_widths += child.layout.margin_box.width;
+						max_element_height = std::max(max_element_height, child.layout.margin_box.height);
+					}
+					const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
+					const int vertical_remainder = element->layout.content_box.height - max_element_height;
 					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
 					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
+
 				case Direction::Vertical: {
-					left_padding = alignment_padding(element->style.cross_alignment, horizontal_remainder);
-					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
+					float total_element_heights = 0;
+					float max_element_width = 0;
+					for (Element& child : box->children) {
+						total_element_heights += child.layout.margin_box.height;
+						max_element_width = std::max(max_element_width, child.layout.margin_box.width);
+					}
+					const int horizontal_remainder = element->layout.content_box.height - max_element_width;
+					const int vertical_remainder = element->layout.content_box.width - total_element_heights;
+					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
+					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
 			}
 

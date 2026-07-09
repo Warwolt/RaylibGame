@@ -5,6 +5,8 @@
 #include <gtest/gtest.h>
 #include <raylib.h>
 
+#include <format>
+
 constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
 constexpr Vector2 SCREEN_SIZE = { SCREEN_WIDTH, SCREEN_HEIGHT };
@@ -45,9 +47,9 @@ public:
 		Raylib_SetConfigFlags(FLAG_WINDOW_HIDDEN);
 		Raylib_InitWindow(1, 1, "Unit Test");
 		m_resources.load_default_font("resource/font/ModernDOS8x16.ttf");
-		m_big_test_image = m_resources.load_image("resource/image/test/utah_teapot_1000_818.png").value_or(ImageID(0));
-		m_small_test_image = m_resources.load_image("resource/image/test/chess_board_145_145.png").value_or(ImageID(0));
-		m_nine_slice_image = m_resources.load_image("resource/image/test/nine_slice_48_48.png").value_or(ImageID(0));
+		m_big_test_image = m_resources.load_image("resource/image/test/utah_teapot_1000_818.png").value();
+		m_small_test_image = m_resources.load_image("resource/image/test/chess_board_145_145.png").value();
+		m_nine_slice_image = m_resources.load_image("resource/image/test/nine_slice_48_48.png").value();
 	}
 
 	void TearDown() {
@@ -128,30 +130,35 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart) {
 		},
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
-			.children = {
-				ui::Element {
-					.style = {
-						.width = ui::AbsoluteSize(100),
-						.height= ui::AbsoluteSize(100),
-						.alignment = ui::Alignment::Center,
-						.cross_alignment = ui::Alignment::Center,
-						.background_color = GREEN,
-						.font_color = WHITE,
-					},
-					.content = ui::Text {
-						.text = "Start",
-					},
-				},
-			},
+			.children = {},
 		},
 	};
+	for (int i = 0; i < 3; i++) {
+		element.box()->children.push_back(
+			ui::Element {
+				.style = {
+					.width = ui::AbsoluteSize(100),
+					.height= ui::AbsoluteSize(100),
+					.margin = ui::Spacing::uniform(2),
+					.border = ui::Spacing::uniform(2),
+					.alignment = ui::Alignment::Center,
+					.cross_alignment = ui::Alignment::Center,
+					.background_color = BLUE,
+					.font_color = WHITE,
+					.border_color = DARKBLUE,
+				},
+				.content = ui::Text {
+					.text = std::format("Start {}", i + 1),
+				},
+			}
+		);
+	}
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
-
 TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter) {
 	ui::Element element = {
 		.style = {
@@ -160,23 +167,29 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter) {
 		},
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
-			.children = {
-				ui::Element {
-					.style = {
-						.width = ui::AbsoluteSize(100),
-						.height= ui::AbsoluteSize(100),
-						.alignment = ui::Alignment::Center,
-						.cross_alignment = ui::Alignment::Center,
-						.background_color = GREEN,
-						.font_color = WHITE,
-					},
-					.content = ui::Text {
-						.text = "Center",
-					},
-				},
-			},
+			.children = {},
 		},
 	};
+	for (int i = 0; i < 3; i++) {
+		element.box()->children.push_back(
+			ui::Element {
+				.style = {
+					.width = ui::AbsoluteSize(100),
+					.height= ui::AbsoluteSize(100),
+					.margin = ui::Spacing::uniform(2),
+					.border = ui::Spacing::uniform(2),
+					.alignment = ui::Alignment::Center,
+					.cross_alignment = ui::Alignment::Center,
+					.background_color = BLUE,
+					.font_color = WHITE,
+					.border_color = DARKBLUE,
+				},
+				.content = ui::Text {
+					.text = std::format("Center {}", i + 1),
+				},
+			}
+		);
+	}
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
@@ -192,22 +205,71 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd) {
 		},
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
+			.children = {},
+		},
+	};
+	for (int i = 0; i < 3; i++) {
+		element.box()->children.push_back(
+			ui::Element {
+				.style = {
+					.width = ui::AbsoluteSize(100),
+					.height= ui::AbsoluteSize(100),
+					.margin = ui::Spacing::uniform(2),
+					.border = ui::Spacing::uniform(2),
+					.alignment = ui::Alignment::Center,
+					.cross_alignment = ui::Alignment::Center,
+					.background_color = BLUE,
+					.font_color = WHITE,
+					.border_color = DARKBLUE,
+				},
+				.content = ui::Text {
+					.text = std::format("End {}", i + 1),
+				},
+			}
+		);
+	}
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
+	ui::Element element = {
+		.style = {
+			.alignment = ui::Alignment::Center,
+			.cross_alignment = ui::Alignment::Center,
+		},
+		.content = ui::Box {
+			.direction = ui::Direction::Horizontal,
 			.children = {
 				ui::Element {
 					.style = {
 						.width = ui::AbsoluteSize(100),
-						.height= ui::AbsoluteSize(100),
-						.alignment = ui::Alignment::Center,
-						.cross_alignment = ui::Alignment::Center,
-						.background_color = GREEN,
-						.font_color = WHITE,
+						.height = ui::AbsoluteSize(100),
+						.background_color = BLUE,
 					},
-					.content = ui::Text {
-						.text = "End",
-					},
+					.content = ui::Box {}
 				},
-			},
-		},
+				ui::Element {
+					.style = {
+						.width = ui::AbsoluteSize(100),
+						.height = ui::AbsoluteSize(100),
+						.background_color = YELLOW,
+					},
+					.content = ui::Box {}
+				},
+				// ui::Element {
+				// 	.style = {
+				// 		.width = ui::AbsoluteSize(100),
+				// 		.height = ui::AbsoluteSize(100),
+				// 		.background_color = BLUE,
+				// 	},
+				// 	.content = ui::Box {}
+				// },
+			}
+		}
 	};
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);

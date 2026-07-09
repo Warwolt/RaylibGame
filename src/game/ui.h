@@ -89,6 +89,11 @@ namespace ui {
 		std::optional<Color> font_color;
 	};
 
+	// FIXME: move border stuff into own substruct?
+	// border -> border.edges
+	// border_color -> border.color
+	// border_image -> border.image
+	// etc. etc.
 	struct Style {
 		Size width = RelativeSize(100);
 		Size height = RelativeSize(100);
@@ -154,6 +159,7 @@ namespace ui {
 
 	/* Element */
 	struct Element {
+		std::string debug_name;
 		Style style;
 		Content content;
 		Layout layout; // computed with layout_element()

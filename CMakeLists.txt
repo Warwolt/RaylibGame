@@ -79,6 +79,7 @@ add_executable(UnitTests
 )
 target_include_directories(UnitTests PUBLIC src lib)
 target_link_libraries(UnitTests PUBLIC ${LIB} gtest gmock)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT UnitTests)
 
 add_executable(SnapshotTests
     $<TARGET_OBJECTS:Source>
@@ -88,6 +89,7 @@ add_executable(SnapshotTests
 )
 target_include_directories(SnapshotTests PUBLIC src lib)
 target_link_libraries(SnapshotTests PUBLIC ${LIB} gtest gmock)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT SnapshotTests)
 
 # Set compilation options
 SET(TARGETS Executable Library Source UnitTests SnapshotTests)
