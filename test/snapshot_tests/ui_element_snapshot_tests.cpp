@@ -360,7 +360,53 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_BigImage_Clipped) {
+TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_FitsInContainer) {
+	ui::Element element = {
+		.content =
+			ui::Box {
+				.direction = ui::Direction::Vertical,
+				.children = {
+						ui::Element {
+						.style = ui::Style {
+							.width = ui::AbsoluteSize(64),
+							.height = ui::AbsoluteSize(50),
+						},
+						.content =
+							ui::Image {
+								.image = m_big_test_image,
+							},
+					},
+					ui::Element {
+					.style = ui::Style {
+						.width = ui::AbsoluteSize(128),
+						.height = ui::AbsoluteSize(100),
+					},
+					.content =
+						ui::Image {
+							.image = m_big_test_image,
+						},
+					},
+					ui::Element {
+					.style = ui::Style {
+						.width = ui::AbsoluteSize(256),
+						.height = ui::AbsoluteSize(200),
+					},
+					.content =
+						ui::Image {
+							.image = m_big_test_image,
+						},
+					},
+				},
+			},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Image_AbsoluteSize_BiggerThanContainer_GetsClipped) {
 	Texture2D texture = m_resources.get_image(m_big_test_image);
 	ui::Element element = {
 		.style = {

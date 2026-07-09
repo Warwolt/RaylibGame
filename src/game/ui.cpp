@@ -195,13 +195,13 @@ namespace ui {
 					if (box->direction == Direction::Horizontal) {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
-							.y = content_box.height,
+							.y = std::min<float>(desired_size.value.y, content_box.height),
 						};
 						remaining_width -= child_size.x;
 						compute_constrained_element_sizes(resources, child_size, &child);
 					} else {
 						const Vector2 child_size = {
-							.x = content_box.width,
+							.x = std::min<float>(desired_size.value.x, content_box.width),
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
 						compute_constrained_element_sizes(resources, child_size, &child);
@@ -455,29 +455,26 @@ namespace ui {
 			}
 			Raylib_EndScissorMode();
 		} else if (const Image* image = element.image()) {
-			Texture2D texture = resources.get_image(image->image);
-			float source_width = 0;
+			const Texture2D texture = resources.get_image(image->image);
+			float source_width = (float)texture.width;
 			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&element.style.width)) {
-				source_width = std::min((float)absolute_width->pixels, element.layout.content_box.width);
+				if (absolute_width->pixels > element.layout.content_box.width) {
+					source_width = element.layout.content_box.width;
+				}
 			}
-			if (std::holds_alternative<RelativeSize>(element.style.width)) {
-				source_width = texture.width;
-			}
-			float source_height = 0;
+			float source_height = (float)texture.height;
 			if (const AbsoluteSize* absolute_height = std::get_if<AbsoluteSize>(&element.style.height)) {
-				source_height = std::min((float)absolute_height->pixels, element.layout.content_box.height);
+				if (absolute_height->pixels > element.layout.content_box.height) {
+					source_height = element.layout.content_box.height;
+				}
 			}
-			if (std::holds_alternative<RelativeSize>(element.style.height)) {
-				source_height = texture.height;
-			}
-
-			Rectangle source = {
+			const Rectangle source = {
 				.x = 0,
 				.y = 0,
 				.width = source_width,
 				.height = source_height,
 			};
-			DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+			Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
 		} else if (const Box* box = element.box()) {
 			for (const Element& child : box->children) {
 				draw_element(resources, child);
