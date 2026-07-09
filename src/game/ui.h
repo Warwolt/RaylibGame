@@ -37,18 +37,22 @@ namespace ui {
 	using Content = std::variant<Box, Text, Image>;
 
 	/* Style */
+	struct Pixels {
+		float pixels;
+	};
+
+	struct Percentage {
+		float percentage; // range [0, 100]
+	};
+
 	// struct StaticPosition {};
 	// struct RelativePosition {
 	// 	float value; // Percentage or Pixels
 	// };
 	// using Position = std::variant<StaticPosition, RelativePosition>;
 
-	struct AbsoluteSize {
-		int pixels = 0;
-	};
-	struct RelativeSize {
-		float percentage; // relative parent size, range [0, 100]
-	};
+	using AbsoluteSize = Pixels;
+	using RelativeSize = Percentage;
 	using Size = std::variant<AbsoluteSize, RelativeSize>;
 
 	// in pixels
