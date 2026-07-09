@@ -56,19 +56,19 @@ namespace ui {
 			: value(percentage) {
 		}
 
-		inline bool is_pixels() {
+		inline bool is_pixels() const {
 			return std::holds_alternative<Pixels>(this->value);
 		}
 
-		inline Pixels* pixels() {
+		inline const Pixels* pixels() const {
 			return std::get_if<Pixels>(&this->value);
 		}
 
-		inline bool is_percentage() {
+		inline bool is_percentage() const {
 			return std::holds_alternative<Percentage>(this->value);
 		}
 
-		inline Percentage* percentage() {
+		inline const Percentage* percentage() const {
 			return std::get_if<Percentage>(&this->value);
 		}
 	};

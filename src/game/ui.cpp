@@ -49,22 +49,15 @@ namespace ui {
 		};
 	}
 
-	static float get_pixels(Measure size) {
-		if (const Pixels* pixels = std::get_if<Pixels>(&size.value)) {
-			return pixels->value;
-		}
-		return 0.0f;
-	}
-
 	static float fit_size_to_parent(const Measure& size, float parent_size) {
-		float pixels = 0.0f;
-		if (const Pixels* absolute_size = std::get_if<Pixels>(&size.value)) {
-			pixels = std::min<float>(absolute_size->value, parent_size);
+		float constrained_size = 0.0f;
+		if (const Pixels* pixels = size.pixels()) {
+			constrained_size = std::min<float>(pixels->value, parent_size);
 		}
-		if (const Percentage* relative_size = std::get_if<Percentage>(&size.value)) {
-			pixels = (relative_size->value / 100.0f) * parent_size;
+		if (const Percentage* percentage = size.percentage()) {
+			constrained_size = (percentage->value / 100.0f) * parent_size;
 		}
-		return pixels;
+		return constrained_size;
 	}
 
 	// based on Raylib MeasureTextEx in rtext.c
@@ -131,7 +124,7 @@ namespace ui {
 				}
 			}
 			const float paragraph_height = cursor.y + style.font_size;
-			const bool has_absolute_height = std::holds_alternative<Pixels>(style.height.value);
+			const bool has_absolute_height = style.height.is_pixels();
 			desired_size = {
 				.x = element_width,
 				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
@@ -481,17 +474,19 @@ namespace ui {
 			// Depending on the size of the content box and the desired size of
 			// the image, we have to sample either the whole image texture or
 			// just a portion of it (in case of an overflow).
-			const float absolute_image_width = get_pixels(element.style.width);
-			const float absolute_image_height = get_pixels(element.style.height);
 			float source_width = (float)texture.width;
 			float source_height = (float)texture.height;
-			if (absolute_image_width > element.layout.content_box.width) {
-				const float scale = texture.width / absolute_image_width;
-				source_width = scale * element.layout.content_box.width;
+			if (const Pixels* pixel_width = element.style.width.pixels()) {
+				if (pixel_width->value > element.layout.content_box.width) {
+					const float scale = texture.width / pixel_width->value;
+					source_width = scale * element.layout.content_box.width;
+				}
 			}
-			if (absolute_image_height > element.layout.content_box.height) {
-				const float scale = texture.height / absolute_image_height;
-				source_height = scale * element.layout.content_box.height;
+			if (const Pixels* pixel_height = element.style.height.pixels()) {
+				if (pixel_height->value > element.layout.content_box.height) {
+					const float scale = texture.height / pixel_height->value;
+					source_height = scale * element.layout.content_box.height;
+				}
 			}
 
 			const Rectangle source = {
