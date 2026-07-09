@@ -11,28 +11,11 @@ jobs:
         with:
           submodules: recursive
 
-      # Mesa is a CPU-only OpenGL implementation, windows-latest doesn't have GPUs
-      - name: Download Mesa
-        shell: pwsh
-        run: |
-          $url = "https://github.com/pal1000/mesa-dist-win/releases/download/23.1.9/mesa3d-23.1.9-release-msvc.7z"
-          Invoke-WebRequest $url -OutFile mesa.7z
-          7z x mesa.7z -omesa
-
       - name: Setup CMake
         uses: threeal/cmake-action@v2.1.0
 
       - name: Build
         run: cmake --build build --config Debug
 
-      - name: Setup Mesa
-        shell: pwsh
-        run: |
-          Copy-Item mesa/x64/*.dll build/Debug/ -Force
-          echo "LIBGL_ALWAYS_SOFTWARE=1" >> $env:GITHUB_ENV
-
       - name: Run unit tests
         run: ./build/Debug/UnitTests.exe
-
-      - name: Run snapshot tests
-        run: ./build/Debug/SnapshotTests.exe

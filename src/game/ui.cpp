@@ -5,6 +5,7 @@
 #include "core/util.h"
 
 #include <algorithm>
+#include <array>
 #include <memory>
 
 namespace ui {
@@ -22,6 +23,37 @@ namespace ui {
 				break;
 		}
 		return 0;
+	}
+
+	// returns slices of box with given spacing
+	static std::array<Rectangle, 9> spacing_to_9_slices(const Spacing& spacing, const Rectangle& box) {
+		const float top_height = spacing.top;
+		const float middle_height = box.height - spacing.top - spacing.bottom;
+		const float bottom_height = spacing.bottom;
+		const float center_width = box.width - spacing.left - spacing.right;
+		const float top_y = box.y;
+		const float middle_y = box.y + spacing.top;
+		const float bottom_y = box.height - spacing.bottom;
+		return {
+			Rectangle { box.x, top_y, spacing.left, top_height }, // top left
+			Rectangle { box.x + spacing.left, top_y, center_width, top_height }, // top center
+			Rectangle { box.x + box.width - spacing.right, top_y, spacing.right, top_height }, // top right
+
+			Rectangle { box.x, middle_y, spacing.left, middle_height }, // middle left
+			Rectangle { box.x + spacing.left, middle_y, center_width, middle_height }, // middle center
+			Rectangle { box.x + box.width - spacing.right, middle_y, spacing.right, middle_height }, // middle right
+
+			Rectangle { box.x, bottom_y, spacing.left, bottom_height }, // bottom left
+			Rectangle { box.x + spacing.left, bottom_y, center_width, bottom_height }, // bottom center
+			Rectangle { box.x + box.width - spacing.right, bottom_y, spacing.right, bottom_height }, // bottom right
+		};
+	}
+
+	static float get_absolute_size(Size size) {
+		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
+			return absolute_size->pixels;
+		}
+		return 0.0f;
 	}
 
 	static float fit_size_to_parent(const Size& size, float parent_size) {
@@ -170,13 +202,13 @@ namespace ui {
 					if (box->direction == Direction::Horizontal) {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
-							.y = content_box.height,
+							.y = std::min<float>(desired_size.value.y, content_box.height),
 						};
 						remaining_width -= child_size.x;
 						compute_constrained_element_sizes(resources, child_size, &child);
 					} else {
 						const Vector2 child_size = {
-							.x = content_box.width,
+							.x = std::min<float>(desired_size.value.x, content_box.width),
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
 						compute_constrained_element_sizes(resources, child_size, &child);
@@ -350,6 +382,21 @@ namespace ui {
 			Raylib_DrawRectangleRec(border_right, border_color);
 		}
 
+		/* Draw border image */
+		if (element.style.border_image.value != 0) {
+			const Texture2D texture = resources.get_image(element.style.border_image);
+			const Spacing& slice_spacing = element.style.border_image_slicing;
+			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
+			const auto source_rects = spacing_to_9_slices(slice_spacing, texture_rect);
+			const auto destination_rects = spacing_to_9_slices(element.style.border, element.layout.border_box);
+			for (size_t i = 0; i < source_rects.size(); i++) {
+				if (i == 4 && !element.style.border_image_fill_center) {
+					continue;
+				}
+				Raylib_DrawTexturePro(texture, source_rects[i], destination_rects[i], Vector2 { 0, 0 }, 0.0f, WHITE);
+			}
+		}
+
 		/* Debug draw box outlines */
 		{
 			if (element.style.debug.show_margin_outline) {
@@ -415,29 +462,33 @@ namespace ui {
 			}
 			Raylib_EndScissorMode();
 		} else if (const Image* image = element.image()) {
-			Texture2D texture = resources.get_image(image->image);
-			float source_width = 0;
-			if (const AbsoluteSize* absolute_width = std::get_if<AbsoluteSize>(&element.style.width)) {
-				source_width = std::min((float)absolute_width->pixels, element.layout.content_box.width);
+			const Texture2D texture = resources.get_image(image->image);
+
+			// Handle overflow of absolutely sized images
+			//
+			// Depending on the size of the content box and the desired size of
+			// the image, we have to sample either the whole image texture or
+			// just a portion of it (in case of an overflow).
+			const float absolute_image_width = get_absolute_size(element.style.width);
+			const float absolute_image_height = get_absolute_size(element.style.height);
+			float source_width = (float)texture.width;
+			float source_height = (float)texture.height;
+			if (absolute_image_width > element.layout.content_box.width) {
+				const float scale = texture.width / absolute_image_width;
+				source_width = scale * element.layout.content_box.width;
 			}
-			if (std::holds_alternative<RelativeSize>(element.style.width)) {
-				source_width = texture.width;
-			}
-			float source_height = 0;
-			if (const AbsoluteSize* absolute_height = std::get_if<AbsoluteSize>(&element.style.height)) {
-				source_height = std::min((float)absolute_height->pixels, element.layout.content_box.height);
-			}
-			if (std::holds_alternative<RelativeSize>(element.style.height)) {
-				source_height = texture.height;
+			if (absolute_image_height > element.layout.content_box.height) {
+				const float scale = texture.height / absolute_image_height;
+				source_height = scale * element.layout.content_box.height;
 			}
 
-			Rectangle source = {
+			const Rectangle source = {
 				.x = 0,
 				.y = 0,
 				.width = source_width,
 				.height = source_height,
 			};
-			DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
+			Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
 		} else if (const Box* box = element.box()) {
 			for (const Element& child : box->children) {
 				draw_element(resources, child);
