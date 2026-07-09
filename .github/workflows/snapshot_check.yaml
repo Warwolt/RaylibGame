@@ -1,0 +1,13 @@
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  check-snapshot-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that snapshots have been verified manually
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'Snapshot tests pass') }}
+        run: |
+          echo "Missing required label: Snapshot tests pass"
+          exit 1

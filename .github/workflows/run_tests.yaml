@@ -19,9 +19,3 @@ jobs:
 
       - name: Run unit tests
         run: ./build/Debug/UnitTests.exe
-
-      - name: Check that snapshots have been verified manually
-        if: ${{ !contains(github.event.pull_request.labels.*.name, 'Snapshot tests pass') }}
-        run: |
-          echo "Missing required label: Snapshot tests pass"
-          exit 1
