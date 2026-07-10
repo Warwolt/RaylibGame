@@ -235,16 +235,14 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-// FIXME: use parameterized tests to get better coverage
-// e.g. should test alignment with both vertical and horizontal directions on the containing box
-TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
-	ui::Element element = {
+ui::Element box_with_relative_position(ui::Direction direction, ui::Position position) {
+	return {
 		.style = {
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
 		},
 		.content = ui::Box {
-			.direction = ui::Direction::Horizontal,
+			.direction = direction,
 			.children = {
 				ui::Element {
 					.style = {
@@ -261,10 +259,7 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 				},
 				ui::Element {
 					.style = {
-						.position = ui::RelativePosition {
-							.x = ui::Percentage(-50),
-							.y = ui::Percentage(-50),
-						},
+						.position = position,
 						.width = ui::Pixels(100),
 						.height = ui::Pixels(100),
 						.margin = ui::Spacing::uniform(2),
@@ -292,6 +287,61 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition) {
 			}
 		}
 	};
+}
+
+TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Horizontal) {
+	ui::Element element = box_with_relative_position(
+		ui::Direction::Horizontal,
+		ui::RelativePosition {
+			.x = ui::Percentage(-50),
+			.y = ui::Percentage(-50),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Vertical) {
+	ui::Element element = box_with_relative_position(
+		ui::Direction::Vertical,
+		ui::RelativePosition {
+			.x = ui::Percentage(-50),
+			.y = ui::Percentage(-50),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
+	ui::Element element = box_with_relative_position(
+		ui::Direction::Horizontal,
+		ui::RelativePosition {
+			.x = ui::Pixels(-50),
+			.y = ui::Pixels(-50),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Vertical) {
+	ui::Element element = box_with_relative_position(
+		ui::Direction::Vertical,
+		ui::RelativePosition {
+			.x = ui::Pixels(-50),
+			.y = ui::Pixels(-50),
+		}
+	);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });

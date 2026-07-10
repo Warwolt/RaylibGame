@@ -76,8 +76,12 @@ namespace ui {
 		Measure x;
 		Measure y;
 	};
+	struct AbsolutePosition {
+		Measure x;
+		Measure y;
+	};
 	struct Position {
-		std::variant<StaticPosition, RelativePosition> value;
+		std::variant<StaticPosition, RelativePosition, AbsolutePosition> value;
 
 		Position(StaticPosition static_position)
 			: value(static_position) {
