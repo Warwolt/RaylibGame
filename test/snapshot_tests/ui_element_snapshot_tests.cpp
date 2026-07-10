@@ -210,9 +210,10 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-ui::Element box_with_relative_position(ui::Direction direction, ui::Position position) {
+ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 	return {
 		.style = {
+			.border = ui::Spacing::uniform(2),
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
 		},
@@ -264,42 +265,27 @@ ui::Element box_with_relative_position(ui::Direction direction, ui::Position pos
 	};
 }
 
-TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Horizontal) {
-	ui::Element element = box_with_relative_position(
-		ui::Direction::Horizontal,
-		ui::RelativePosition {
-			.x = ui::Percentage(-50),
-			.y = ui::Percentage(-50),
-		}
-	);
-
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
-
-TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Vertical) {
-	ui::Element element = box_with_relative_position(
-		ui::Direction::Vertical,
-		ui::RelativePosition {
-			.x = ui::Percentage(-50),
-			.y = ui::Percentage(-50),
-		}
-	);
-
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
-
 TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
-	ui::Element element = box_with_relative_position(
+	ui::Element element = box_with_position(
 		ui::Direction::Horizontal,
 		ui::RelativePosition {
 			.x = ui::Pixels(-50),
 			.y = ui::Pixels(-50),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Horizontal) {
+	ui::Element element = box_with_position(
+		ui::Direction::Horizontal,
+		ui::RelativePosition {
+			.x = ui::Percentage(-50),
+			.y = ui::Percentage(-50),
 		}
 	);
 
@@ -310,11 +296,86 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
 }
 
 TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Vertical) {
-	ui::Element element = box_with_relative_position(
+	ui::Element element = box_with_position(
 		ui::Direction::Vertical,
 		ui::RelativePosition {
 			.x = ui::Pixels(-50),
 			.y = ui::Pixels(-50),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Vertical) {
+	ui::Element element = box_with_position(
+		ui::Direction::Vertical,
+		ui::RelativePosition {
+			.x = ui::Percentage(-50),
+			.y = ui::Percentage(-50),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Horizontal) {
+	ui::Element element = box_with_position(
+		ui::Direction::Horizontal,
+		ui::AbsolutePosition {
+			.x = ui::Pixels(100),
+			.y = ui::Pixels(100),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Horizontal) {
+	ui::Element element = box_with_position(
+		ui::Direction::Horizontal,
+		ui::AbsolutePosition {
+			.x = ui::Percentage(50),
+			.y = ui::Percentage(50),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Vertical) {
+	ui::Element element = box_with_position(
+		ui::Direction::Vertical,
+		ui::AbsolutePosition {
+			.x = ui::Pixels(100),
+			.y = ui::Pixels(100),
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vertical) {
+	ui::Element element = box_with_position(
+		ui::Direction::Vertical,
+		ui::AbsolutePosition {
+			.x = ui::Percentage(50),
+			.y = ui::Percentage(50),
 		}
 	);
 

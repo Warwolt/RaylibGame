@@ -55,7 +55,7 @@ namespace ui {
 			constrained_size = std::min<float>(pixels->value, parent_size);
 		}
 		if (const Percentage* percentage = size.percentage()) {
-			constrained_size = (percentage->value / 100.0f) * parent_size;
+			constrained_size = percentage->fractional() * parent_size;
 		}
 		return constrained_size;
 	}
@@ -223,7 +223,8 @@ namespace ui {
 		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
 
-	static void compute_element_positions(Vector2 position, Element* element) {
+	// `containing_box` is either root or the closest parent element with a non-static position
+	static void compute_element_positions(Vector2 position, Rectangle containing_box, Element* element) {
 		const Style style = element->style;
 		Layout* layout = &element->layout;
 
@@ -234,20 +235,35 @@ namespace ui {
 				offset.x = x_pixels->value;
 			}
 			if (const Percentage* x_percentage = relative_position->x.percentage()) {
-				offset.x = x_percentage->value / 100.f * element->layout.border_box.width;
+				offset.x = x_percentage->fractional() * element->layout.border_box.width;
 			}
 
 			if (const Pixels* y_pixels = relative_position->y.pixels()) {
 				offset.y = y_pixels->value;
 			}
 			if (const Percentage* y_percentage = relative_position->y.percentage()) {
-				offset.y = y_percentage->value / 100.f * element->layout.border_box.height;
+				offset.y = y_percentage->fractional() * element->layout.border_box.height;
 			}
 		}
 
 		/* Position all boxes relative to each other */
-		layout->margin_box.x = position.x + offset.x;
-		layout->margin_box.y = position.y + offset.y;
+		if (const AbsolutePosition* absolute_position = element->style.position.absolute_position()) {
+			if (const Pixels* x_pixels = absolute_position->x.pixels()) {
+				layout->margin_box.x = containing_box.x + x_pixels->value;
+			}
+			if (const Percentage* x_percentage = absolute_position->x.percentage()) {
+				layout->margin_box.x = containing_box.x + x_percentage->fractional() * containing_box.width;
+			}
+			if (const Pixels* y_pixels = absolute_position->y.pixels()) {
+				layout->margin_box.y = containing_box.x + y_pixels->value;
+			}
+			if (const Percentage* y_percentage = absolute_position->y.percentage()) {
+				layout->margin_box.y = containing_box.y + y_percentage->fractional() * containing_box.height;
+			}
+		} else {
+			layout->margin_box.x = position.x + offset.x;
+			layout->margin_box.y = position.y + offset.y;
+		}
 		layout->border_box.x = layout->margin_box.x + style.margin.left;
 		layout->border_box.y = layout->margin_box.y + style.margin.top;
 		layout->padding_box.x = layout->border_box.x + style.border.left;
@@ -265,6 +281,9 @@ namespace ui {
 					float total_element_widths = 0;
 					float max_element_height = 0;
 					for (Element& child : box->children) {
+						if (child.style.position.is_absolute_position()) {
+							continue; // remove absolutely positioned element from flow
+						}
 						total_element_widths += child.layout.margin_box.width;
 						max_element_height = std::max(max_element_height, child.layout.margin_box.height);
 					}
@@ -278,6 +297,9 @@ namespace ui {
 					float total_element_heights = 0;
 					float max_element_width = 0;
 					for (Element& child : box->children) {
+						if (child.style.position.is_absolute_position()) {
+							continue; // remove absolutely positioned element from flow
+						}
 						total_element_heights += child.layout.margin_box.height;
 						max_element_width = std::max(max_element_width, child.layout.margin_box.width);
 					}
@@ -288,16 +310,22 @@ namespace ui {
 				} break;
 			}
 
+			/* Iterate over children */
 			Vector2 cursor = {
 				.x = layout->content_box.x + left_padding,
 				.y = layout->content_box.y + top_padding,
 			};
 			for (Element& child : box->children) {
 				/* Compute child position */
-				Vector2 child_position = cursor;
-				compute_element_positions(child_position, &child);
+				const Vector2 child_position = cursor;
+				const Rectangle child_containing_box =
+					element->style.position.is_static_position() ? containing_box : element->layout.margin_box;
+				compute_element_positions(child_position, containing_box, &child);
 
 				/* Move cursor */
+				if (child.style.position.is_absolute_position()) {
+					continue; // don't move cursor for absolutely positioned elements
+				}
 				switch (box->direction) {
 					case Direction::Horizontal:
 						cursor.x += child.layout.margin_box.width;
@@ -314,8 +342,9 @@ namespace ui {
 		PROFILING_SCOPE();
 		const Vector2 top_left = { 0, 0 };
 		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
+		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
 		compute_constrained_element_sizes(resources, desired_size, element);
-		compute_element_positions(top_left, element);
+		compute_element_positions(top_left, containing_box, element);
 	}
 
 	static bool key_is_down(ButtonState state) {
@@ -515,8 +544,17 @@ namespace ui {
 			};
 			Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
 		} else if (const Box* box = element.box()) {
+			/* Draw statically and relatively positioned children first */
 			for (const Element& child : box->children) {
-				draw_element(resources, child);
+				if (!child.style.position.is_absolute_position()) {
+					draw_element(resources, child);
+				}
+			}
+			/* Draw absolutely positioned children last */
+			for (const Element& child : box->children) {
+				if (child.style.position.is_absolute_position()) {
+					draw_element(resources, child);
+				}
 			}
 		} else {
 			ABORT("Unhandled ui::Content case!");

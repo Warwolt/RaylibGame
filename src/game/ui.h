@@ -42,6 +42,9 @@ namespace ui {
 	};
 	struct Percentage {
 		float value;
+		inline float fractional() const {
+			return value / 100.0f;
+		}
 	};
 	struct Measure {
 		std::variant<Pixels, Percentage> value;
@@ -91,6 +94,10 @@ namespace ui {
 			: value(relative_position) {
 		}
 
+		Position(AbsolutePosition absolute_position)
+			: value(absolute_position) {
+		}
+
 		inline bool is_static_position() const {
 			return std::holds_alternative<StaticPosition>(this->value);
 		}
@@ -101,6 +108,14 @@ namespace ui {
 
 		inline const RelativePosition* relative_position() const {
 			return std::get_if<RelativePosition>(&this->value);
+		}
+
+		inline bool is_absolute_position() const {
+			return std::holds_alternative<AbsolutePosition>(this->value);
+		}
+
+		inline const AbsolutePosition* absolute_position() const {
+			return std::get_if<AbsolutePosition>(&this->value);
 		}
 	};
 
