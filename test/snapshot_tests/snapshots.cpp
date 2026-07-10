@@ -53,6 +53,7 @@ namespace snapshots {
 
 	struct SnapshotTestContext {
 		bool should_update_snapshots = false;
+		bool should_clean_snapshots = false;
 		std::vector<SnapshotTestSuite> all_suites;
 		std::vector<SnapshotTestSuite> failed_suites;
 		std::vector<SnapshotTestSuite> updated_suites;
@@ -308,7 +309,6 @@ namespace snapshots {
 	}
 
 	void initialize_snapshot_tests(int argc, char** argv) {
-		bool clean_snapshots = false;
 		for (int i = 0; i < argc; i++) {
 			std::string arg = std::string(argv[i]);
 			if (arg == "--update-snapshots" || arg == "-u") {
@@ -316,16 +316,8 @@ namespace snapshots {
 			}
 
 			if (arg == "--clean-snapshots") {
-				clean_snapshots = true;
+				g_context.should_clean_snapshots = true;
 			}
-		}
-
-		if (clean_snapshots) {
-			std::filesystem::remove_all(REPORT_DIRECTORY);
-			LOG_INFO("removed %s", REPORT_DIRECTORY.string().c_str());
-
-			std::filesystem::remove_all(SNAPSHOT_DIRECTORY);
-			LOG_INFO("removed %s", SNAPSHOT_DIRECTORY.string().c_str());
 		}
 	}
 
@@ -367,6 +359,32 @@ namespace snapshots {
 
 		if (!g_context.all_suites.empty()) {
 			printf("\nSnapshot test report updated: %s\n", "./snapshot_report/index.html");
+		}
+
+		/* Clean up stray files */
+		if (g_context.should_clean_snapshots) {
+			// Remove any iamges in snapshot directories that doesn't correspond to a test case
+			std::vector<std::string> removed_files;
+			for (const SnapshotTestSuite& suite : g_context.all_suites) {
+				const std::filesystem::path suite_dir = snapshot_directory(suite.name);
+				for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(suite_dir)) {
+					const std::string filename = entry.path().stem().string();
+					const bool filename_matches_test_name = std::any_of(suite.tests.begin(), suite.tests.end(), [&](const SnapshotTestCase& test) {
+						return test.name == filename;
+					});
+					const bool file_is_png = entry.path().extension() == ".png";
+					if (file_is_png && !filename_matches_test_name) {
+						std::filesystem::remove(entry.path());
+						removed_files.push_back(entry.path().string());
+					}
+				}
+			}
+			if (!removed_files.empty()) {
+				printf("Cleaned up the following unused snapshots:\n");
+				for (const std::string& removed_file : removed_files) {
+					printf("- %s\n", removed_file.c_str());
+				}
+			}
 		}
 	}
 } // namespace snapshots
