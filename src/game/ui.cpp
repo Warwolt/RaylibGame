@@ -49,22 +49,15 @@ namespace ui {
 		};
 	}
 
-	static float get_absolute_size(Size size) {
-		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
-			return absolute_size->pixels;
+	static float fit_size_to_parent(const Measure& size, float parent_size) {
+		float constrained_size = 0.0f;
+		if (const Pixels* pixels = size.pixels()) {
+			constrained_size = std::min<float>(pixels->value, parent_size);
 		}
-		return 0.0f;
-	}
-
-	static float fit_size_to_parent(const Size& size, float parent_size) {
-		float pixels = 0.0f;
-		if (const AbsoluteSize* absolute_size = std::get_if<AbsoluteSize>(&size)) {
-			pixels = std::min<float>(absolute_size->pixels, parent_size);
+		if (const Percentage* percentage = size.percentage()) {
+			constrained_size = percentage->fractional() * parent_size;
 		}
-		if (const RelativeSize* relative_size = std::get_if<RelativeSize>(&size)) {
-			pixels = (relative_size->percentage / 100.0f) * parent_size;
-		}
-		return pixels;
+		return constrained_size;
 	}
 
 	// based on Raylib MeasureTextEx in rtext.c
@@ -131,7 +124,7 @@ namespace ui {
 				}
 			}
 			const float paragraph_height = cursor.y + style.font_size;
-			const bool has_absolute_height = std::holds_alternative<AbsoluteSize>(style.height);
+			const bool has_absolute_height = style.height.is_pixels();
 			desired_size = {
 				.x = element_width,
 				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
@@ -230,13 +223,47 @@ namespace ui {
 		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
 
-	static void compute_element_positions(Vector2 position, Element* element) {
+	// `containing_box` is either root or the closest parent element with a non-static position
+	static void compute_element_positions(Vector2 position, Rectangle containing_box, Element* element) {
 		const Style style = element->style;
 		Layout* layout = &element->layout;
 
+		/* Compute position offsets */
+		Vector2 offset = { 0, 0 };
+		if (const RelativePosition* relative_position = element->style.position.relative_position()) {
+			if (const Pixels* x_pixels = relative_position->x.pixels()) {
+				offset.x = x_pixels->value;
+			}
+			if (const Percentage* x_percentage = relative_position->x.percentage()) {
+				offset.x = x_percentage->fractional() * element->layout.border_box.width;
+			}
+
+			if (const Pixels* y_pixels = relative_position->y.pixels()) {
+				offset.y = y_pixels->value;
+			}
+			if (const Percentage* y_percentage = relative_position->y.percentage()) {
+				offset.y = y_percentage->fractional() * element->layout.border_box.height;
+			}
+		}
+
 		/* Position all boxes relative to each other */
-		layout->margin_box.x = position.x;
-		layout->margin_box.y = position.y;
+		if (const AbsolutePosition* absolute_position = element->style.position.absolute_position()) {
+			if (const Pixels* x_pixels = absolute_position->x.pixels()) {
+				layout->margin_box.x = containing_box.x + x_pixels->value;
+			}
+			if (const Percentage* x_percentage = absolute_position->x.percentage()) {
+				layout->margin_box.x = containing_box.x + x_percentage->fractional() * containing_box.width;
+			}
+			if (const Pixels* y_pixels = absolute_position->y.pixels()) {
+				layout->margin_box.y = containing_box.x + y_pixels->value;
+			}
+			if (const Percentage* y_percentage = absolute_position->y.percentage()) {
+				layout->margin_box.y = containing_box.y + y_percentage->fractional() * containing_box.height;
+			}
+		} else {
+			layout->margin_box.x = position.x + offset.x;
+			layout->margin_box.y = position.y + offset.y;
+		}
 		layout->border_box.x = layout->margin_box.x + style.margin.left;
 		layout->border_box.y = layout->margin_box.y + style.margin.top;
 		layout->padding_box.x = layout->border_box.x + style.border.left;
@@ -247,37 +274,58 @@ namespace ui {
 		/* Recurse into children */
 		if (Box* box = element->box()) {
 			/* Compute padding for alignment */
-			int left_padding = 0;
-			int top_padding = 0;
-			int total_element_widths = 0;
-			int total_element_heights = 0;
-			for (Element& child : box->children) {
-				total_element_widths += child.layout.margin_box.width;
-				total_element_heights += child.layout.margin_box.height;
-			}
-			const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
-			const int vertical_remainder = element->layout.content_box.height - total_element_heights;
+			float left_padding = 0;
+			float top_padding = 0;
 			switch (box->direction) {
 				case Direction::Horizontal: {
+					float total_element_widths = 0;
+					float max_element_height = 0;
+					for (Element& child : box->children) {
+						if (child.style.position.is_absolute_position()) {
+							continue; // remove absolutely positioned element from flow
+						}
+						total_element_widths += child.layout.margin_box.width;
+						max_element_height = std::max(max_element_height, child.layout.margin_box.height);
+					}
+					const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
+					const int vertical_remainder = element->layout.content_box.height - max_element_height;
 					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
 					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
+
 				case Direction::Vertical: {
-					left_padding = alignment_padding(element->style.cross_alignment, horizontal_remainder);
-					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
+					float total_element_heights = 0;
+					float max_element_width = 0;
+					for (Element& child : box->children) {
+						if (child.style.position.is_absolute_position()) {
+							continue; // remove absolutely positioned element from flow
+						}
+						total_element_heights += child.layout.margin_box.height;
+						max_element_width = std::max(max_element_width, child.layout.margin_box.width);
+					}
+					const int horizontal_remainder = element->layout.content_box.width - max_element_width;
+					const int vertical_remainder = element->layout.content_box.height - total_element_heights;
+					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
+					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
 			}
 
+			/* Iterate over children */
 			Vector2 cursor = {
 				.x = layout->content_box.x + left_padding,
 				.y = layout->content_box.y + top_padding,
 			};
 			for (Element& child : box->children) {
 				/* Compute child position */
-				Vector2 child_position = cursor;
-				compute_element_positions(child_position, &child);
+				const Vector2 child_position = cursor;
+				const Rectangle child_containing_box =
+					element->style.position.is_static_position() ? containing_box : element->layout.margin_box;
+				compute_element_positions(child_position, containing_box, &child);
 
 				/* Move cursor */
+				if (child.style.position.is_absolute_position()) {
+					continue; // don't move cursor for absolutely positioned elements
+				}
 				switch (box->direction) {
 					case Direction::Horizontal:
 						cursor.x += child.layout.margin_box.width;
@@ -294,8 +342,9 @@ namespace ui {
 		PROFILING_SCOPE();
 		const Vector2 top_left = { 0, 0 };
 		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
+		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
 		compute_constrained_element_sizes(resources, desired_size, element);
-		compute_element_positions(top_left, element);
+		compute_element_positions(top_left, containing_box, element);
 	}
 
 	static bool key_is_down(ButtonState state) {
@@ -472,17 +521,19 @@ namespace ui {
 			// Depending on the size of the content box and the desired size of
 			// the image, we have to sample either the whole image texture or
 			// just a portion of it (in case of an overflow).
-			const float absolute_image_width = get_absolute_size(element.style.width);
-			const float absolute_image_height = get_absolute_size(element.style.height);
 			float source_width = (float)texture.width;
 			float source_height = (float)texture.height;
-			if (absolute_image_width > element.layout.content_box.width) {
-				const float scale = texture.width / absolute_image_width;
-				source_width = scale * element.layout.content_box.width;
+			if (const Pixels* pixel_width = element.style.width.pixels()) {
+				if (pixel_width->value > element.layout.content_box.width) {
+					const float scale = texture.width / pixel_width->value;
+					source_width = scale * element.layout.content_box.width;
+				}
 			}
-			if (absolute_image_height > element.layout.content_box.height) {
-				const float scale = texture.height / absolute_image_height;
-				source_height = scale * element.layout.content_box.height;
+			if (const Pixels* pixel_height = element.style.height.pixels()) {
+				if (pixel_height->value > element.layout.content_box.height) {
+					const float scale = texture.height / pixel_height->value;
+					source_height = scale * element.layout.content_box.height;
+				}
 			}
 
 			const Rectangle source = {
@@ -493,8 +544,17 @@ namespace ui {
 			};
 			Raylib_DrawTexturePro(texture, source, element.layout.content_box, Vector2 { 0, 0 }, 0.0f, WHITE);
 		} else if (const Box* box = element.box()) {
+			/* Draw statically and relatively positioned children first */
 			for (const Element& child : box->children) {
-				draw_element(resources, child);
+				if (!child.style.position.is_absolute_position()) {
+					draw_element(resources, child);
+				}
+			}
+			/* Draw absolutely positioned children last */
+			for (const Element& child : box->children) {
+				if (child.style.position.is_absolute_position()) {
+					draw_element(resources, child);
+				}
 			}
 		} else {
 			ABORT("Unhandled ui::Content case!");

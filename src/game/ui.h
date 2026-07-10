@@ -37,15 +37,87 @@ namespace ui {
 	using Content = std::variant<Box, Text, Image>;
 
 	/* Style */
-	struct AbsoluteSize {
-		int pixels = 0;
+	struct Pixels {
+		float value;
+	};
+	struct Percentage {
+		float value;
+		inline float fractional() const {
+			return value / 100.0f;
+		}
+	};
+	struct Measure {
+		std::variant<Pixels, Percentage> value;
+
+		Measure(Pixels pixels)
+			: value(pixels) {
+		}
+
+		Measure(Percentage percentage)
+			: value(percentage) {
+		}
+
+		inline bool is_pixels() const {
+			return std::holds_alternative<Pixels>(this->value);
+		}
+
+		inline const Pixels* pixels() const {
+			return std::get_if<Pixels>(&this->value);
+		}
+
+		inline bool is_percentage() const {
+			return std::holds_alternative<Percentage>(this->value);
+		}
+
+		inline const Percentage* percentage() const {
+			return std::get_if<Percentage>(&this->value);
+		}
 	};
 
-	struct RelativeSize {
-		float percentage; // relative parent size, range [0, 100]
+	struct StaticPosition {};
+	struct RelativePosition {
+		Measure x;
+		Measure y;
 	};
+	struct AbsolutePosition {
+		Measure x;
+		Measure y;
+	};
+	struct Position {
+		std::variant<StaticPosition, RelativePosition, AbsolutePosition> value;
 
-	using Size = std::variant<AbsoluteSize, RelativeSize>;
+		Position(StaticPosition static_position)
+			: value(static_position) {
+		}
+
+		Position(RelativePosition relative_position)
+			: value(relative_position) {
+		}
+
+		Position(AbsolutePosition absolute_position)
+			: value(absolute_position) {
+		}
+
+		inline bool is_static_position() const {
+			return std::holds_alternative<StaticPosition>(this->value);
+		}
+
+		inline bool is_relative_position() const {
+			return std::holds_alternative<RelativePosition>(this->value);
+		}
+
+		inline const RelativePosition* relative_position() const {
+			return std::get_if<RelativePosition>(&this->value);
+		}
+
+		inline bool is_absolute_position() const {
+			return std::holds_alternative<AbsolutePosition>(this->value);
+		}
+
+		inline const AbsolutePosition* absolute_position() const {
+			return std::get_if<AbsolutePosition>(&this->value);
+		}
+	};
 
 	// in pixels
 	struct Spacing {
@@ -89,9 +161,15 @@ namespace ui {
 		std::optional<Color> font_color;
 	};
 
+	// FIXME: move border stuff into own substruct?
+	// border -> border.edges
+	// border_color -> border.color
+	// border_image -> border.image
+	// etc. etc.
 	struct Style {
-		Size width = RelativeSize(100);
-		Size height = RelativeSize(100);
+		Position position = StaticPosition();
+		Measure width = Percentage(100);
+		Measure height = Percentage(100);
 		Spacing margin;
 		Spacing border;
 		Spacing padding;
@@ -99,7 +177,6 @@ namespace ui {
 		Alignment cross_alignment;
 
 		Color background_color;
-
 		Color font_color = WHITE;
 		FontID font_id = FontID::default_font();
 		int font_size = 16;
@@ -154,6 +231,7 @@ namespace ui {
 
 	/* Element */
 	struct Element {
+		std::string debug_name;
 		Style style;
 		Content content;
 		Layout layout; // computed with layout_element()

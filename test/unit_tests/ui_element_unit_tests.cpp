@@ -24,15 +24,15 @@ constexpr Vector2 outside = { size.x + 1, size.y + 1 };
 ui::Element box_element_with_child() {
 	return ui::Element {
 		.style = {
-			.width = ui::AbsoluteSize(size.x),
-			.height = ui::AbsoluteSize(size.y),
+			.width = ui::Pixels(size.x),
+			.height = ui::Pixels(size.y),
 		},
 		.content = ui::Box {
 			.children = {
 				ui::Element {
 					.style = {
-						.width = ui::AbsoluteSize(size.x / 2),
-						.height = ui::AbsoluteSize(size.y / 2),
+						.width = ui::Pixels(size.x / 2),
+						.height = ui::Pixels(size.y / 2),
 					},
 					.content = ui::Box {},
 				},
