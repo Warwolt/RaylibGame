@@ -122,14 +122,14 @@ TEST_F(UIElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart) {
+ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 	ui::Element element = {
 		.style = {
-			.alignment = ui::Alignment::Start,
-			.cross_alignment = ui::Alignment::Start,
+			.alignment = alignment,
+			.cross_alignment = alignment,
 		},
 		.content = ui::Box {
-			.direction = ui::Direction::Horizontal,
+			.direction = direction,
 			.children = {},
 		},
 	};
@@ -148,48 +148,16 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart) {
 					.border_color = DARKBLUE,
 				},
 				.content = ui::Text {
-					.text = std::format("Start {}", i + 1),
+					.text = std::format("{}", i + 1),
 				},
 			}
 		);
 	}
-
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
+	return element;
 }
-TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter) {
-	ui::Element element = {
-		.style = {
-			.alignment = ui::Alignment::Center,
-			.cross_alignment = ui::Alignment::Center,
-		},
-		.content = ui::Box {
-			.direction = ui::Direction::Horizontal,
-			.children = {},
-		},
-	};
-	for (int i = 0; i < 3; i++) {
-		element.box()->children.push_back(
-			ui::Element {
-				.style = {
-					.width = ui::Pixels(100),
-					.height= ui::Pixels(100),
-					.margin = ui::Spacing::uniform(2),
-					.border = ui::Spacing::uniform(2),
-					.alignment = ui::Alignment::Center,
-					.cross_alignment = ui::Alignment::Center,
-					.background_color = BLUE,
-					.font_color = WHITE,
-					.border_color = DARKBLUE,
-				},
-				.content = ui::Text {
-					.text = std::format("Center {}", i + 1),
-				},
-			}
-		);
-	}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
+	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
@@ -197,37 +165,44 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd) {
-	ui::Element element = {
-		.style = {
-			.alignment = ui::Alignment::End,
-			.cross_alignment = ui::Alignment::End,
-		},
-		.content = ui::Box {
-			.direction = ui::Direction::Horizontal,
-			.children = {},
-		},
-	};
-	for (int i = 0; i < 3; i++) {
-		element.box()->children.push_back(
-			ui::Element {
-				.style = {
-					.width = ui::Pixels(100),
-					.height= ui::Pixels(100),
-					.margin = ui::Spacing::uniform(2),
-					.border = ui::Spacing::uniform(2),
-					.alignment = ui::Alignment::Center,
-					.cross_alignment = ui::Alignment::Center,
-					.background_color = BLUE,
-					.font_color = WHITE,
-					.border_color = DARKBLUE,
-				},
-				.content = ui::Text {
-					.text = std::format("End {}", i + 1),
-				},
-			}
-		);
-	}
+TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart_Vertical) {
+	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Vertical);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter_Horizontal) {
+	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Horizontal);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter_Vertical) {
+	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Vertical);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd_Horizontal) {
+	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Horizontal);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
+	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
