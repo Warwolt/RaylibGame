@@ -158,7 +158,7 @@ namespace ui {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
-			/* Measure parent content  */
+			/* Size parent content  */
 			Rectangle& content_box = layout->content_box;
 			content_box.width = max_size.x - style.horizontal_spacing();
 			content_box.height = max_size.y - style.vertical_spacing();
@@ -214,7 +214,7 @@ namespace ui {
 			ABORT("Unhandled ui::Content case!");
 		}
 
-		/* Measure padding, border, and margin boxes */
+		/* Size padding, border, and margin boxes */
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
 		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
 		layout->border_box.width = layout->padding_box.width + style.border.left + style.border.right;

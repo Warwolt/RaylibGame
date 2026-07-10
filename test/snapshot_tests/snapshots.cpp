@@ -363,7 +363,7 @@ namespace snapshots {
 
 		/* Clean up stray files */
 		if (g_context.should_clean_snapshots) {
-			// Remove any iamges in snapshot directories that doesn't correspond to a test case
+			// Remove images in snapshot directories that don't correspond to a test case
 			std::vector<std::string> removed_files;
 			for (const SnapshotTestSuite& suite : g_context.all_suites) {
 				const std::filesystem::path suite_dir = snapshot_directory(suite.name);
