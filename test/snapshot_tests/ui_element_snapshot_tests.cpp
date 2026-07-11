@@ -421,9 +421,39 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+// FIXME: horizontal, vertical case
+
+TEST_F(UIElementSnapshotTests, Box_FitContent_TextChild_FitsText) {
+	ui::Element element = {
+		.style = {
+			.fit_content = true,
+			.border = {
+				.edges = ui::Edges::uniform(2),
+				.color = GREEN,
+			},
+		},
+		.content =
+			ui::Box {
+				.direction = ui::Direction::Horizontal,
+				.children = {
+					ui::Element {
+						.content = ui::Text {
+							.text = "Hello world",
+						},
+					},
+				},
+			},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
 // FIXME: write tests for:
 // Box fit content, text
-// Box fit content, image
+// Box fit content, image, text
 
 TEST_F(UIElementSnapshotTests, Box_DefaultStyle) {
 	ui::Element element = {

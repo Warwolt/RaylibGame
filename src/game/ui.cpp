@@ -60,6 +60,27 @@ namespace ui {
 		return constrained_size;
 	}
 
+	// computes space that the box children will use, given the layout direction
+	static Vector2 compute_child_content_size(const Box& box) {
+		Vector2 content_size = {};
+		for (const Element& child : box.children) {
+			if (child.style.position.is_absolute_position()) {
+				continue; // remove absolutely positioned element from flow
+			}
+			switch (box.direction) {
+				case Direction::Horizontal: {
+					content_size.x += child.layout.margin_box.width;
+					content_size.y = std::max(content_size.y, child.layout.margin_box.height);
+				} break;
+				case Direction::Vertical: {
+					content_size.x = std::max(content_size.x, child.layout.margin_box.width);
+					content_size.y += child.layout.margin_box.height;
+				} break;
+			}
+		}
+		return content_size;
+	}
+
 	// based on Raylib MeasureTextEx in rtext.c
 	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
 		if (font.texture.id == 0) {
@@ -214,7 +235,9 @@ namespace ui {
 			/* Size parent content */
 			Rectangle& content_box = layout->content_box;
 			if (element->style.fit_content) {
-				//
+				const Vector2 child_content_size = compute_child_content_size(*box);
+				content_box.width = child_content_size.x;
+				content_box.height = child_content_size.y;
 			} else {
 				content_box.width = max_parent_size.x;
 				content_box.height = max_parent_size.y;
@@ -285,37 +308,18 @@ namespace ui {
 			/* Compute padding for alignment */
 			float left_padding = 0;
 			float top_padding = 0;
+			const Vector2 child_content_size = compute_child_content_size(*box);
+			const int horizontal_remainder = element->layout.content_box.width - child_content_size.x;
+			const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
 			switch (box->direction) {
 				case Direction::Horizontal: {
-					float total_element_widths = 0;
-					float max_element_height = 0;
-					for (Element& child : box->children) {
-						if (child.style.position.is_absolute_position()) {
-							continue; // remove absolutely positioned element from flow
-						}
-						total_element_widths += child.layout.margin_box.width;
-						max_element_height = std::max(max_element_height, child.layout.margin_box.height);
-					}
-					const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
-					const int vertical_remainder = element->layout.content_box.height - max_element_height;
 					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
 					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
 
 				case Direction::Vertical: {
-					float total_element_heights = 0;
-					float max_element_width = 0;
-					for (Element& child : box->children) {
-						if (child.style.position.is_absolute_position()) {
-							continue; // remove absolutely positioned element from flow
-						}
-						total_element_heights += child.layout.margin_box.height;
-						max_element_width = std::max(max_element_width, child.layout.margin_box.width);
-					}
-					const int horizontal_remainder = element->layout.content_box.width - max_element_width;
-					const int vertical_remainder = element->layout.content_box.height - total_element_heights;
-					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
-					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
+					left_padding = alignment_padding(element->style.cross_alignment, horizontal_remainder);
+					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
 				} break;
 			}
 
