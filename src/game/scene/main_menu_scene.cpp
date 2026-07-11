@@ -38,17 +38,17 @@ void MainMenuScene::update(Game* game) {
 		};
 		ui::Style image_container_style = {
 			.width = ui::Percentage(33),
-			.border = ui::Spacing::uniform(16),
+			.border = ui::Edges::uniform(16),
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
 			.background_color = Color { 20, 37, 136, 255 },
 			.border_image = m_images.final_fantasy_menu_border,
-			.border_image_slicing = ui::Spacing::uniform(5),
+			.border_image_slicing = ui::Edges::uniform(5),
 		};
 		ui::Style image_style {
 			.width = ui::Pixels(200),
 			.height = ui::Pixels(200),
-			.border = ui::Spacing::uniform(2),
+			.border = ui::Edges::uniform(2),
 			.border_color = WHITE,
 		};
 		ui::Style item_style = {
@@ -74,7 +74,7 @@ void MainMenuScene::update(Game* game) {
 			m_ui.box_begin(
 				ui::Direction::Vertical,
 				ui::Style {
-					.padding = ui::Spacing::uniform(16),
+					.padding = ui::Edges::uniform(16),
 				}
 			);
 			{

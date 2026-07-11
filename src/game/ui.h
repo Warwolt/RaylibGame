@@ -120,7 +120,7 @@ namespace ui {
 	};
 
 	// in pixels
-	struct Spacing {
+	struct Edges {
 		float top;
 		float bottom;
 		float left;
@@ -134,7 +134,7 @@ namespace ui {
 			return this->top + this->bottom;
 		}
 
-		static Spacing uniform(float size) {
+		static Edges uniform(float size) {
 			return { size, size, size, size };
 		}
 	};
@@ -170,9 +170,9 @@ namespace ui {
 		Position position = StaticPosition();
 		Measure width = Percentage(100);
 		Measure height = Percentage(100);
-		Spacing margin;
-		Spacing border;
-		Spacing padding;
+		Edges margin;
+		Edges border;
+		Edges padding;
 		Alignment alignment;
 		Alignment cross_alignment;
 
@@ -186,7 +186,7 @@ namespace ui {
 
 		Color border_color;
 		ImageID border_image = ImageID(0);
-		Spacing border_image_slicing;
+		Edges border_image_slicing;
 		bool border_image_fill_center = false;
 
 		StyleOverride hovered;

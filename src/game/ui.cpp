@@ -26,26 +26,26 @@ namespace ui {
 	}
 
 	// returns slices of box with given spacing
-	static std::array<Rectangle, 9> spacing_to_9_slices(const Spacing& spacing, const Rectangle& box) {
-		const float top_height = spacing.top;
-		const float middle_height = box.height - spacing.top - spacing.bottom;
-		const float bottom_height = spacing.bottom;
-		const float center_width = box.width - spacing.left - spacing.right;
+	static std::array<Rectangle, 9> edges_to_9_slices(const Edges& edges, const Rectangle& box) {
+		const float top_height = edges.top;
+		const float middle_height = box.height - edges.top - edges.bottom;
+		const float bottom_height = edges.bottom;
+		const float center_width = box.width - edges.left - edges.right;
 		const float top_y = box.y;
-		const float middle_y = box.y + spacing.top;
-		const float bottom_y = box.height - spacing.bottom;
+		const float middle_y = box.y + edges.top;
+		const float bottom_y = box.height - edges.bottom;
 		return {
-			Rectangle { box.x, top_y, spacing.left, top_height }, // top left
-			Rectangle { box.x + spacing.left, top_y, center_width, top_height }, // top center
-			Rectangle { box.x + box.width - spacing.right, top_y, spacing.right, top_height }, // top right
+			Rectangle { box.x, top_y, edges.left, top_height }, // top left
+			Rectangle { box.x + edges.left, top_y, center_width, top_height }, // top center
+			Rectangle { box.x + box.width - edges.right, top_y, edges.right, top_height }, // top right
 
-			Rectangle { box.x, middle_y, spacing.left, middle_height }, // middle left
-			Rectangle { box.x + spacing.left, middle_y, center_width, middle_height }, // middle center
-			Rectangle { box.x + box.width - spacing.right, middle_y, spacing.right, middle_height }, // middle right
+			Rectangle { box.x, middle_y, edges.left, middle_height }, // middle left
+			Rectangle { box.x + edges.left, middle_y, center_width, middle_height }, // middle center
+			Rectangle { box.x + box.width - edges.right, middle_y, edges.right, middle_height }, // middle right
 
-			Rectangle { box.x, bottom_y, spacing.left, bottom_height }, // bottom left
-			Rectangle { box.x + spacing.left, bottom_y, center_width, bottom_height }, // bottom center
-			Rectangle { box.x + box.width - spacing.right, bottom_y, spacing.right, bottom_height }, // bottom right
+			Rectangle { box.x, bottom_y, edges.left, bottom_height }, // bottom left
+			Rectangle { box.x + edges.left, bottom_y, center_width, bottom_height }, // bottom center
+			Rectangle { box.x + box.width - edges.right, bottom_y, edges.right, bottom_height }, // bottom right
 		};
 	}
 
@@ -435,10 +435,10 @@ namespace ui {
 		/* Draw border image */
 		if (element.style.border_image.value != 0) {
 			const Texture2D texture = resources.get_image(element.style.border_image);
-			const Spacing& slice_spacing = element.style.border_image_slicing;
+			const Edges& slice_spacing = element.style.border_image_slicing;
 			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
-			const auto source_rects = spacing_to_9_slices(slice_spacing, texture_rect);
-			const auto destination_rects = spacing_to_9_slices(element.style.border, element.layout.border_box);
+			const auto source_rects = edges_to_9_slices(slice_spacing, texture_rect);
+			const auto destination_rects = edges_to_9_slices(element.style.border, element.layout.border_box);
 			for (size_t i = 0; i < source_rects.size(); i++) {
 				if (i == 4 && !element.style.border_image_fill_center) {
 					continue;
