@@ -26,26 +26,26 @@ namespace ui {
 	}
 
 	// returns slices of box with given spacing
-	static std::array<Rectangle, 9> spacing_to_9_slices(const Spacing& spacing, const Rectangle& box) {
-		const float top_height = spacing.top;
-		const float middle_height = box.height - spacing.top - spacing.bottom;
-		const float bottom_height = spacing.bottom;
-		const float center_width = box.width - spacing.left - spacing.right;
+	static std::array<Rectangle, 9> edges_to_9_slices(const Edges& edges, const Rectangle& box) {
+		const float top_height = edges.top;
+		const float middle_height = box.height - edges.top - edges.bottom;
+		const float bottom_height = edges.bottom;
+		const float center_width = box.width - edges.left - edges.right;
 		const float top_y = box.y;
-		const float middle_y = box.y + spacing.top;
-		const float bottom_y = box.height - spacing.bottom;
+		const float middle_y = box.y + edges.top;
+		const float bottom_y = box.height - edges.bottom;
 		return {
-			Rectangle { box.x, top_y, spacing.left, top_height }, // top left
-			Rectangle { box.x + spacing.left, top_y, center_width, top_height }, // top center
-			Rectangle { box.x + box.width - spacing.right, top_y, spacing.right, top_height }, // top right
+			Rectangle { box.x, top_y, edges.left, top_height }, // top left
+			Rectangle { box.x + edges.left, top_y, center_width, top_height }, // top center
+			Rectangle { box.x + box.width - edges.right, top_y, edges.right, top_height }, // top right
 
-			Rectangle { box.x, middle_y, spacing.left, middle_height }, // middle left
-			Rectangle { box.x + spacing.left, middle_y, center_width, middle_height }, // middle center
-			Rectangle { box.x + box.width - spacing.right, middle_y, spacing.right, middle_height }, // middle right
+			Rectangle { box.x, middle_y, edges.left, middle_height }, // middle left
+			Rectangle { box.x + edges.left, middle_y, center_width, middle_height }, // middle center
+			Rectangle { box.x + box.width - edges.right, middle_y, edges.right, middle_height }, // middle right
 
-			Rectangle { box.x, bottom_y, spacing.left, bottom_height }, // bottom left
-			Rectangle { box.x + spacing.left, bottom_y, center_width, bottom_height }, // bottom center
-			Rectangle { box.x + box.width - spacing.right, bottom_y, spacing.right, bottom_height }, // bottom right
+			Rectangle { box.x, bottom_y, edges.left, bottom_height }, // bottom left
+			Rectangle { box.x + edges.left, bottom_y, center_width, bottom_height }, // bottom center
+			Rectangle { box.x + box.width - edges.right, bottom_y, edges.right, bottom_height }, // bottom right
 		};
 	}
 
@@ -85,18 +85,18 @@ namespace ui {
 		const Style& style = element->style;
 
 		if (Text* text = element->text()) {
-			const Font& font = resources.get_font(style.font_id);
+			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
 			const float element_width = fit_size_to_parent(style.width, parent_size.x);
 			const float element_height = fit_size_to_parent(style.height, parent_size.y);
 			const float max_text_width = element_width - style.horizontal_spacing();
 			const float max_text_height = element_height - style.vertical_spacing();
-			const int space_width = Raylib_MeasureTextEx(font, " ", style.font_size, font_spacing).x;
+			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
 			for (const std::string_view word : util::get_string_view_per_word(text->text)) {
-				const int word_width = measure_word_width(word, font, style.font_size, font_spacing);
+				const int word_width = measure_word_width(word, font, style.font.size, font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
 				// check if word fits on remainder of current line
 				if (cursor.x + needed_length <= max_text_width) {
@@ -115,15 +115,15 @@ namespace ui {
 				} else {
 					// switch to new line
 					cursor.x = 0;
-					cursor.y = cursor.y + style.font_size;
-					if (cursor.y + style.font_size > max_text_height) {
+					cursor.y = cursor.y + style.font.size;
+					if (cursor.y + style.font.size > max_text_height) {
 						break;
 					}
 					text->lines.push_back(word);
 					cursor.x = word_width;
 				}
 			}
-			const float paragraph_height = cursor.y + style.font_size;
+			const float paragraph_height = cursor.y + style.font.size;
 			const bool has_absolute_height = style.height.is_pixels();
 			desired_size = {
 				.x = element_width,
@@ -217,8 +217,8 @@ namespace ui {
 		/* Size padding, border, and margin boxes */
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
 		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
-		layout->border_box.width = layout->padding_box.width + style.border.left + style.border.right;
-		layout->border_box.height = layout->padding_box.height + style.border.top + style.border.bottom;
+		layout->border_box.width = layout->padding_box.width + style.border.edges.left + style.border.edges.right;
+		layout->border_box.height = layout->padding_box.height + style.border.edges.top + style.border.edges.bottom;
 		layout->margin_box.width = layout->border_box.width + style.margin.left + style.margin.right;
 		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
@@ -266,8 +266,8 @@ namespace ui {
 		}
 		layout->border_box.x = layout->margin_box.x + style.margin.left;
 		layout->border_box.y = layout->margin_box.y + style.margin.top;
-		layout->padding_box.x = layout->border_box.x + style.border.left;
-		layout->padding_box.y = layout->border_box.y + style.border.top;
+		layout->padding_box.x = layout->border_box.x + style.border.edges.left;
+		layout->padding_box.y = layout->border_box.y + style.border.edges.top;
 		layout->content_box.x = layout->padding_box.x + style.padding.left;
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
 
@@ -385,7 +385,7 @@ namespace ui {
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
 		/* Draw padding box */
-		Color background_color = element.style.background_color;
+		Color background_color = element.style.background.color;
 		if (element.state.is_active) {
 			background_color = element.style.active.background_color.value_or(background_color);
 		} else if (element.state.is_hovered) {
@@ -395,7 +395,7 @@ namespace ui {
 
 		/* Draw border */
 		{
-			Color border_color = element.style.border_color;
+			Color border_color = element.style.border.color;
 			if (element.state.is_active) {
 				border_color = element.style.active.border_color.value_or(border_color);
 			} else if (element.state.is_hovered) {
@@ -406,24 +406,24 @@ namespace ui {
 				.x = element.layout.border_box.x,
 				.y = element.layout.border_box.y,
 				.width = element.layout.border_box.width,
-				.height = element.style.border.top,
+				.height = element.style.border.edges.top,
 			};
 			const Rectangle border_bottom = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.padding_box.y + element.layout.padding_box.height,
 				.width = element.layout.border_box.width,
-				.height = element.style.border.bottom,
+				.height = element.style.border.edges.bottom,
 			};
 			const Rectangle border_left = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.padding_box.y,
-				.width = element.style.border.left,
+				.width = element.style.border.edges.left,
 				.height = element.layout.padding_box.height,
 			};
 			const Rectangle border_right = {
-				.x = element.layout.border_box.x + element.layout.border_box.width - element.style.border.right,
+				.x = element.layout.border_box.x + element.layout.border_box.width - element.style.border.edges.right,
 				.y = element.layout.padding_box.y,
-				.width = element.style.border.right,
+				.width = element.style.border.edges.right,
 				.height = element.layout.padding_box.height,
 			};
 			Raylib_DrawRectangleRec(border_top, border_color);
@@ -433,14 +433,14 @@ namespace ui {
 		}
 
 		/* Draw border image */
-		if (element.style.border_image.value != 0) {
-			const Texture2D texture = resources.get_image(element.style.border_image);
-			const Spacing& slice_spacing = element.style.border_image_slicing;
+		if (element.style.border.image.value != 0) {
+			const Texture2D texture = resources.get_image(element.style.border.image);
+			const Edges& slice_spacing = element.style.border.image_slices;
 			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
-			const auto source_rects = spacing_to_9_slices(slice_spacing, texture_rect);
-			const auto destination_rects = spacing_to_9_slices(element.style.border, element.layout.border_box);
+			const auto source_rects = edges_to_9_slices(slice_spacing, texture_rect);
+			const auto destination_rects = edges_to_9_slices(element.style.border.edges, element.layout.border_box);
 			for (size_t i = 0; i < source_rects.size(); i++) {
-				if (i == 4 && !element.style.border_image_fill_center) {
+				if (i == 4 && !element.style.border.image_fill_center) {
 					continue;
 				}
 				Raylib_DrawTexturePro(texture, source_rects[i], destination_rects[i], Vector2 { 0, 0 }, 0.0f, WHITE);
@@ -459,9 +459,9 @@ namespace ui {
 		}
 
 		/* Draw background image */
-		if (element.style.background_image.value != 0) {
-			Texture2D texture = resources.get_image(element.style.background_image);
-			switch (element.style.background_fill) {
+		if (element.style.background.image.value != 0) {
+			Texture2D texture = resources.get_image(element.style.background.image);
+			switch (element.style.background.fill) {
 				case Fill::Repeat: {
 					Rectangle source = {
 						.x = 0,
@@ -486,29 +486,29 @@ namespace ui {
 
 		/* Draw content */
 		if (const ui::Text* text = element.text()) {
-			const Font& font = resources.get_font(element.style.font_id);
+			const Font font = resources.get_font(element.style.font.id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
-				const int text_height = (int)text->lines.size() * element.style.font_size;
+				const int text_height = (int)text->lines.size() * element.style.font.size;
 				const int top_padding = alignment_padding(element.style.cross_alignment, content_box.height - text_height);
 				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
-					const int line_length = measure_word_width(line, font, element.style.font_size, font_spacing);
+					const int line_length = measure_word_width(line, font, element.style.font.size, font_spacing);
 					const int left_padding = alignment_padding(element.style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
-						.y = element.layout.content_box.y + line_num * element.style.font_size + top_padding,
+						.y = element.layout.content_box.y + line_num * element.style.font.size + top_padding,
 					};
-					Color font_color = element.style.font_color;
+					Color font_color = element.style.font.color;
 					if (element.state.is_active) {
 						font_color = element.style.active.font_color.value_or(font_color);
 					} else if (element.state.is_hovered) {
 						font_color = element.style.hovered.font_color.value_or(font_color);
 					}
 					const std::string line_str(line);
-					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font_size, font_spacing, font_color);
+					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font.size, font_spacing, font_color);
 					line_num++;
 				}
 			}

@@ -120,7 +120,7 @@ namespace ui {
 	};
 
 	// in pixels
-	struct Spacing {
+	struct Edges {
 		float top;
 		float bottom;
 		float left;
@@ -134,7 +134,7 @@ namespace ui {
 			return this->top + this->bottom;
 		}
 
-		static Spacing uniform(float size) {
+		static Edges uniform(float size) {
 			return { size, size, size, size };
 		}
 	};
@@ -150,6 +150,26 @@ namespace ui {
 		Stretch,
 	};
 
+	struct BorderStyle {
+		Edges edges;
+		Color color;
+		ImageID image;
+		Edges image_slices; // for 9-slicing
+		bool image_fill_center;
+	};
+
+	struct BackgroundStyle {
+		Color color;
+		ImageID image;
+		Fill fill = Fill::Stretch;
+	};
+
+	struct FontStyle {
+		FontID id = FontID::default_font();
+		int size = 16;
+		Color color = WHITE;
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
@@ -161,44 +181,28 @@ namespace ui {
 		std::optional<Color> font_color;
 	};
 
-	// FIXME: move border stuff into own substruct?
-	// border -> border.edges
-	// border_color -> border.color
-	// border_image -> border.image
-	// etc. etc.
 	struct Style {
 		Position position = StaticPosition();
 		Measure width = Percentage(100);
 		Measure height = Percentage(100);
-		Spacing margin;
-		Spacing border;
-		Spacing padding;
+		Edges margin;
+		BorderStyle border;
+		Edges padding;
 		Alignment alignment;
 		Alignment cross_alignment;
-
-		Color background_color;
-		Color font_color = WHITE;
-		FontID font_id = FontID::default_font();
-		int font_size = 16;
-
-		ImageID background_image = ImageID(0);
-		Fill background_fill = Fill::Stretch;
-
-		Color border_color;
-		ImageID border_image = ImageID(0);
-		Spacing border_image_slicing;
-		bool border_image_fill_center = false;
+		BackgroundStyle background;
+		FontStyle font;
 
 		StyleOverride hovered;
 		StyleOverride active;
 		StyleDebug debug;
 
 		inline float horizontal_spacing() const {
-			return margin.horizontal() + border.horizontal() + padding.horizontal();
+			return margin.horizontal() + border.edges.horizontal() + padding.horizontal();
 		}
 
 		inline float vertical_spacing() const {
-			return margin.vertical() + border.vertical() + padding.vertical();
+			return margin.vertical() + border.edges.vertical() + padding.vertical();
 		}
 	};
 
