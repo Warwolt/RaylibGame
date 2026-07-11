@@ -150,6 +150,14 @@ namespace ui {
 		Stretch,
 	};
 
+	struct Border {
+		Edges edges;
+		Color color;
+		ImageID image;
+		Edges image_slices; // for 9-slicing
+		bool image_fill_center;
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
@@ -161,17 +169,12 @@ namespace ui {
 		std::optional<Color> font_color;
 	};
 
-	// FIXME: move border stuff into own substruct?
-	// border -> border.edges
-	// border_color -> border.color
-	// border_image -> border.image
-	// etc. etc.
 	struct Style {
 		Position position = StaticPosition();
 		Measure width = Percentage(100);
 		Measure height = Percentage(100);
 		Edges margin;
-		Edges border;
+		Border border;
 		Edges padding;
 		Alignment alignment;
 		Alignment cross_alignment;
@@ -184,21 +187,16 @@ namespace ui {
 		ImageID background_image = ImageID(0);
 		Fill background_fill = Fill::Stretch;
 
-		Color border_color;
-		ImageID border_image = ImageID(0);
-		Edges border_image_slicing;
-		bool border_image_fill_center = false;
-
 		StyleOverride hovered;
 		StyleOverride active;
 		StyleDebug debug;
 
 		inline float horizontal_spacing() const {
-			return margin.horizontal() + border.horizontal() + padding.horizontal();
+			return margin.horizontal() + border.edges.horizontal() + padding.horizontal();
 		}
 
 		inline float vertical_spacing() const {
-			return margin.vertical() + border.vertical() + padding.vertical();
+			return margin.vertical() + border.edges.vertical() + padding.vertical();
 		}
 	};
 

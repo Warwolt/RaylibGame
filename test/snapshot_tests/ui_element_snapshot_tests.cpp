@@ -15,13 +15,15 @@ constexpr Vector2 SCREEN_SIZE = { SCREEN_WIDTH, SCREEN_HEIGHT };
 const ui::Style button_style = {
 		.width = ui::Pixels(200),
 		.height = ui::Pixels(100),
-		.border = ui::Edges::uniform(10),
+		.border = {
+			.edges = ui::Edges::uniform(10),
+			.color = DARKGREEN,
+		},
 		.padding = ui::Edges::uniform(10),
 		.alignment = ui::Alignment::Center,
 		.cross_alignment = ui::Alignment::Center,
 		.background_color = GREEN,
 		.font_color = DARKGREEN,
-		.border_color = DARKGREEN,
 
 		.hovered = {
 			.border_color = GREEN,
@@ -140,12 +142,14 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 					.width = ui::Pixels(100),
 					.height= ui::Pixels(100),
 					.margin = ui::Edges::uniform(2),
-					.border = ui::Edges::uniform(2),
+					.border = {
+						.edges = ui::Edges::uniform(2),
+						.color = DARKBLUE,
+					},
 					.alignment = ui::Alignment::Center,
 					.cross_alignment = ui::Alignment::Center,
 					.background_color = BLUE,
 					.font_color = WHITE,
-					.border_color = DARKBLUE,
 				},
 				.content = ui::Text {
 					.text = std::format("{}", i + 1),
@@ -225,12 +229,14 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.width = ui::Pixels(100),
 						.height= ui::Pixels(100),
 						.margin = ui::Edges::uniform(2),
-						.border = ui::Edges::uniform(2),
+						.border = {
+							.edges = ui::Edges::uniform(2),
+							.color = DARKBLUE,
+						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
 						.background_color = BLUE,
 						.font_color = WHITE,
-						.border_color = DARKBLUE,
 					},
 				},
 				ui::Element {
@@ -239,12 +245,14 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.width = ui::Pixels(100),
 						.height = ui::Pixels(100),
 						.margin = ui::Edges::uniform(2),
-						.border = ui::Edges::uniform(2),
+						.border = {
+							.edges = ui::Edges::uniform(2),
+							.color = GOLD,
+						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
 						.background_color = YELLOW,
 						.font_color = WHITE,
-						.border_color = GOLD,
 					},
 				},
 				ui::Element {
@@ -252,12 +260,14 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.width = ui::Pixels(100),
 						.height= ui::Pixels(100),
 						.margin = ui::Edges::uniform(2),
-						.border = ui::Edges::uniform(2),
+						.border = {
+							.edges = ui::Edges::uniform(2),
+							.color = DARKBLUE,
+						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
 						.background_color = BLUE,
 						.font_color = WHITE,
-						.border_color = DARKBLUE,
 					},
 				},
 			}
@@ -680,8 +690,10 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 	ui::Element element = {
 		.style = {
 			.width = ui::Percentage(50),
-			.border = ui::Edges::uniform(2),
-			.border_color = GREEN,
+			.border = {
+				.edges = ui::Edges::uniform(2),
+				.color = GREEN,
+			},
 		},
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -714,8 +726,10 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 	ui::Element element = {
 		.style = {
 			.height = ui::Percentage(50),
-			.border = ui::Edges::uniform(2),
-			.border_color = GREEN,
+			.border = {
+				.edges = ui::Edges::uniform(2),
+				.color = GREEN,
+			},
 		},
 		.content = ui::Box {
 			.direction = ui::Direction::Vertical,
@@ -773,10 +787,12 @@ TEST_F(UIElementSnapshotTests, BackgroundImage_FillByStretch) {
 TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 	ui::Element element = {
 		.style = {
-			.border = ui::Edges::uniform(64),
-			.border_image = m_nine_slice_image,
-			.border_image_slicing = ui::Edges::uniform(16),
-			.border_image_fill_center = true,
+			.border = {
+				.edges = ui::Edges::uniform(64),
+				.image = m_nine_slice_image,
+				.image_slices = ui::Edges::uniform(16),
+				.image_fill_center = true,
+			},
 		},
 		.content = ui::Box {},
 	};
@@ -790,10 +806,12 @@ TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
 	ui::Element element = {
 		.style = {
-			.border = ui::Edges::uniform(64),
-			.border_image = m_nine_slice_image,
-			.border_image_slicing = ui::Edges::uniform(16),
-			.border_image_fill_center = false,
+			.border = {
+				.edges = ui::Edges::uniform(64),
+				.image = m_nine_slice_image,
+				.image_slices = ui::Edges::uniform(16),
+				.image_fill_center = false,
+			},
 		},
 		.content = ui::Box {},
 	};

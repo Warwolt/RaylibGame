@@ -38,18 +38,23 @@ void MainMenuScene::update(Game* game) {
 		};
 		ui::Style image_container_style = {
 			.width = ui::Percentage(33),
-			.border = ui::Edges::uniform(16),
+			.border = {
+				.edges = ui::Edges::uniform(16),
+				.image = m_images.final_fantasy_menu_border,
+				.image_slices = ui::Edges::uniform(5),
+			},
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
 			.background_color = Color { 20, 37, 136, 255 },
-			.border_image = m_images.final_fantasy_menu_border,
-			.border_image_slicing = ui::Edges::uniform(5),
+
 		};
 		ui::Style image_style {
 			.width = ui::Pixels(200),
 			.height = ui::Pixels(200),
-			.border = ui::Edges::uniform(2),
-			.border_color = WHITE,
+			.border = {
+				.edges = ui::Edges::uniform(2),
+				.color = WHITE,
+			},
 		};
 		ui::Style item_style = {
 			.padding = {
