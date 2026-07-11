@@ -158,6 +158,18 @@ namespace ui {
 		bool image_fill_center;
 	};
 
+	struct Background {
+		Color color;
+		ImageID image;
+		Fill fill = Fill::Stretch;
+	};
+
+	struct Font {
+		FontID id = FontID::default_font();
+		int size = 16;
+		Color color = WHITE;
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
@@ -178,14 +190,8 @@ namespace ui {
 		Edges padding;
 		Alignment alignment;
 		Alignment cross_alignment;
-
-		Color background_color;
-		Color font_color = WHITE;
-		FontID font_id = FontID::default_font();
-		int font_size = 16;
-
-		ImageID background_image = ImageID(0);
-		Fill background_fill = Fill::Stretch;
+		Background background;
+		Font font;
 
 		StyleOverride hovered;
 		StyleOverride active;

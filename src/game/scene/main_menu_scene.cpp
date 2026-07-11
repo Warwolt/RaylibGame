@@ -34,7 +34,7 @@ void MainMenuScene::update(Game* game) {
 	{
 		ui::Style menu_style = {
 			.alignment = ui::Alignment::Center,
-			.background_image = m_images.mario64_skybox,
+			.background = { .image = m_images.mario64_skybox },
 		};
 		ui::Style image_container_style = {
 			.width = ui::Percentage(33),
@@ -45,7 +45,7 @@ void MainMenuScene::update(Game* game) {
 			},
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
-			.background_color = Color { 20, 37, 136, 255 },
+			.background = { .color = Color { 20, 37, 136, 255 }, }
 
 		};
 		ui::Style image_style {
@@ -61,8 +61,10 @@ void MainMenuScene::update(Game* game) {
 					.bottom = 2,
 				},
 			.alignment = ui::Alignment::Center,
-			.font_color = WHITE,
-			.font_size = 32,
+			.font = {
+				.size = 32,
+				.color = WHITE,
+			}
 		};
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{

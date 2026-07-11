@@ -22,8 +22,12 @@ const ui::Style button_style = {
 		.padding = ui::Edges::uniform(10),
 		.alignment = ui::Alignment::Center,
 		.cross_alignment = ui::Alignment::Center,
-		.background_color = GREEN,
-		.font_color = DARKGREEN,
+		.background = {
+			.color = GREEN,
+		},
+		.font = {
+			.color = DARKGREEN,
+		},
 
 		.hovered = {
 			.border_color = GREEN,
@@ -67,13 +71,13 @@ TEST_F(UIElementSnapshotTests, Box_100_100_Gives_50_50) {
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background_color = RED,
+						.background = { .color = RED },
 					},
 				},
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background_color = GREEN,
+						.background = { .color = GREEN },
 					},
 				}
 			}
@@ -96,19 +100,19 @@ TEST_F(UIElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background_color = RED,
+						.background = { .color = RED },
 					},
 				},
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(25),
-						.background_color = GREEN,
+						.background = { .color = GREEN },
 					},
 				},
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background_color = BLUE,
+						.background = { .color = BLUE },
 					},
 				}
 			}
@@ -148,8 +152,8 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 					},
 					.alignment = ui::Alignment::Center,
 					.cross_alignment = ui::Alignment::Center,
-					.background_color = BLUE,
-					.font_color = WHITE,
+					.background = { .color = BLUE },
+					.font = { .color = WHITE },
 				},
 				.content = ui::Text {
 					.text = std::format("{}", i + 1),
@@ -235,8 +239,8 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
-						.background_color = BLUE,
-						.font_color = WHITE,
+						.background = { .color = BLUE },
+						.font = { .color = WHITE },
 					},
 				},
 				ui::Element {
@@ -251,8 +255,8 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
-						.background_color = YELLOW,
-						.font_color = WHITE,
+						.background = { .color = YELLOW },
+						.font = { .color = WHITE },
 					},
 				},
 				ui::Element {
@@ -266,8 +270,8 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
-						.background_color = BLUE,
-						.font_color = WHITE,
+						.background = { .color = BLUE },
+						.font = { .color = WHITE },
 					},
 				},
 			}
@@ -443,7 +447,7 @@ TEST_F(UIElementSnapshotTests, Text_LeftAligned) {
 			.width = ui::Percentage(100),
 			.padding = ui::Edges::uniform(20),
 			.alignment = ui::Alignment::Start,
-			.font_size = 32,
+			.font = { .size = 32 },
 		},
 		.content = ui::Text {
 			.text = "Left Aligned Text",
@@ -462,7 +466,7 @@ TEST_F(UIElementSnapshotTests, Text_CenterAligned) {
 			.width = ui::Percentage(100),
 			.padding = ui::Edges::uniform(20),
 			.alignment = ui::Alignment::Center,
-			.font_size = 32,
+			.font = { .size = 32 },
 		},
 		.content = ui::Text {
 			.text = "Center Aligned Text",
@@ -481,7 +485,7 @@ TEST_F(UIElementSnapshotTests, Text_RightAligned) {
 			.width = ui::Percentage(100),
 			.padding = ui::Edges::uniform(20),
 			.alignment = ui::Alignment::End,
-			.font_size = 32,
+			.font = { .size = 32 },
 		},
 		.content = ui::Text {
 			.text = "Right Aligned Text",
@@ -508,7 +512,7 @@ TEST_F(UIElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 						.margin = {
 							.bottom = 16,
 						},
-						.font_size = 32,
+						.font = { .size = 32 },
 					},
 					.content = ui::Text {
 						.text = "Super Metroid",
@@ -757,8 +761,10 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 TEST_F(UIElementSnapshotTests, BackgroundImage_FillByRepeat) {
 	ui::Element element = {
 		.style = {
-			.background_image = m_small_test_image,
-			.background_fill = ui::Fill::Repeat,
+			.background = {
+				.image = m_small_test_image,
+				.fill = ui::Fill::Repeat,
+			},
 		},
 		.content = ui::Box {},
 	};
@@ -772,8 +778,10 @@ TEST_F(UIElementSnapshotTests, BackgroundImage_FillByRepeat) {
 TEST_F(UIElementSnapshotTests, BackgroundImage_FillByStretch) {
 	ui::Element element = {
 		.style = {
-			.background_image = m_small_test_image,
-			.background_fill = ui::Fill::Stretch,
+			.background = {
+				.image = m_small_test_image,
+				.fill = ui::Fill::Stretch,
+			},
 		},
 		.content = ui::Box {},
 	};
