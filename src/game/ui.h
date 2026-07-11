@@ -150,7 +150,7 @@ namespace ui {
 		Stretch,
 	};
 
-	struct Border {
+	struct BorderStyle {
 		Edges edges;
 		Color color;
 		ImageID image;
@@ -158,13 +158,13 @@ namespace ui {
 		bool image_fill_center;
 	};
 
-	struct Background {
+	struct BackgroundStyle {
 		Color color;
 		ImageID image;
 		Fill fill = Fill::Stretch;
 	};
 
-	struct Font {
+	struct FontStyle {
 		FontID id = FontID::default_font();
 		int size = 16;
 		Color color = WHITE;
@@ -186,12 +186,12 @@ namespace ui {
 		Measure width = Percentage(100);
 		Measure height = Percentage(100);
 		Edges margin;
-		Border border;
+		BorderStyle border;
 		Edges padding;
 		Alignment alignment;
 		Alignment cross_alignment;
-		Background background;
-		Font font;
+		BackgroundStyle background;
+		FontStyle font;
 
 		StyleOverride hovered;
 		StyleOverride active;

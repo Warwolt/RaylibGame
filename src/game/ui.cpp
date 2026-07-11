@@ -10,8 +10,6 @@
 
 namespace ui {
 
-	using RaylibFont = ::Font;
-
 	static float alignment_padding(Alignment alignment, float remainder) {
 		switch (alignment) {
 			case Alignment::Start:
@@ -63,7 +61,7 @@ namespace ui {
 	}
 
 	// based on Raylib MeasureTextEx in rtext.c
-	static int measure_word_width(std::string_view word, const RaylibFont& font, int font_size, int font_spacing) {
+	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
 		if (font.texture.id == 0) {
 			return 0;
 		}
@@ -87,7 +85,7 @@ namespace ui {
 		const Style& style = element->style;
 
 		if (Text* text = element->text()) {
-			const RaylibFont font = resources.get_font(style.font.id);
+			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
 			const float element_width = fit_size_to_parent(style.width, parent_size.x);
 			const float element_height = fit_size_to_parent(style.height, parent_size.y);
@@ -488,7 +486,7 @@ namespace ui {
 
 		/* Draw content */
 		if (const ui::Text* text = element.text()) {
-			const RaylibFont& font = resources.get_font(element.style.font.id);
+			const Font font = resources.get_font(element.style.font.id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
