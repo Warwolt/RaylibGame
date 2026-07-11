@@ -185,6 +185,7 @@ namespace ui {
 		Position position = StaticPosition();
 		Measure width = Percentage(100);
 		Measure height = Percentage(100);
+		bool fit_content = false; // width and height ignored if true
 		Edges margin;
 		BorderStyle border;
 		Edges padding;

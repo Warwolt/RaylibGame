@@ -158,10 +158,11 @@ namespace ui {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
-			/* Size parent content  */
-			Rectangle& content_box = layout->content_box;
-			content_box.width = max_size.x - style.horizontal_spacing();
-			content_box.height = max_size.y - style.vertical_spacing();
+			/* Compute max size of parent content box */
+			const Vector2 max_parent_size = {
+				max_size.x - style.horizontal_spacing(),
+				max_size.y - style.vertical_spacing(),
+			};
 
 			/* Recursively size all box children */
 			{
@@ -173,8 +174,7 @@ namespace ui {
 				std::vector<IndexedVector2> desired_sizes;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
-					Vector2 parent_size = { content_box.width, content_box.height };
-					Vector2 desired_size = compute_desired_element_size(resources, parent_size, &child);
+					const Vector2 desired_size = compute_desired_element_size(resources, max_parent_size, &child);
 					desired_sizes.push_back({ i, desired_size });
 				}
 				// 2. sort desired sizes from smallest to biggest
@@ -187,8 +187,8 @@ namespace ui {
 				};
 				std::sort(desired_sizes.begin(), desired_sizes.end(), ordering);
 				// 3. from smallest to biggest, compute actual sizes
-				float remaining_width = content_box.width;
-				float remaining_height = content_box.height;
+				float remaining_width = max_parent_size.x;
+				float remaining_height = max_parent_size.y;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					const size_t remaining_children = box->children.size() - i;
 					const IndexedVector2& desired_size = desired_sizes[i];
@@ -196,19 +196,28 @@ namespace ui {
 					if (box->direction == Direction::Horizontal) {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
-							.y = std::min<float>(desired_size.value.y, content_box.height),
+							.y = std::min<float>(desired_size.value.y, max_parent_size.y),
 						};
 						remaining_width -= child_size.x;
 						compute_constrained_element_sizes(resources, child_size, &child);
 					} else {
 						const Vector2 child_size = {
-							.x = std::min<float>(desired_size.value.x, content_box.width),
+							.x = std::min<float>(desired_size.value.x, max_parent_size.x),
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
 						compute_constrained_element_sizes(resources, child_size, &child);
 						remaining_height -= child.layout.margin_box.height;
 					}
 				}
+			}
+
+			/* Size parent content */
+			Rectangle& content_box = layout->content_box;
+			if (element->style.fit_content) {
+				//
+			} else {
+				content_box.width = max_parent_size.x;
+				content_box.height = max_parent_size.y;
 			}
 		} else {
 			ABORT("Unhandled ui::Content case!");
