@@ -57,6 +57,7 @@ void MainMenuScene::update(Game* game) {
 			},
 		};
 		ui::Style item_style = {
+			.width = ui::Pixels(150),
 			.padding = {
 					.bottom = 2,
 				},
@@ -82,10 +83,41 @@ void MainMenuScene::update(Game* game) {
 				ui::Direction::Vertical,
 				ui::Style {
 					.padding = ui::Edges::uniform(16),
+					.alignment = ui::Alignment::Center,
+					.cross_alignment = ui::Alignment::Center,
 				}
 			);
 			{
-				m_ui.text("Continue", item_style);
+				m_ui.box_begin(
+					ui::Direction::Horizontal,
+					ui::Style {
+						.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
+						.fit_content = true,
+						.debug = {
+							.show_content_outline = true,
+						},
+					},
+					"container box"
+				);
+				{
+					const int indicator_size = 24;
+					m_ui.image(
+						m_images.developer_face,
+						ui::Style {
+							.position =
+								ui::AbsolutePosition {
+									.x = ui::Pixels(-indicator_size),
+									.y = ui::Pixels(2),
+								},
+							.width = ui::Pixels(indicator_size),
+							.height = ui::Pixels(indicator_size),
+						},
+						"focus indicator"
+					);
+					m_ui.text("Continue", item_style);
+				}
+				m_ui.box_end();
+
 				m_ui.text("Load Game", item_style);
 				m_ui.text("New Game", item_style);
 				m_ui.text("Settings", item_style);

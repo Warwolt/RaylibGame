@@ -647,11 +647,12 @@ namespace ui {
 		layout_element(resources, window_size, &m_root_element);
 	}
 
-	void UserInterface::box_begin(Direction direction, std::optional<Style> style) {
+	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
+				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
 				.content = Box { .direction = direction },
 			}
@@ -665,22 +666,24 @@ namespace ui {
 		m_parent_stack.pop_back();
 	}
 
-	void UserInterface::text(std::string_view text, std::optional<Style> style) {
+	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string debug_name) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
+				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
 			}
 		);
 	}
 
-	void UserInterface::image(ImageID image, std::optional<Style> style) {
+	void UserInterface::image(ImageID image, std::optional<Style> style, std::string debug_name) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
+				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
 				.content = Image { .id = image },
 			}
