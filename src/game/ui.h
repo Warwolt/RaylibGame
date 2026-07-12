@@ -21,7 +21,7 @@ namespace ui {
 	};
 
 	struct Image {
-		ImageID image;
+		ImageID image; // FIXME: rename to id (image->id makes more sense than image->image)
 	};
 
 	enum class Direction {
@@ -183,8 +183,8 @@ namespace ui {
 
 	struct Style {
 		Position position = StaticPosition();
-		Measure width = Percentage(100);
-		Measure height = Percentage(100);
+		std::optional<Measure> width;
+		std::optional<Measure> height;
 		bool fit_content = false; // width and height ignored if true
 		Edges margin;
 		BorderStyle border;

@@ -399,8 +399,8 @@ TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vert
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
-	ui::Element element = {
+ui::Element box_fit_content(ui::Direction direction, std::vector<ui::Element> children) {
+	return {
 		.style = {
 			.fit_content = true,
 			.border = {
@@ -410,40 +410,33 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
 		},
 		.content =
 			ui::Box {
-				.direction = ui::Direction::Horizontal,
-				.children = {},
-			},
+				.direction = direction,
+				.children = children,
+			}
 	};
+}
+
+TEST_F(UIElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
+	ui::Element element = box_fit_content(ui::Direction::Horizontal, {});
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
-
-// FIXME: horizontal, vertical case
 
 TEST_F(UIElementSnapshotTests, Box_FitContent_TextChild_FitsText) {
-	ui::Element element = {
-		.style = {
-			.fit_content = true,
-			.border = {
-				.edges = ui::Edges::uniform(2),
-				.color = GREEN,
-			},
-		},
-		.content =
-			ui::Box {
-				.direction = ui::Direction::Horizontal,
-				.children = {
-					ui::Element {
-						.content = ui::Text {
-							.text = "Hello world",
-						},
+	ui::Element element = box_fit_content(
+		ui::Direction::Horizontal,
+		{
+			ui::Element {
+				.content =
+					ui::Text {
+						.text = "Hello world",
 					},
-				},
 			},
-	};
+		}
+	);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
@@ -451,9 +444,55 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_TextChild_FitsText) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-// FIXME: write tests for:
-// Box fit content, text
-// Box fit content, image, text
+TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Horizontal) {
+	ui::Element element = box_fit_content(
+		ui::Direction::Horizontal,
+		{
+			ui::Element {
+				.content =
+					ui::Text {
+						.text = "Hello world",
+					},
+			},
+			ui::Element {
+				.content =
+					ui::Image {
+						.image = m_small_test_image,
+					},
+			},
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Vertical) {
+	ui::Element element = box_fit_content(
+		ui::Direction::Vertical,
+		{
+			ui::Element {
+				.content =
+					ui::Text {
+						.text = "Hello world",
+					},
+			},
+			ui::Element {
+				.content =
+					ui::Image {
+						.image = m_small_test_image,
+					},
+			},
+		}
+	);
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
 
 TEST_F(UIElementSnapshotTests, Box_DefaultStyle) {
 	ui::Element element = {
@@ -614,7 +653,7 @@ TEST_F(UIElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_DefaultStyle_FillsParentContainer) {
+TEST_F(UIElementSnapshotTests, Image_DefaultStyle_UsesIntrinsicSize) {
 	ui::Element element = {
 		.content =
 			ui::Image {
@@ -630,32 +669,53 @@ TEST_F(UIElementSnapshotTests, Image_DefaultStyle_FillsParentContainer) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
-	ui::Element element = {
-		.style = {
-			.height = ui::Percentage(50)
-		},
+ui::Element image_relative_size(ui::Style parent_style, ui::Direction direction, ImageID image) {
+	return {
+		.style = parent_style,
 		.content = ui::Box {
-			.direction = ui::Direction::Horizontal,
+			.direction = direction,
 			.children = {
 				ui::Element {
+					.style = {
+						.width = ui::Percentage(100),
+						.height = ui::Percentage(100),
+					},
 					.content = ui::Image {
-						.image = m_big_test_image,
+						.image = image,
 					}
 				},
 				ui::Element {
+					.style = {
+						.width = ui::Percentage(100),
+						.height = ui::Percentage(100),
+					},
 					.content = ui::Image {
-						.image = m_big_test_image,
+						.image = image,
 					}
 				},
 				ui::Element {
+					.style = {
+						.width = ui::Percentage(100),
+						.height = ui::Percentage(100),
+					},
 					.content = ui::Image {
-						.image = m_big_test_image,
+						.image = image,
 					}
 				},
 			},
 		},
 	};
+}
+
+TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
+	ui::Element element = image_relative_size(
+		ui::Style {
+			.width = ui::Percentage(100),
+			.height = ui::Percentage(50),
+		},
+		ui::Direction::Horizontal,
+		m_big_test_image
+	);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
@@ -664,31 +724,14 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
 }
 
 TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
-	ui::Element element = {
-		.style = {
-			.width = ui::Percentage(50)
+	ui::Element element = image_relative_size(
+		ui::Style {
+			.width = ui::Percentage(50),
+			.height = ui::Percentage(100),
 		},
-		.content = ui::Box {
-			.direction = ui::Direction::Vertical,
-			.children = {
-				ui::Element {
-					.content = ui::Image {
-						.image = m_big_test_image,
-					}
-				},
-				ui::Element {
-					.content = ui::Image {
-						.image = m_big_test_image,
-					}
-				},
-				ui::Element {
-					.content = ui::Image {
-						.image = m_big_test_image,
-					}
-				},
-			},
-		},
-	};
+		ui::Direction::Vertical,
+		m_big_test_image
+	);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });

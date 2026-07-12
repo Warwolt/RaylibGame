@@ -49,6 +49,20 @@ namespace ui {
 		};
 	}
 
+	static std::pair<Measure, Measure> element_default_size(const ResourceManager& resources, const Element& element) {
+		if (const Image* image = element.image()) {
+			Texture2D texture = resources.get_image(image->image);
+			return {
+				Pixels(texture.width),
+				Pixels(texture.height),
+			};
+		}
+		return {
+			Percentage(100),
+			Percentage(100),
+		};
+	}
+
 	static float fit_size_to_parent(const Measure& size, float parent_size) {
 		float constrained_size = 0.0f;
 		if (const Pixels* pixels = size.pixels()) {
@@ -104,12 +118,13 @@ namespace ui {
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
+		const auto& [default_width, default_height] = element_default_size(resources, *element);
 
 		if (Text* text = element->text()) {
 			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
-			const float element_width = fit_size_to_parent(style.width, parent_size.x);
-			const float element_height = fit_size_to_parent(style.height, parent_size.y);
+			const float element_width = fit_size_to_parent(style.width.value_or(default_width), parent_size.x);
+			const float element_height = fit_size_to_parent(style.height.value_or(default_height), parent_size.y);
 			const float max_text_width = element_width - style.horizontal_spacing();
 			const float max_text_height = element_height - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
@@ -145,20 +160,20 @@ namespace ui {
 				}
 			}
 			const float paragraph_height = cursor.y + style.font.size;
-			const bool has_absolute_height = style.height.is_pixels();
+			const bool has_absolute_height = style.height.value_or(default_height).is_pixels();
 			desired_size = {
 				.x = element_width,
 				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
 			};
 		} else if (element->is_image()) {
 			desired_size = {
-				.x = fit_size_to_parent(style.width, parent_size.x),
-				.y = fit_size_to_parent(style.height, parent_size.y),
+				.x = fit_size_to_parent(style.width.value_or(default_width), parent_size.x),
+				.y = fit_size_to_parent(style.height.value_or(default_height), parent_size.y),
 			};
 		} else if (element->is_box()) {
 			desired_size = {
-				.x = fit_size_to_parent(style.width, parent_size.x),
-				.y = fit_size_to_parent(style.height, parent_size.y),
+				.x = fit_size_to_parent(style.width.value_or(default_width), parent_size.x),
+				.y = fit_size_to_parent(style.height.value_or(default_height), parent_size.y),
 			};
 		} else {
 			ABORT("Unhandled ui::Content case!");
@@ -397,6 +412,8 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
+		const auto& [default_width, default_height] = element_default_size(resources, element);
+
 		/* Draw padding box */
 		Color background_color = element.style.background.color;
 		if (element.state.is_active) {
@@ -536,13 +553,13 @@ namespace ui {
 			// just a portion of it (in case of an overflow).
 			float source_width = (float)texture.width;
 			float source_height = (float)texture.height;
-			if (const Pixels* pixel_width = element.style.width.pixels()) {
+			if (const Pixels* pixel_width = element.style.width.value_or(default_width).pixels()) {
 				if (pixel_width->value > element.layout.content_box.width) {
 					const float scale = texture.width / pixel_width->value;
 					source_width = scale * element.layout.content_box.width;
 				}
 			}
-			if (const Pixels* pixel_height = element.style.height.pixels()) {
+			if (const Pixels* pixel_height = element.style.height.value_or(default_height).pixels()) {
 				if (pixel_height->value > element.layout.content_box.height) {
 					const float scale = texture.height / pixel_height->value;
 					source_height = scale * element.layout.content_box.height;
