@@ -21,7 +21,7 @@ namespace ui {
 	};
 
 	struct Image {
-		ImageID image; // FIXME: rename to id (image->id makes more sense than image->image)
+		ImageID id;
 	};
 
 	enum class Direction {

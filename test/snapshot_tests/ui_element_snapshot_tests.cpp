@@ -457,7 +457,7 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Horizonta
 			ui::Element {
 				.content =
 					ui::Image {
-						.image = m_small_test_image,
+						.id = m_small_test_image,
 					},
 			},
 		}
@@ -482,7 +482,7 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Vertical)
 			ui::Element {
 				.content =
 					ui::Image {
-						.image = m_small_test_image,
+						.id = m_small_test_image,
 					},
 			},
 		}
@@ -657,7 +657,7 @@ TEST_F(UIElementSnapshotTests, Image_DefaultStyle_UsesIntrinsicSize) {
 	ui::Element element = {
 		.content =
 			ui::Image {
-				.image = m_big_test_image,
+				.id = m_big_test_image,
 			},
 	};
 
@@ -681,7 +681,7 @@ ui::Element image_relative_size(ui::Style parent_style, ui::Direction direction,
 						.height = ui::Percentage(100),
 					},
 					.content = ui::Image {
-						.image = image,
+						.id = image,
 					}
 				},
 				ui::Element {
@@ -690,7 +690,7 @@ ui::Element image_relative_size(ui::Style parent_style, ui::Direction direction,
 						.height = ui::Percentage(100),
 					},
 					.content = ui::Image {
-						.image = image,
+						.id = image,
 					}
 				},
 				ui::Element {
@@ -699,7 +699,7 @@ ui::Element image_relative_size(ui::Style parent_style, ui::Direction direction,
 						.height = ui::Percentage(100),
 					},
 					.content = ui::Image {
-						.image = image,
+						.id = image,
 					}
 				},
 			},
@@ -752,7 +752,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 						},
 						.content =
 							ui::Image {
-								.image = m_big_test_image,
+								.id = m_big_test_image,
 							},
 					},
 					ui::Element {
@@ -762,7 +762,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 					},
 					.content =
 						ui::Image {
-							.image = m_big_test_image,
+							.id = m_big_test_image,
 						},
 					},
 					ui::Element {
@@ -772,7 +772,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 					},
 					.content =
 						ui::Image {
-							.image = m_big_test_image,
+							.id = m_big_test_image,
 						},
 					},
 				},
@@ -808,7 +808,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 					},
 					.content =
 						ui::Image {
-							.image = m_big_test_image,
+							.id = m_big_test_image,
 						},
 				},
 			},
@@ -844,7 +844,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 					},
 					.content =
 						ui::Image {
-							.image = m_big_test_image,
+							.id = m_big_test_image,
 						},
 				},
 			},

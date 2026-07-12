@@ -51,7 +51,7 @@ namespace ui {
 
 	static std::pair<Measure, Measure> element_default_size(const ResourceManager& resources, const Element& element) {
 		if (const Image* image = element.image()) {
-			Texture2D texture = resources.get_image(image->image);
+			Texture2D texture = resources.get_image(image->id);
 			return {
 				Pixels(texture.width),
 				Pixels(texture.height),
@@ -544,7 +544,7 @@ namespace ui {
 			}
 			Raylib_EndScissorMode();
 		} else if (const Image* image = element.image()) {
-			const Texture2D texture = resources.get_image(image->image);
+			const Texture2D texture = resources.get_image(image->id);
 
 			// Handle overflow of absolutely sized images
 			//
@@ -649,7 +649,7 @@ namespace ui {
 		parent->box()->children.push_back(
 			Element {
 				.style = style.value_or(Style {}),
-				.content = Image { .image = image },
+				.content = Image { .id = image },
 			}
 		);
 	}
