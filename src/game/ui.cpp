@@ -106,20 +106,6 @@ namespace ui {
 		}
 	}
 
-	// FIXME: remove this, not as general as I thought
-	static float fit_size_to_maximum(const Measure& size, float max_size) {
-		float constrained_size = 0.0f;
-		if (const Pixels* pixels = size.pixels()) {
-			// Constrain absolute size to the given max size
-			constrained_size = std::min<float>(pixels->value, max_size);
-		}
-		if (const Percentage* percentage = size.percentage()) {
-			// Give a pixel value from a percentage value relative the max size
-			constrained_size = percentage->fractional() * max_size;
-		}
-		return constrained_size;
-	}
-
 	// computes space that the box children will use, given the layout direction
 	static Vector2 compute_child_content_size(const Box& box) {
 		Vector2 content_size = {};
@@ -155,7 +141,14 @@ namespace ui {
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
 
 			// The actual paragraph width, might be smaller than content area
-			const float paragraph_width = fit_size_to_maximum(style.width.value_or(intrinsic_size.x), max_content_width);
+			float paragraph_width = 0;
+			const Measure& content_width = style.width.value_or(intrinsic_size.x);
+			if (const Pixels* pixel_width = content_width.pixels()) {
+				paragraph_width = std::min<float>(pixel_width->value, max_content_width);
+			}
+			if (const Percentage* percentage_width = content_width.percentage()) {
+				paragraph_width = percentage_width->fractional() * max_content_width;
+			}
 
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
@@ -407,7 +400,7 @@ namespace ui {
 		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
 		const Vector2 top_left = { 0, 0 };
 		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
-		const Vector2 max_size = { 
+		const Vector2 max_size = {
 			.x = std::min(desired_size.x, containing_box.width),
 			.y = std::min(desired_size.y, containing_box.height),
 		};
