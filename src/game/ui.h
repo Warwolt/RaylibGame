@@ -205,6 +205,10 @@ namespace ui {
 		inline float vertical_spacing() const {
 			return margin.vertical() + border.edges.vertical() + padding.vertical();
 		}
+
+		inline Vector2 spacing() const {
+			return { horizontal_spacing(), vertical_spacing() };
+		}
 	};
 
 	/* Layout */

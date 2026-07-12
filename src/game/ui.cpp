@@ -10,6 +10,26 @@
 
 namespace ui {
 
+	// based on Raylib MeasureTextEx in rtext.c
+	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
+		if (font.texture.id == 0) {
+			return 0;
+		}
+
+		int word_width = 0;
+		for (char letter : word) {
+			const int index = GetGlyphIndex(font, letter);
+			if (font.glyphs[index].advanceX > 0) {
+				word_width += font.glyphs[index].advanceX;
+			} else {
+				word_width += (font.recs[index].width + font.glyphs[index].offsetX);
+			}
+		}
+
+		const float scale_factor = font_size / (float)font.baseSize;
+		return word_width * scale_factor + font_spacing * (word.length() - 1);
+	}
+
 	static float alignment_padding(Alignment alignment, float remainder) {
 		switch (alignment) {
 			case Alignment::Start:
@@ -49,18 +69,35 @@ namespace ui {
 		};
 	}
 
-	static std::pair<Measure, Measure> element_default_size(const ResourceManager& resources, const Element& element) {
-		if (const Image* image = element.image()) {
+	static std::pair<Measure, Measure> get_intrinsic_size(const ResourceManager& resources, const Element& element) {
+		if (const Text* text = element.text()) {
+			// Intrinsic size of text element is just one long line
+			const Font font = resources.get_font(element.style.font.id);
+			const int font_size = element.style.font.size;
+			const float width = measure_word_width(text->text, font, font_size, 0);
+			return {
+				Pixels(width),
+				Pixels(font_size),
+			};
+		} else if (const Image* image = element.image()) {
+			// Intrinsic size of image is the size of the texture itself
 			Texture2D texture = resources.get_image(image->id);
 			return {
 				Pixels(texture.width),
 				Pixels(texture.height),
 			};
+		} else if (element.is_box()) {
+			return {
+				Percentage(100),
+				Percentage(100),
+			};
+		} else {
+			ABORT("Missing ui::Content case!");
+			return {
+				Percentage(100),
+				Percentage(100),
+			};
 		}
-		return {
-			Percentage(100),
-			Percentage(100),
-		};
 	}
 
 	static float fit_size_to_maximum(const Measure& size, float max_size) {
@@ -97,38 +134,19 @@ namespace ui {
 		return content_size;
 	}
 
-	// based on Raylib MeasureTextEx in rtext.c
-	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
-		if (font.texture.id == 0) {
-			return 0;
-		}
-
-		int word_width = 0;
-		for (char letter : word) {
-			const int index = GetGlyphIndex(font, letter);
-			if (font.glyphs[index].advanceX > 0) {
-				word_width += font.glyphs[index].advanceX;
-			} else {
-				word_width += (font.recs[index].width + font.glyphs[index].offsetX);
-			}
-		}
-
-		const float scale_factor = font_size / (float)font.baseSize;
-		return word_width * scale_factor + font_spacing * (word.length() - 1);
-	}
-
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
-		const auto& [default_width, default_height] = element_default_size(resources, *element);
+		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_size(resources, *element);
 
 		if (Text* text = element->text()) {
 			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
-			const float element_width = fit_size_to_maximum(style.width.value_or(default_width), parent_size.x);
-			const float element_height = fit_size_to_maximum(style.height.value_or(default_height), parent_size.y);
-			const float max_text_width = element_width - style.horizontal_spacing();
-			const float max_text_height = element_height - style.vertical_spacing();
+			const float fitted_width = fit_size_to_maximum(style.width.value_or(intrinsic_width), parent_size.x);
+			const float fitted_height =
+				style.height.has_value() ? fit_size_to_maximum(*style.height, parent_size.y) : parent_size.y;
+			const float max_text_width = fitted_width - style.horizontal_spacing();
+			const float max_text_height = fitted_height - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
@@ -162,20 +180,20 @@ namespace ui {
 				}
 			}
 			const float paragraph_height = cursor.y + style.font.size;
-			const bool has_absolute_height = style.height.value_or(default_height).is_pixels();
+			const bool has_absolute_height = style.height.has_value() && style.height->is_pixels();
 			desired_size = {
-				.x = element_width,
-				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
+				.x = fitted_width,
+				.y = has_absolute_height ? fitted_height : paragraph_height + style.vertical_spacing(),
 			};
 		} else if (element->is_image()) {
 			desired_size = {
-				.x = fit_size_to_maximum(style.width.value_or(default_width), parent_size.x),
-				.y = fit_size_to_maximum(style.height.value_or(default_height), parent_size.y),
+				.x = fit_size_to_maximum(style.width.value_or(intrinsic_width), parent_size.x),
+				.y = fit_size_to_maximum(style.height.value_or(intrinsic_height), parent_size.y),
 			};
 		} else if (element->is_box()) {
 			desired_size = {
-				.x = fit_size_to_maximum(style.width.value_or(default_width), parent_size.x),
-				.y = fit_size_to_maximum(style.height.value_or(default_height), parent_size.y),
+				.x = fit_size_to_maximum(style.width.value_or(intrinsic_width), parent_size.x),
+				.y = fit_size_to_maximum(style.height.value_or(intrinsic_height), parent_size.y),
 			};
 		} else {
 			ABORT("Unhandled ui::Content case!");
@@ -414,7 +432,7 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
-		const auto& [default_width, default_height] = element_default_size(resources, element);
+		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_size(resources, element);
 
 		/* Draw padding box */
 		Color background_color = element.style.background.color;
@@ -555,13 +573,13 @@ namespace ui {
 			// just a portion of it (in case of an overflow).
 			float source_width = (float)texture.width;
 			float source_height = (float)texture.height;
-			if (const Pixels* pixel_width = element.style.width.value_or(default_width).pixels()) {
+			if (const Pixels* pixel_width = element.style.width.value_or(intrinsic_width).pixels()) {
 				if (pixel_width->value > element.layout.content_box.width) {
 					const float scale = texture.width / pixel_width->value;
 					source_width = scale * element.layout.content_box.width;
 				}
 			}
-			if (const Pixels* pixel_height = element.style.height.value_or(default_height).pixels()) {
+			if (const Pixels* pixel_height = element.style.height.value_or(intrinsic_height).pixels()) {
 				if (pixel_height->value > element.layout.content_box.height) {
 					const float scale = texture.height / pixel_height->value;
 					source_height = scale * element.layout.content_box.height;
