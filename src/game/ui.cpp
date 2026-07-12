@@ -106,6 +106,7 @@ namespace ui {
 		}
 	}
 
+	// FIXME: remove this, not as general as I thought
 	static float fit_size_to_maximum(const Measure& size, float max_size) {
 		float constrained_size = 0.0f;
 		if (const Pixels* pixels = size.pixels()) {
@@ -140,19 +141,18 @@ namespace ui {
 		return content_size;
 	}
 
+	// compute desired size of margin box
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
 		const Measure2 intrinsic_size = get_intrinsic_content_size(resources, *element);
+		const float max_content_width = parent_size.x - style.horizontal_spacing();
+		const float max_content_height = parent_size.y - style.vertical_spacing();
 
 		if (Text* text = element->text()) {
 			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
-
-			// Maximum content area
-			const float max_content_width = parent_size.x - style.horizontal_spacing();
-			const float max_content_height = parent_size.y - style.vertical_spacing();
 
 			// The actual paragraph width, might be smaller than content area
 			const float paragraph_width = fit_size_to_maximum(style.width.value_or(intrinsic_size.x), max_content_width);
@@ -196,16 +196,23 @@ namespace ui {
 				.x = paragraph_width + style.horizontal_spacing(),
 				.y = content_height + style.vertical_spacing(),
 			};
-		} else if (element->is_image()) {
-			desired_size = {
-				.x = fit_size_to_maximum(style.width.value_or(intrinsic_size.x), parent_size.x),
-				.y = fit_size_to_maximum(style.height.value_or(intrinsic_size.y), parent_size.y),
-			};
-		} else if (element->is_box()) {
-			desired_size = {
-				.x = fit_size_to_maximum(style.width.value_or(intrinsic_size.x), parent_size.x),
-				.y = fit_size_to_maximum(style.height.value_or(intrinsic_size.y), parent_size.y),
-			};
+		} else if (element->is_image() || element->is_box()) {
+			/* Constrain style width */
+			const Measure& content_width = style.width.value_or(intrinsic_size.x);
+			if (const Pixels* pixel_width = content_width.pixels()) {
+				desired_size.x = std::min<float>(pixel_width->value + style.horizontal_spacing(), parent_size.x);
+			}
+			if (const Percentage* percentage_width = content_width.percentage()) {
+				desired_size.x = percentage_width->fractional() * parent_size.x + style.horizontal_spacing();
+			}
+			/* Constrain style height */
+			const Measure& content_height = style.height.value_or(intrinsic_size.x);
+			if (const Pixels* pixel_height = content_height.pixels()) {
+				desired_size.y = std::min<float>(pixel_height->value + style.vertical_spacing(), parent_size.y);
+			}
+			if (const Percentage* percentage_height = content_height.percentage()) {
+				desired_size.y = percentage_height->fractional() * parent_size.y + style.vertical_spacing();
+			}
 		} else {
 			ABORT("Unhandled ui::Content case!");
 		}
@@ -213,15 +220,13 @@ namespace ui {
 		return desired_size;
 	}
 
+	// `max_size` is the constraint on the margin box size
 	static void compute_constrained_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
 		/* Compute size of content box */
-		if (element->is_text()) {
-			layout->content_box.width = max_size.x - style.horizontal_spacing();
-			layout->content_box.height = max_size.y - style.vertical_spacing();
-		} else if (element->is_image()) {
+		if (element->is_text() || element->is_image()) {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
@@ -399,10 +404,14 @@ namespace ui {
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		PROFILING_SCOPE();
+		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
 		const Vector2 top_left = { 0, 0 };
 		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
-		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
-		compute_constrained_element_sizes(resources, desired_size, element);
+		const Vector2 max_size = { 
+			.x = std::min(desired_size.x, containing_box.width),
+			.y = std::min(desired_size.y, containing_box.height),
+		};
+		compute_constrained_element_sizes(resources, max_size, element);
 		compute_element_positions(top_left, containing_box, element);
 	}
 

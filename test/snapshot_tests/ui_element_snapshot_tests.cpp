@@ -270,6 +270,8 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
+	EXPECT_EQ(element.box()->children[0].layout.content_box.width, 100);
+	EXPECT_EQ(element.box()->children[0].layout.content_box.height, 100);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
@@ -824,6 +826,8 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
+	EXPECT_EQ(element.layout.content_box.width, SCREEN_SIZE.x / 2);
+	EXPECT_EQ(element.layout.margin_box.width, SCREEN_SIZE.x / 2 + 2 + 2);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
