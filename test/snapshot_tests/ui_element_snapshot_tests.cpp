@@ -64,8 +64,8 @@ TEST_F(UIElementSnapshotTests, Box_100_100_Gives_50_50) {
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
-	EXPECT_EQ(std::get<ui::Box>(element.content).children[0].layout.margin_box.width, SCREEN_WIDTH / 2);
-	EXPECT_EQ(std::get<ui::Box>(element.content).children[1].layout.margin_box.width, SCREEN_WIDTH / 2);
+	EXPECT_EQ(element.box()->children[0].layout.margin_box.width, SCREEN_WIDTH / 2);
+	EXPECT_EQ(element.box()->children[1].layout.margin_box.width, SCREEN_WIDTH / 2);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
@@ -99,9 +99,9 @@ TEST_F(UIElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
-	EXPECT_EQ(std::get<ui::Box>(element.content).children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
-	EXPECT_EQ(std::get<ui::Box>(element.content).children[1].layout.margin_box.width, SCREEN_WIDTH * 0.25);
-	EXPECT_EQ(std::get<ui::Box>(element.content).children[2].layout.margin_box.width, SCREEN_WIDTH * 0.375);
+	EXPECT_EQ(element.box()->children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
+	EXPECT_EQ(element.box()->children[1].layout.margin_box.width, SCREEN_WIDTH * 0.25);
+	EXPECT_EQ(element.box()->children[2].layout.margin_box.width, SCREEN_WIDTH * 0.375);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
@@ -790,6 +790,12 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
+	EXPECT_EQ(element.box()->children[0].layout.content_box.width, 64);
+	EXPECT_EQ(element.box()->children[0].layout.content_box.height, 50);
+	EXPECT_EQ(element.box()->children[1].layout.content_box.width, 128);
+	EXPECT_EQ(element.box()->children[1].layout.content_box.height, 100);
+	EXPECT_EQ(element.box()->children[2].layout.content_box.width, 256);
+	EXPECT_EQ(element.box()->children[2].layout.content_box.height, 200);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
