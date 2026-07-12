@@ -69,7 +69,13 @@ namespace ui {
 		};
 	}
 
-	static std::pair<Measure, Measure> get_intrinsic_size(const ResourceManager& resources, const Element& element) {
+	struct Measure2 {
+		Measure x;
+		Measure y;
+	};
+
+	// The size of an element only considering its content.
+	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element) {
 		if (const Text* text = element.text()) {
 			// Intrinsic size of text element is just one long line
 			const Font font = resources.get_font(element.style.font.id);
@@ -137,17 +143,20 @@ namespace ui {
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
-		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_size(resources, *element);
+		const Measure2 intrinsic_size = get_intrinsic_content_size(resources, *element);
 
 		if (Text* text = element->text()) {
 			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
-			const float fitted_width = fit_size_to_maximum(style.width.value_or(intrinsic_width), parent_size.x);
-			const float fitted_height =
-				style.height.has_value() ? fit_size_to_maximum(*style.height, parent_size.y) : parent_size.y;
-			const float max_text_width = fitted_width - style.horizontal_spacing();
-			const float max_text_height = fitted_height - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
+
+			// Maximum content area
+			const float max_content_width = parent_size.x - style.horizontal_spacing();
+			const float max_content_height = parent_size.y - style.vertical_spacing();
+
+			// The actual paragraph width, might be smaller than content area
+			const float paragraph_width = fit_size_to_maximum(style.width.value_or(intrinsic_size.x), max_content_width);
+
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
@@ -155,7 +164,7 @@ namespace ui {
 				const int word_width = measure_word_width(word, font, style.font.size, font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
 				// check if word fits on remainder of current line
-				if (cursor.x + needed_length <= max_text_width) {
+				if (cursor.x + needed_length <= paragraph_width) {
 					// extend current line view to include word
 					if (cursor.x > 0) {
 						cursor.x += space_width;
@@ -172,28 +181,30 @@ namespace ui {
 					// switch to new line
 					cursor.x = 0;
 					cursor.y = cursor.y + style.font.size;
-					if (cursor.y + style.font.size > max_text_height) {
+					if (cursor.y + style.font.size > max_content_height) {
 						break;
 					}
 					text->lines.push_back(word);
 					cursor.x = word_width;
 				}
 			}
+
 			const float paragraph_height = cursor.y + style.font.size;
-			const bool has_absolute_height = style.height.has_value() && style.height->is_pixels();
+			const float content_height = style.height.has_value() && style.height->is_pixels() ? style.height->pixels()->value : paragraph_height;
+
 			desired_size = {
-				.x = fitted_width,
-				.y = has_absolute_height ? fitted_height : paragraph_height + style.vertical_spacing(),
+				.x = paragraph_width + style.horizontal_spacing(),
+				.y = content_height + style.vertical_spacing(),
 			};
 		} else if (element->is_image()) {
 			desired_size = {
-				.x = fit_size_to_maximum(style.width.value_or(intrinsic_width), parent_size.x),
-				.y = fit_size_to_maximum(style.height.value_or(intrinsic_height), parent_size.y),
+				.x = fit_size_to_maximum(style.width.value_or(intrinsic_size.x), parent_size.x),
+				.y = fit_size_to_maximum(style.height.value_or(intrinsic_size.y), parent_size.y),
 			};
 		} else if (element->is_box()) {
 			desired_size = {
-				.x = fit_size_to_maximum(style.width.value_or(intrinsic_width), parent_size.x),
-				.y = fit_size_to_maximum(style.height.value_or(intrinsic_height), parent_size.y),
+				.x = fit_size_to_maximum(style.width.value_or(intrinsic_size.x), parent_size.x),
+				.y = fit_size_to_maximum(style.height.value_or(intrinsic_size.y), parent_size.y),
 			};
 		} else {
 			ABORT("Unhandled ui::Content case!");
@@ -432,7 +443,7 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
-		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_size(resources, element);
+		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element);
 
 		/* Draw padding box */
 		Color background_color = element.style.background.color;

@@ -12,35 +12,6 @@ constexpr int SCREEN_HEIGHT = 432;
 constexpr Vector2 SCREEN_SIZE = { SCREEN_WIDTH, SCREEN_HEIGHT };
 #define LIGHTGREEN Color(191, 240, 172, 255)
 
-const ui::Style button_style = {
-		.width = ui::Pixels(200),
-		.height = ui::Pixels(100),
-		.border = {
-			.edges = ui::Edges::uniform(10),
-			.color = DARKGREEN,
-		},
-		.padding = ui::Edges::uniform(10),
-		.alignment = ui::Alignment::Center,
-		.cross_alignment = ui::Alignment::Center,
-		.background = {
-			.color = GREEN,
-		},
-		.font = {
-			.color = DARKGREEN,
-		},
-
-		.hovered = {
-			.border_color = GREEN,
-			.background_color = LIGHTGREEN,
-		},
-
-		.active = {
-			.border_color = GREEN,
-			.background_color = DARKGREEN,
-			.font_color = GREEN,
-		},
-	};
-
 class UIElementSnapshotTests : public ::testing::Test {
 public:
 	static ResourceManager m_resources;
@@ -176,6 +147,8 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
+	EXPECT_EQ(element.box()->children[0].layout.content_box.width, 100);
+	EXPECT_EQ(element.box()->children[0].layout.content_box.height, 100);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
@@ -500,25 +473,55 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Vertical)
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_DefaultStyle) {
-	ui::Element element = {
-		.style = button_style,
+ui::Element button_box() {
+	return {
+		.style = {
+			.width = ui::Pixels(200),
+			.height = ui::Pixels(100),
+			.border = {
+				.edges = ui::Edges::uniform(10),
+				.color = DARKGREEN,
+			},
+			.padding = ui::Edges::uniform(10),
+			.alignment = ui::Alignment::Center,
+			.cross_alignment = ui::Alignment::Center,
+			.background = {
+				.color = GREEN,
+			},
+			.font = {
+				.color = DARKGREEN,
+			},
+
+			.hovered = {
+				.border_color = GREEN,
+				.background_color = LIGHTGREEN,
+			},
+
+			.active = {
+				.border_color = GREEN,
+				.background_color = DARKGREEN,
+				.font_color = GREEN,
+			},
+		},
 		.content = ui::Text { .text = "Press Me" },
 	};
+}
+
+TEST_F(UIElementSnapshotTests, Box_DefaultStyle) {
+	ui::Element element = button_box();
 	element.state.is_hovered = false;
 	element.state.is_active = false;
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
 
+	EXPECT_EQ(element.layout.content_box.width, 200);
+	EXPECT_EQ(element.layout.content_box.height, 100);
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
 TEST_F(UIElementSnapshotTests, Box_HoveredStyle) {
-	ui::Element element = {
-		.style = button_style,
-		.content = ui::Text { .text = "Press Me" },
-	};
+	ui::Element element = button_box();
 	element.state.is_hovered = true;
 	element.state.is_active = false;
 
@@ -529,10 +532,7 @@ TEST_F(UIElementSnapshotTests, Box_HoveredStyle) {
 }
 
 TEST_F(UIElementSnapshotTests, Box_ActiveStyle) {
-	ui::Element element = {
-		.style = button_style,
-		.content = ui::Text { .text = "Press Me" },
-	};
+	ui::Element element = button_box();
 	element.state.is_hovered = true;
 	element.state.is_active = true;
 
