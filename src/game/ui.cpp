@@ -331,7 +331,7 @@ namespace ui {
 				layout->margin_box.x = containing_box.x + x_percentage->fractional() * containing_box.width;
 			}
 			if (const Pixels* y_pixels = absolute_position->y.pixels()) {
-				layout->margin_box.y = containing_box.x + y_pixels->value;
+				layout->margin_box.y = containing_box.y + y_pixels->value;
 			}
 			if (const Percentage* y_percentage = absolute_position->y.percentage()) {
 				layout->margin_box.y = containing_box.y + y_percentage->fractional() * containing_box.height;
@@ -377,7 +377,7 @@ namespace ui {
 				const Vector2 child_position = cursor;
 				const Rectangle child_containing_box =
 					element->style.position.is_static_position() ? containing_box : element->layout.margin_box;
-				compute_element_positions(child_position, containing_box, &child);
+				compute_element_positions(child_position, child_containing_box, &child);
 
 				/* Move cursor */
 				if (child.style.position.is_absolute_position()) {
