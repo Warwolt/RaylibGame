@@ -43,12 +43,12 @@ const ui::Style button_style = {
 
 class UIElementSnapshotTests : public ::testing::Test {
 public:
-	ResourceManager m_resources;
-	ImageID m_big_test_image;
-	ImageID m_small_test_image;
-	ImageID m_nine_slice_image;
+	static ResourceManager m_resources;
+	static ImageID m_big_test_image;
+	static ImageID m_small_test_image;
+	static ImageID m_nine_slice_image;
 
-	void SetUp() {
+	static void SetUpTestSuite() {
 		Raylib_SetTraceLogLevel(LOG_WARNING);
 		Raylib_SetConfigFlags(FLAG_WINDOW_HIDDEN);
 		Raylib_InitWindow(1, 1, "Unit Test");
@@ -58,10 +58,16 @@ public:
 		m_nine_slice_image = m_resources.load_image("resource/image/test/nine_slice_48_48.png").value();
 	}
 
-	void TearDown() {
+	static void TearDownTestSuite() {
+		m_resources = {};
 		Raylib_CloseWindow();
 	}
 };
+
+ResourceManager UIElementSnapshotTests::m_resources;
+ImageID UIElementSnapshotTests::m_big_test_image;
+ImageID UIElementSnapshotTests::m_small_test_image;
+ImageID UIElementSnapshotTests::m_nine_slice_image;
 
 TEST_F(UIElementSnapshotTests, Box_100_100_Gives_50_50) {
 	ui::Element element = {
