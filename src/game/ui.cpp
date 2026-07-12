@@ -63,13 +63,15 @@ namespace ui {
 		};
 	}
 
-	static float fit_size_to_parent(const Measure& size, float parent_size) {
+	static float fit_size_to_maximum(const Measure& size, float max_size) {
 		float constrained_size = 0.0f;
 		if (const Pixels* pixels = size.pixels()) {
-			constrained_size = std::min<float>(pixels->value, parent_size);
+			// Constrain absolute size to the given max size
+			constrained_size = std::min<float>(pixels->value, max_size);
 		}
 		if (const Percentage* percentage = size.percentage()) {
-			constrained_size = percentage->fractional() * parent_size;
+			// Give a pixel value from a percentage value relative the max size
+			constrained_size = percentage->fractional() * max_size;
 		}
 		return constrained_size;
 	}
@@ -123,8 +125,8 @@ namespace ui {
 		if (Text* text = element->text()) {
 			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
-			const float element_width = fit_size_to_parent(style.width.value_or(default_width), parent_size.x);
-			const float element_height = fit_size_to_parent(style.height.value_or(default_height), parent_size.y);
+			const float element_width = fit_size_to_maximum(style.width.value_or(default_width), parent_size.x);
+			const float element_height = fit_size_to_maximum(style.height.value_or(default_height), parent_size.y);
 			const float max_text_width = element_width - style.horizontal_spacing();
 			const float max_text_height = element_height - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
@@ -167,13 +169,13 @@ namespace ui {
 			};
 		} else if (element->is_image()) {
 			desired_size = {
-				.x = fit_size_to_parent(style.width.value_or(default_width), parent_size.x),
-				.y = fit_size_to_parent(style.height.value_or(default_height), parent_size.y),
+				.x = fit_size_to_maximum(style.width.value_or(default_width), parent_size.x),
+				.y = fit_size_to_maximum(style.height.value_or(default_height), parent_size.y),
 			};
 		} else if (element->is_box()) {
 			desired_size = {
-				.x = fit_size_to_parent(style.width.value_or(default_width), parent_size.x),
-				.y = fit_size_to_parent(style.height.value_or(default_height), parent_size.y),
+				.x = fit_size_to_maximum(style.width.value_or(default_width), parent_size.x),
+				.y = fit_size_to_maximum(style.height.value_or(default_height), parent_size.y),
 			};
 		} else {
 			ABORT("Unhandled ui::Content case!");
