@@ -15,6 +15,7 @@ void MainMenuScene::initialize(Game* game) {
 	m_images.mario64_skybox = game->resources.load_image("resource/image/mario64_skybox.jpg").value();
 	m_images.developer_face = game->resources.load_image("resource/image/developer_face_1000_1000.png").value();
 	m_images.final_fantasy_menu_border = game->resources.load_image("resource/image/final_fantasy_menu_border_15_15.png").value();
+	m_images.focus_indicator = game->resources.load_image("resource/image/pointing_hand.png").value();
 	// clang-format on
 }
 
@@ -107,16 +108,20 @@ void MainMenuScene::update(Game* game) {
 				.color = WHITE,
 			}
 		};
-	const int indicator_size = 24;
+	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
 		.position =
 			ui::AbsolutePosition {
 				.x = ui::Pixels(-indicator_size),
-				.y = ui::Pixels(4),
+				.y = ui::Pixels(-10),
 			},
 		.width = ui::Pixels(indicator_size),
 		.height = ui::Pixels(indicator_size),
+		.debug = {
+			.show_content_outline = true,
+		},
 	};
+
 	m_ui.frame_begin();
 	{
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
@@ -137,7 +142,7 @@ void MainMenuScene::update(Game* game) {
 					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container);
 					{
 						if (m_menu_index == i) {
-							m_ui.image(m_images.developer_face, focus_indicator_style);
+							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 						m_ui.text(menu_items[i], menu_item_image_style);
 					}
