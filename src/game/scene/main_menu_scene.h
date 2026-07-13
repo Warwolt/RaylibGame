@@ -16,8 +16,9 @@ public:
 private:
 	struct Images {
 		ImageID mario64_skybox;
-		ImageID developer_face;
 		ImageID final_fantasy_menu_border;
+		ImageID focus_indicator;
 	} m_images;
 	ui::UserInterface m_ui;
+	int m_menu_index = 0;
 };

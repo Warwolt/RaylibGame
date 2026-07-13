@@ -21,7 +21,7 @@ namespace ui {
 	};
 
 	struct Image {
-		ImageID image;
+		ImageID id;
 	};
 
 	enum class Direction {
@@ -183,8 +183,9 @@ namespace ui {
 
 	struct Style {
 		Position position = StaticPosition();
-		Measure width = Percentage(100);
-		Measure height = Percentage(100);
+		std::optional<Measure> width;
+		std::optional<Measure> height;
+		bool fit_content = false; // width and height ignored if true
 		Edges margin;
 		BorderStyle border;
 		Edges padding;
@@ -203,6 +204,10 @@ namespace ui {
 
 		inline float vertical_spacing() const {
 			return margin.vertical() + border.edges.vertical() + padding.vertical();
+		}
+
+		inline Vector2 spacing() const {
+			return { horizontal_spacing(), vertical_spacing() };
 		}
 	};
 
@@ -290,11 +295,11 @@ namespace ui {
 		void frame_begin();
 		void frame_end(const ResourceManager& resources, Vector2 window_size);
 
-		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {});
+		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {}, std::string debug_name = "");
 		void box_end();
 
-		void text(std::string_view text, std::optional<Style> style = {});
-		void image(ImageID image, std::optional<Style> style = {});
+		void text(std::string_view text, std::optional<Style> style = {}, std::string debug_name = "");
+		void image(ImageID image, std::optional<Style> style = {}, std::string debug_name = "");
 
 	private:
 		bool m_within_frame = false;

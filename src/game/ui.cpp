@@ -10,6 +10,26 @@
 
 namespace ui {
 
+	// based on Raylib MeasureTextEx in rtext.c
+	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
+		if (font.texture.id == 0) {
+			return 0;
+		}
+
+		int word_width = 0;
+		for (char letter : word) {
+			const int index = GetGlyphIndex(font, letter);
+			if (font.glyphs[index].advanceX > 0) {
+				word_width += font.glyphs[index].advanceX;
+			} else {
+				word_width += (font.recs[index].width + font.glyphs[index].offsetX);
+			}
+		}
+
+		const float scale_factor = font_size / (float)font.baseSize;
+		return word_width * scale_factor + font_spacing * (word.length() - 1);
+	}
+
 	static float alignment_padding(Alignment alignment, float remainder) {
 		switch (alignment) {
 			case Alignment::Start:
@@ -49,49 +69,87 @@ namespace ui {
 		};
 	}
 
-	static float fit_size_to_parent(const Measure& size, float parent_size) {
-		float constrained_size = 0.0f;
-		if (const Pixels* pixels = size.pixels()) {
-			constrained_size = std::min<float>(pixels->value, parent_size);
+	struct Measure2 {
+		Measure x;
+		Measure y;
+	};
+
+	// The size of an element only considering its content.
+	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element) {
+		if (const Text* text = element.text()) {
+			// Intrinsic size of text element is just one long line
+			const Font font = resources.get_font(element.style.font.id);
+			const int font_size = element.style.font.size;
+			const float width = measure_word_width(text->text, font, font_size, 0);
+			return {
+				Pixels(width),
+				Pixels(font_size),
+			};
+		} else if (const Image* image = element.image()) {
+			// Intrinsic size of image is the size of the texture itself
+			Texture2D texture = resources.get_image(image->id);
+			return {
+				Pixels(texture.width),
+				Pixels(texture.height),
+			};
+		} else if (element.is_box()) {
+			return {
+				Percentage(100),
+				Percentage(100),
+			};
+		} else {
+			ABORT("Missing ui::Content case!");
+			return {
+				Percentage(100),
+				Percentage(100),
+			};
 		}
-		if (const Percentage* percentage = size.percentage()) {
-			constrained_size = percentage->fractional() * parent_size;
-		}
-		return constrained_size;
 	}
 
-	// based on Raylib MeasureTextEx in rtext.c
-	static int measure_word_width(std::string_view word, const Font& font, int font_size, int font_spacing) {
-		if (font.texture.id == 0) {
-			return 0;
-		}
-
-		int word_width = 0;
-		for (char letter : word) {
-			const int index = GetGlyphIndex(font, letter);
-			if (font.glyphs[index].advanceX > 0) {
-				word_width += font.glyphs[index].advanceX;
-			} else {
-				word_width += (font.recs[index].width + font.glyphs[index].offsetX);
+	// computes space that the box children will use, given the layout direction
+	static Vector2 compute_child_content_size(const Box& box) {
+		Vector2 content_size = {};
+		for (const Element& child : box.children) {
+			if (child.style.position.is_absolute_position()) {
+				continue; // remove absolutely positioned element from flow
+			}
+			switch (box.direction) {
+				case Direction::Horizontal: {
+					content_size.x += child.layout.margin_box.width;
+					content_size.y = std::max(content_size.y, child.layout.margin_box.height);
+				} break;
+				case Direction::Vertical: {
+					content_size.x = std::max(content_size.x, child.layout.margin_box.width);
+					content_size.y += child.layout.margin_box.height;
+				} break;
 			}
 		}
-
-		const float scale_factor = font_size / (float)font.baseSize;
-		return word_width * scale_factor + font_spacing * (word.length() - 1);
+		return content_size;
 	}
 
+	// compute desired size of margin box
 	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
 		Vector2 desired_size = { 0, 0 };
 		const Style& style = element->style;
+		const Measure2 intrinsic_size = get_intrinsic_content_size(resources, *element);
+		const float max_content_width = parent_size.x - style.horizontal_spacing();
+		const float max_content_height = parent_size.y - style.vertical_spacing();
 
 		if (Text* text = element->text()) {
 			const Font font = resources.get_font(style.font.id);
 			const float font_spacing = 0.0f;
-			const float element_width = fit_size_to_parent(style.width, parent_size.x);
-			const float element_height = fit_size_to_parent(style.height, parent_size.y);
-			const float max_text_width = element_width - style.horizontal_spacing();
-			const float max_text_height = element_height - style.vertical_spacing();
 			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
+
+			// The actual paragraph width, might be smaller than content area
+			float paragraph_width = 0;
+			const Measure& content_width = style.width.value_or(intrinsic_size.x);
+			if (const Pixels* pixel_width = content_width.pixels()) {
+				paragraph_width = std::min<float>(pixel_width->value, max_content_width);
+			}
+			if (const Percentage* percentage_width = content_width.percentage()) {
+				paragraph_width = percentage_width->fractional() * max_content_width;
+			}
+
 			/* Fit text to element size */
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
@@ -99,7 +157,7 @@ namespace ui {
 				const int word_width = measure_word_width(word, font, style.font.size, font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
 				// check if word fits on remainder of current line
-				if (cursor.x + needed_length <= max_text_width) {
+				if (cursor.x + needed_length <= paragraph_width) {
 					// extend current line view to include word
 					if (cursor.x > 0) {
 						cursor.x += space_width;
@@ -116,29 +174,48 @@ namespace ui {
 					// switch to new line
 					cursor.x = 0;
 					cursor.y = cursor.y + style.font.size;
-					if (cursor.y + style.font.size > max_text_height) {
+					if (cursor.y + style.font.size > max_content_height) {
 						break;
 					}
 					text->lines.push_back(word);
 					cursor.x = word_width;
 				}
 			}
+
 			const float paragraph_height = cursor.y + style.font.size;
-			const bool has_absolute_height = style.height.is_pixels();
+			const float content_height = style.height.has_value() && style.height->is_pixels() ? style.height->pixels()->value : paragraph_height;
+
 			desired_size = {
-				.x = element_width,
-				.y = has_absolute_height ? element_height : paragraph_height + style.vertical_spacing(),
+				.x = paragraph_width + style.horizontal_spacing(),
+				.y = content_height + style.vertical_spacing(),
 			};
-		} else if (element->is_image()) {
-			desired_size = {
-				.x = fit_size_to_parent(style.width, parent_size.x),
-				.y = fit_size_to_parent(style.height, parent_size.y),
-			};
-		} else if (element->is_box()) {
-			desired_size = {
-				.x = fit_size_to_parent(style.width, parent_size.x),
-				.y = fit_size_to_parent(style.height, parent_size.y),
-			};
+		} else if (element->is_image() || element->is_box()) {
+			/* Constrain style width */
+			const Measure& content_width = style.width.value_or(intrinsic_size.x);
+			if (const Pixels* pixel_width = content_width.pixels()) {
+				if (element->style.position.is_absolute_position()) {
+					// Absolutely positioned elements sizes aren't constrained
+					desired_size.x = pixel_width->value + style.horizontal_spacing();
+				} else {
+					desired_size.x = std::min<float>(pixel_width->value + style.horizontal_spacing(), parent_size.x);
+				}
+			}
+			if (const Percentage* percentage_width = content_width.percentage()) {
+				desired_size.x = percentage_width->fractional() * parent_size.x + style.horizontal_spacing();
+			}
+			/* Constrain style height */
+			const Measure& content_height = style.height.value_or(intrinsic_size.x);
+			if (const Pixels* pixel_height = content_height.pixels()) {
+				if (element->style.position.is_absolute_position()) {
+					// Absolutely positioned elements sizes aren't constrained
+					desired_size.y = pixel_height->value + style.vertical_spacing();
+				} else {
+					desired_size.y = std::min<float>(pixel_height->value + style.vertical_spacing(), parent_size.y);
+				}
+			}
+			if (const Percentage* percentage_height = content_height.percentage()) {
+				desired_size.y = percentage_height->fractional() * parent_size.y + style.vertical_spacing();
+			}
 		} else {
 			ABORT("Unhandled ui::Content case!");
 		}
@@ -146,23 +223,29 @@ namespace ui {
 		return desired_size;
 	}
 
+	// `max_size` is the constraint on the margin box size
 	static void compute_constrained_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
 		/* Compute size of content box */
-		if (element->is_text()) {
-			layout->content_box.width = max_size.x - style.horizontal_spacing();
-			layout->content_box.height = max_size.y - style.vertical_spacing();
-		} else if (element->is_image()) {
+		if (element->is_text() || element->is_image()) {
 			layout->content_box.width = max_size.x - style.horizontal_spacing();
 			layout->content_box.height = max_size.y - style.vertical_spacing();
 		} else if (Box* box = element->box()) {
-			/* Size parent content  */
-			Rectangle& content_box = layout->content_box;
-			content_box.width = max_size.x - style.horizontal_spacing();
-			content_box.height = max_size.y - style.vertical_spacing();
+			/* Compute max size of parent content box */
+			const Vector2 max_parent_size = {
+				max_size.x - style.horizontal_spacing(),
+				max_size.y - style.vertical_spacing(),
+			};
 
+			//
+			// FIXME: this code needs to be cleaned up
+			//
+			// Box children with absolute position are just given their desired size directly.
+			// Other children should participate in size fitting relative to parent content area.
+			// Right now the code looks a little messy to me.
+			//
 			/* Recursively size all box children */
 			{
 				// 1. compute desired size of each child
@@ -173,9 +256,13 @@ namespace ui {
 				std::vector<IndexedVector2> desired_sizes;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
-					Vector2 parent_size = { content_box.width, content_box.height };
-					Vector2 desired_size = compute_desired_element_size(resources, parent_size, &child);
-					desired_sizes.push_back({ i, desired_size });
+					const Vector2 desired_size = compute_desired_element_size(resources, max_parent_size, &child);
+					if (child.style.position.is_absolute_position()) {
+						// Absolutely positioned elements get their desired size directly
+						compute_constrained_element_sizes(resources, desired_size, &child);
+					} else {
+						desired_sizes.push_back({ i, desired_size });
+					}
 				}
 				// 2. sort desired sizes from smallest to biggest
 				auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
@@ -187,28 +274,39 @@ namespace ui {
 				};
 				std::sort(desired_sizes.begin(), desired_sizes.end(), ordering);
 				// 3. from smallest to biggest, compute actual sizes
-				float remaining_width = content_box.width;
-				float remaining_height = content_box.height;
-				for (size_t i = 0; i < box->children.size(); i++) {
-					const size_t remaining_children = box->children.size() - i;
+				float remaining_width = max_parent_size.x;
+				float remaining_height = max_parent_size.y;
+				for (size_t i = 0; i < desired_sizes.size(); i++) {
+					const size_t remaining_children = desired_sizes.size() - i;
 					const IndexedVector2& desired_size = desired_sizes[i];
 					Element& child = box->children[desired_size.index];
 					if (box->direction == Direction::Horizontal) {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
-							.y = std::min<float>(desired_size.value.y, content_box.height),
+							.y = std::min<float>(desired_size.value.y, max_parent_size.y),
 						};
 						remaining_width -= child_size.x;
 						compute_constrained_element_sizes(resources, child_size, &child);
 					} else {
 						const Vector2 child_size = {
-							.x = std::min<float>(desired_size.value.x, content_box.width),
+							.x = std::min<float>(desired_size.value.x, max_parent_size.x),
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
 						compute_constrained_element_sizes(resources, child_size, &child);
 						remaining_height -= child.layout.margin_box.height;
 					}
 				}
+			}
+
+			/* Size parent content */
+			Rectangle& content_box = layout->content_box;
+			if (element->style.fit_content) {
+				const Vector2 child_content_size = compute_child_content_size(*box);
+				content_box.width = child_content_size.x;
+				content_box.height = child_content_size.y;
+			} else {
+				content_box.width = max_parent_size.x;
+				content_box.height = max_parent_size.y;
 			}
 		} else {
 			ABORT("Unhandled ui::Content case!");
@@ -255,7 +353,7 @@ namespace ui {
 				layout->margin_box.x = containing_box.x + x_percentage->fractional() * containing_box.width;
 			}
 			if (const Pixels* y_pixels = absolute_position->y.pixels()) {
-				layout->margin_box.y = containing_box.x + y_pixels->value;
+				layout->margin_box.y = containing_box.y + y_pixels->value;
 			}
 			if (const Percentage* y_percentage = absolute_position->y.percentage()) {
 				layout->margin_box.y = containing_box.y + y_percentage->fractional() * containing_box.height;
@@ -276,37 +374,18 @@ namespace ui {
 			/* Compute padding for alignment */
 			float left_padding = 0;
 			float top_padding = 0;
+			const Vector2 child_content_size = compute_child_content_size(*box);
+			const int horizontal_remainder = element->layout.content_box.width - child_content_size.x;
+			const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
 			switch (box->direction) {
 				case Direction::Horizontal: {
-					float total_element_widths = 0;
-					float max_element_height = 0;
-					for (Element& child : box->children) {
-						if (child.style.position.is_absolute_position()) {
-							continue; // remove absolutely positioned element from flow
-						}
-						total_element_widths += child.layout.margin_box.width;
-						max_element_height = std::max(max_element_height, child.layout.margin_box.height);
-					}
-					const int horizontal_remainder = element->layout.content_box.width - total_element_widths;
-					const int vertical_remainder = element->layout.content_box.height - max_element_height;
 					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
 					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
 				} break;
 
 				case Direction::Vertical: {
-					float total_element_heights = 0;
-					float max_element_width = 0;
-					for (Element& child : box->children) {
-						if (child.style.position.is_absolute_position()) {
-							continue; // remove absolutely positioned element from flow
-						}
-						total_element_heights += child.layout.margin_box.height;
-						max_element_width = std::max(max_element_width, child.layout.margin_box.width);
-					}
-					const int horizontal_remainder = element->layout.content_box.width - max_element_width;
-					const int vertical_remainder = element->layout.content_box.height - total_element_heights;
-					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
-					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
+					left_padding = alignment_padding(element->style.cross_alignment, horizontal_remainder);
+					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
 				} break;
 			}
 
@@ -320,7 +399,7 @@ namespace ui {
 				const Vector2 child_position = cursor;
 				const Rectangle child_containing_box =
 					element->style.position.is_static_position() ? containing_box : element->layout.margin_box;
-				compute_element_positions(child_position, containing_box, &child);
+				compute_element_positions(child_position, child_containing_box, &child);
 
 				/* Move cursor */
 				if (child.style.position.is_absolute_position()) {
@@ -340,10 +419,14 @@ namespace ui {
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		PROFILING_SCOPE();
+		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
 		const Vector2 top_left = { 0, 0 };
 		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
-		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
-		compute_constrained_element_sizes(resources, desired_size, element);
+		const Vector2 max_size = {
+			.x = std::min(desired_size.x, containing_box.width),
+			.y = std::min(desired_size.y, containing_box.height),
+		};
+		compute_constrained_element_sizes(resources, max_size, element);
 		compute_element_positions(top_left, containing_box, element);
 	}
 
@@ -384,6 +467,8 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Element& element) {
+		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element);
+
 		/* Draw padding box */
 		Color background_color = element.style.background.color;
 		if (element.state.is_active) {
@@ -514,7 +599,7 @@ namespace ui {
 			}
 			Raylib_EndScissorMode();
 		} else if (const Image* image = element.image()) {
-			const Texture2D texture = resources.get_image(image->image);
+			const Texture2D texture = resources.get_image(image->id);
 
 			// Handle overflow of absolutely sized images
 			//
@@ -523,13 +608,13 @@ namespace ui {
 			// just a portion of it (in case of an overflow).
 			float source_width = (float)texture.width;
 			float source_height = (float)texture.height;
-			if (const Pixels* pixel_width = element.style.width.pixels()) {
+			if (const Pixels* pixel_width = element.style.width.value_or(intrinsic_width).pixels()) {
 				if (pixel_width->value > element.layout.content_box.width) {
 					const float scale = texture.width / pixel_width->value;
 					source_width = scale * element.layout.content_box.width;
 				}
 			}
-			if (const Pixels* pixel_height = element.style.height.pixels()) {
+			if (const Pixels* pixel_height = element.style.height.value_or(intrinsic_height).pixels()) {
 				if (pixel_height->value > element.layout.content_box.height) {
 					const float scale = texture.height / pixel_height->value;
 					source_height = scale * element.layout.content_box.height;
@@ -584,11 +669,12 @@ namespace ui {
 		layout_element(resources, window_size, &m_root_element);
 	}
 
-	void UserInterface::box_begin(Direction direction, std::optional<Style> style) {
+	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
+				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
 				.content = Box { .direction = direction },
 			}
@@ -602,24 +688,26 @@ namespace ui {
 		m_parent_stack.pop_back();
 	}
 
-	void UserInterface::text(std::string_view text, std::optional<Style> style) {
+	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string debug_name) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
+				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
 			}
 		);
 	}
 
-	void UserInterface::image(ImageID image, std::optional<Style> style) {
+	void UserInterface::image(ImageID image, std::optional<Style> style, std::string debug_name) {
 		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		parent->box()->children.push_back(
 			Element {
+				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
-				.content = Image { .image = image },
+				.content = Image { .id = image },
 			}
 		);
 	}
