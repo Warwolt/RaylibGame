@@ -13,7 +13,6 @@
 void MainMenuScene::initialize(Game* game) {
 	// clang-format off
 	m_images.mario64_skybox = game->resources.load_image("resource/image/mario64_skybox.jpg").value();
-	m_images.developer_face = game->resources.load_image("resource/image/developer_face_1000_1000.png").value();
 	m_images.final_fantasy_menu_border = game->resources.load_image("resource/image/final_fantasy_menu_border_15_15.png").value();
 	m_images.focus_indicator = game->resources.load_image("resource/image/pointing_hand.png").value();
 	// clang-format on
@@ -68,7 +67,7 @@ void MainMenuScene::update(Game* game) {
 		.alignment = ui::Alignment::Center,
 		.background = { .image = m_images.mario64_skybox },
 	};
-	const ui::Style image_container_style = {
+	const ui::Style title_container_style = {
 			.width = ui::Percentage(33),
 			.border = {
 				.edges = ui::Edges::uniform(16),
@@ -117,9 +116,6 @@ void MainMenuScene::update(Game* game) {
 			},
 		.width = ui::Pixels(indicator_size),
 		.height = ui::Pixels(indicator_size),
-		.debug = {
-			.show_content_outline = true,
-		},
 	};
 
 	m_ui.frame_begin();
@@ -128,9 +124,9 @@ void MainMenuScene::update(Game* game) {
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
 			{
-				m_ui.box_begin(ui::Direction::Vertical, image_container_style);
+				m_ui.box_begin(ui::Direction::Vertical, title_container_style);
 				{
-					m_ui.image(m_images.developer_face, image_style);
+					m_ui.text("Video Game", ui::Style { .alignment = ui::Alignment::Center, .font = { .size = 64 } });
 				}
 				m_ui.box_end();
 			}
