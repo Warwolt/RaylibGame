@@ -380,6 +380,10 @@ TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vert
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeSmallerParent_Pixels) {
+	FAIL() << "Write a test that checks that children can overflow their parent container if absolutely positioned";
+}
+
 ui::Element box_fit_content(ui::Direction direction, std::vector<ui::Element> children) {
 	return {
 		.style = {

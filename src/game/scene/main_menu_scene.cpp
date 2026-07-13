@@ -144,6 +144,8 @@ void MainMenuScene::update(Game* game) {
 						if (m_menu_index == i) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
+						// FIXME: absolutely positioned image should be able to overflow it's container
+						// but right now it gets clamped to the parent size.
 						m_ui.text(menu_items[i], menu_item_image_style);
 					}
 					m_ui.box_end();
