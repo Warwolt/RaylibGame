@@ -20,4 +20,5 @@ private:
 		ImageID final_fantasy_menu_border;
 	} m_images;
 	ui::UserInterface m_ui;
+	int m_menu_index = 0;
 };

@@ -21,22 +21,53 @@ void MainMenuScene::initialize(Game* game) {
 void MainMenuScene::deinitialize(Game* /*game*/) {
 }
 
+namespace MenuItems {
+	enum {
+		Continue,
+		LoadGame,
+		NewGame,
+		Settings,
+		Quit,
+		Count,
+	};
+}
+
 void MainMenuScene::update(Game* game) {
 	PROFILING_SCOPE();
 	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
 		game->scenes.pop_scene(game);
 	}
+
+	const char* menu_items[MenuItems::Count] = {};
+	menu_items[MenuItems::Continue] = "Continue";
+	menu_items[MenuItems::LoadGame] = "Load Game";
+	menu_items[MenuItems::NewGame] = "New Game";
+	menu_items[MenuItems::Settings] = "Settings";
+	menu_items[MenuItems::Quit] = "Quit";
+
+	if (Raylib_IsKeyPressed(KEY_DOWN)) {
+		m_menu_index = (MenuItems::Count + m_menu_index + 1) % MenuItems::Count;
+	}
+	if (Raylib_IsKeyPressed(KEY_UP)) {
+		m_menu_index = (MenuItems::Count + m_menu_index - 1) % MenuItems::Count;
+	}
 	if (Raylib_IsKeyPressed(KEY_ENTER)) {
-		game->scenes.push_scene(game, SceneID::Gameplay);
+		switch (m_menu_index) {
+			case MenuItems::Continue: {
+				game->scenes.push_scene(game, SceneID::Gameplay);
+			} break;
+
+			case MenuItems::Quit: {
+				game->scenes.pop_scene(game);
+			} break;
+		}
 	}
 
-	m_ui.frame_begin();
-	{
-		ui::Style menu_style = {
-			.alignment = ui::Alignment::Center,
-			.background = { .image = m_images.mario64_skybox },
-		};
-		ui::Style image_container_style = {
+	const ui::Style menu_style = {
+		.alignment = ui::Alignment::Center,
+		.background = { .image = m_images.mario64_skybox },
+	};
+	const ui::Style image_container_style = {
 			.width = ui::Percentage(33),
 			.border = {
 				.edges = ui::Edges::uniform(16),
@@ -48,7 +79,7 @@ void MainMenuScene::update(Game* game) {
 			.background = { .color = Color { 20, 37, 136, 255 }, }
 
 		};
-		ui::Style image_style {
+	const ui::Style image_style {
 			.width = ui::Pixels(200),
 			.height = ui::Pixels(200),
 			.border = {
@@ -56,7 +87,16 @@ void MainMenuScene::update(Game* game) {
 				.color = WHITE,
 			},
 		};
-		ui::Style item_style = {
+	const ui::Style menu_container = {
+		.padding = ui::Edges::uniform(16),
+		.alignment = ui::Alignment::Center,
+		.cross_alignment = ui::Alignment::Center,
+	};
+	const ui::Style menu_item_container = {
+		.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
+		.fit_content = true,
+	};
+	const ui::Style menu_item_image_style = {
 			.width = ui::Pixels(150),
 			.padding = {
 					.bottom = 2,
@@ -67,6 +107,18 @@ void MainMenuScene::update(Game* game) {
 				.color = WHITE,
 			}
 		};
+	const int indicator_size = 24;
+	const ui::Style focus_indicator_style = {
+		.position =
+			ui::AbsolutePosition {
+				.x = ui::Pixels(-indicator_size),
+				.y = ui::Pixels(4),
+			},
+		.width = ui::Pixels(indicator_size),
+		.height = ui::Pixels(indicator_size),
+	};
+	m_ui.frame_begin();
+	{
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
@@ -79,49 +131,18 @@ void MainMenuScene::update(Game* game) {
 			}
 			m_ui.box_end();
 
-			m_ui.box_begin(
-				ui::Direction::Vertical,
-				ui::Style {
-					.padding = ui::Edges::uniform(16),
-					.alignment = ui::Alignment::Center,
-					.cross_alignment = ui::Alignment::Center,
-				}
-			);
+			m_ui.box_begin(ui::Direction::Vertical, menu_container);
 			{
-				m_ui.box_begin(
-					ui::Direction::Horizontal,
-					ui::Style {
-						.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
-						.fit_content = true,
-						.debug = {
-							.show_content_outline = true,
-						},
-					},
-					"container box"
-				);
-				{
-					const int indicator_size = 24;
-					m_ui.image(
-						m_images.developer_face,
-						ui::Style {
-							.position =
-								ui::AbsolutePosition {
-									.x = ui::Pixels(-indicator_size),
-									.y = ui::Pixels(2),
-								},
-							.width = ui::Pixels(indicator_size),
-							.height = ui::Pixels(indicator_size),
-						},
-						"focus indicator"
-					);
-					m_ui.text("Continue", item_style);
+				for (int i = 0; i < MenuItems::Count; i++) {
+					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container);
+					{
+						if (m_menu_index == i) {
+							m_ui.image(m_images.developer_face, focus_indicator_style);
+						}
+						m_ui.text(menu_items[i], menu_item_image_style);
+					}
+					m_ui.box_end();
 				}
-				m_ui.box_end();
-
-				m_ui.text("Load Game", item_style);
-				m_ui.text("New Game", item_style);
-				m_ui.text("Settings", item_style);
-				m_ui.text("Quit", item_style);
 			}
 			m_ui.box_end();
 		}
