@@ -193,7 +193,12 @@ namespace ui {
 			/* Constrain style width */
 			const Measure& content_width = style.width.value_or(intrinsic_size.x);
 			if (const Pixels* pixel_width = content_width.pixels()) {
-				desired_size.x = std::min<float>(pixel_width->value + style.horizontal_spacing(), parent_size.x);
+				if (element->style.position.is_absolute_position()) {
+					// Absolutely positioned elements sizes aren't constrained
+					desired_size.x = pixel_width->value + style.horizontal_spacing();
+				} else {
+					desired_size.x = std::min<float>(pixel_width->value + style.horizontal_spacing(), parent_size.x);
+				}
 			}
 			if (const Percentage* percentage_width = content_width.percentage()) {
 				desired_size.x = percentage_width->fractional() * parent_size.x + style.horizontal_spacing();
@@ -201,7 +206,12 @@ namespace ui {
 			/* Constrain style height */
 			const Measure& content_height = style.height.value_or(intrinsic_size.x);
 			if (const Pixels* pixel_height = content_height.pixels()) {
-				desired_size.y = std::min<float>(pixel_height->value + style.vertical_spacing(), parent_size.y);
+				if (element->style.position.is_absolute_position()) {
+					// Absolutely positioned elements sizes aren't constrained
+					desired_size.y = pixel_height->value + style.vertical_spacing();
+				} else {
+					desired_size.y = std::min<float>(pixel_height->value + style.vertical_spacing(), parent_size.y);
+				}
 			}
 			if (const Percentage* percentage_height = content_height.percentage()) {
 				desired_size.y = percentage_height->fractional() * parent_size.y + style.vertical_spacing();
@@ -229,6 +239,13 @@ namespace ui {
 				max_size.y - style.vertical_spacing(),
 			};
 
+			//
+			// FIXME: this code needs to be cleaned up
+			//
+			// Box children with absolute position are just given their desired size directly.
+			// Other children should participate in size fitting relative to parent content area.
+			// Right now the code looks a little messy to me.
+			//
 			/* Recursively size all box children */
 			{
 				// 1. compute desired size of each child
@@ -240,7 +257,12 @@ namespace ui {
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
 					const Vector2 desired_size = compute_desired_element_size(resources, max_parent_size, &child);
-					desired_sizes.push_back({ i, desired_size });
+					if (child.style.position.is_absolute_position()) {
+						// Absolutely positioned elements get their desired size directly
+						compute_constrained_element_sizes(resources, desired_size, &child);
+					} else {
+						desired_sizes.push_back({ i, desired_size });
+					}
 				}
 				// 2. sort desired sizes from smallest to biggest
 				auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
@@ -254,8 +276,8 @@ namespace ui {
 				// 3. from smallest to biggest, compute actual sizes
 				float remaining_width = max_parent_size.x;
 				float remaining_height = max_parent_size.y;
-				for (size_t i = 0; i < box->children.size(); i++) {
-					const size_t remaining_children = box->children.size() - i;
+				for (size_t i = 0; i < desired_sizes.size(); i++) {
+					const size_t remaining_children = desired_sizes.size() - i;
 					const IndexedVector2& desired_size = desired_sizes[i];
 					Element& child = box->children[desired_size.index];
 					if (box->direction == Direction::Horizontal) {

@@ -380,8 +380,47 @@ TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vert
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeSmallerParent_Pixels) {
-	FAIL() << "Write a test that checks that children can overflow their parent container if absolutely positioned";
+TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_CanOverflowParent_Pixels) {
+	ui::Element element = {
+		.style = {
+			.position = ui::AbsolutePosition {
+				.x = ui::Pixels(100),
+				.y = ui::Pixels(100),
+			},
+			.width = ui::Pixels(200),
+			.height = ui::Pixels(50),
+			.border = {
+				.edges = ui::Edges::uniform(2),
+				.color = GREEN,
+			},
+		},
+		.content =
+			ui::Box {
+				.direction = ui::Direction::Horizontal,
+				.children = {
+					ui::Element {
+						.style = {
+							.position = ui::AbsolutePosition {
+								.x = ui::Pixels(0),
+								.y = ui::Pixels(0),
+							},
+							.width = ui::Pixels(100),
+							.height = ui::Pixels(100),
+							.border = {
+								.edges = ui::Edges::uniform(2),
+								.color = ORANGE,
+							},
+						},
+						.content = ui::Box {},
+					},
+				},
+			},
+	};
+
+	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
 }
 
 ui::Element box_fit_content(ui::Direction direction, std::vector<ui::Element> children) {
