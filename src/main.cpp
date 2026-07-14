@@ -40,16 +40,6 @@ static GameLibrary load_game_library(const std::string& library_path) {
 
 static Game* g_game_state = nullptr;
 
-// FIXME: move into `HotReloading::update`
-static void on_build_command_done(int exit_code) {
-	if (exit_code == 0) {
-		g_game_state->debug.reload_state = HotReloadState::ReadyToReload;
-	} else {
-		g_game_state->debug.reload_state = HotReloadState::Failed;
-		LOG_ERROR("Build finished with errors!");
-	}
-}
-
 struct HotReloading {
 	std::string executable_directory;
 	std::string library_name;
@@ -84,6 +74,14 @@ struct HotReloading {
 				if (Raylib_IsKeyPressed(KEY_F5)) {
 					LOG_INFO("Rebuilding game library");
 					game_state->debug.reload_state = HotReloadState::Rebuilding;
+					auto on_build_command_done = [](int exit_code) {
+						if (exit_code == 0) {
+							g_game_state->debug.reload_state = HotReloadState::ReadyToReload;
+						} else {
+							g_game_state->debug.reload_state = HotReloadState::Failed;
+							LOG_ERROR("Build finished with errors!");
+						}
+					};
 					Win32_run_command("cmake --build build --target Library", on_build_command_done);
 				}
 
