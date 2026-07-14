@@ -1,11 +1,13 @@
 #pragma once
 
+#include "game/debug.h"
 #include "game/resource.h"
 #include "game/scene/scene.h"
 #include "platform/window.h"
 
 struct Game {
 	bool should_quit = false;
+	Debug debug;
 	Window window;
 	SceneManager scenes;
 	ResourceManager resources;

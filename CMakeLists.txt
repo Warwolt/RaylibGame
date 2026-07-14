@@ -33,6 +33,7 @@ set(SRC
     src/core/debug/logging.cpp
     src/core/debug/assert.cpp
     src/core/util.cpp
+    src/game/debug.cpp
     src/game/game.cpp
     src/game/resource.cpp
     src/game/scene/gameplay_scene.cpp

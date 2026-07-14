@@ -38,10 +38,13 @@ static GameLibrary load_library(const std::string& library_path) {
 	};
 }
 
-static bool g_library_has_been_rebuilt = false;
+static Game* g_game_state = nullptr;
+
 static void on_build_command_done(int exit_code) {
-	g_library_has_been_rebuilt = exit_code == 0;
-	if (exit_code != 0) {
+	if (exit_code == 0) {
+		g_game_state->debug.reload_state = HotReloadState::ReadyToReload;
+	} else {
+		g_game_state->debug.reload_state = HotReloadState::Failed;
 		LOG_ERROR("Build finished with errors!");
 	}
 }
@@ -75,21 +78,33 @@ int main(int argc, char** argv) {
 	GameLibrary game_library = load_library(library_copy_name);
 
 	/* State */
-	Game* game_state = game_library.initialize(argc, argv);
+	g_game_state = game_library.initialize(argc, argv);
 
 	/* Run program */
-	while (!game_state->should_quit) {
-		/* Check hot reload */
-		{
-			/* Trigger library build */
-			if (Raylib_IsKeyPressed(KEY_F5)) {
-				LOG_INFO("Rebuilding game library");
-				Win32_run_command("cmake --build build --target Library", on_build_command_done);
-			}
+	while (!g_game_state->should_quit) {
+		/* Run game */
+		game_library.update(g_game_state);
+		game_library.render(*g_game_state);
 
-			/* Reload library when modified */
-			if (g_library_has_been_rebuilt) {
-				g_library_has_been_rebuilt = false;
+		/* Update hot reloading */
+		switch (g_game_state->debug.reload_state) {
+			case HotReloadState::Idle:
+			case HotReloadState::Failed: {
+				/* Trigger rebuild */
+				if (Raylib_IsKeyPressed(KEY_F5)) {
+					LOG_INFO("Rebuilding game library");
+					g_game_state->debug.reload_state = HotReloadState::Rebuilding;
+					Win32_run_command("cmake --build build --target Library", on_build_command_done);
+				}
+
+			} break;
+
+			case HotReloadState::Rebuilding:
+				// wait for `on_build_command_done` to be called
+				break;
+
+			case HotReloadState::ReadyToReload: {
+				g_game_state->debug.reload_state = HotReloadState::Idle;
 
 				/* Unload library */
 				FreeLibrary(game_library.handle);
@@ -101,16 +116,12 @@ int main(int argc, char** argv) {
 				game_library = load_library(library_copy_name);
 				LOG_INFO("Game library reloaded");
 				PROFILING_LOG("Game library reloaded");
-			}
+			} break;
 		}
-
-		/* Run game */
-		game_library.update(game_state);
-		game_library.render(*game_state);
 	}
 
 	/* Shutdown */
-	game_library.shutdown(game_state);
+	game_library.shutdown(g_game_state);
 	FreeLibrary(game_library.handle);
 	PROFILING_SHUTDOWN_PROFILER();
 	return 0;

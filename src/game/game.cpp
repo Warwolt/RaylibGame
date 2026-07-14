@@ -68,6 +68,7 @@ void Game_render(const Game& game) {
 		PROFILING_SCOPE(); // anything worth measuring is in the scene
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		game.scenes.render_current_scene(game);
+		render_debug_overlay(game);
 	}
 	Raylib_EndTextureMode();
 
