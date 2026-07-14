@@ -7,6 +7,8 @@
 #include "game/game.h"
 #include "platform/lean_mean_windows.h"
 
+#include <raylib.h>
+
 #include <string>
 
 struct GameLibrary {
@@ -117,13 +119,12 @@ int main(int argc, char** argv) {
 	/* Initialize Tracy */
 	PROFILING_STARTUP_PROFILER();
 
+	/* Load Game DLL */
 	HotReloading hot_reloading = {
 		.executable_directory = Win32_get_executable_directory(),
 		.library_name = "GameLib.dll",
 		.library_copy_name = "GameLib-hot-reload.dll",
 	};
-
-	/* Load copy */
 	GameLibrary game_library = hot_reloading.load_library();
 
 	/* State */
