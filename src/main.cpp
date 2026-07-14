@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 	if (!result.has_value()) {
 		Win32_show_error_message_box(result.error());
 	}
-	game_library = hot_reloading.load_library().value();
+	game_library = result.value();
 
 	/* State */
 	g_game_state = game_library.initialize(argc, argv);
