@@ -4,6 +4,7 @@
 
 // window
 void Win32_set_process_dpi_aware(void);
+void Win32_enable_crash_handler(void);
 void Win32_show_error_message_box(const std::string& text);
 bool Win32_show_assert_message_box(const std::string& text); // true if should break debugger
 

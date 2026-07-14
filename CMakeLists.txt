@@ -64,7 +64,13 @@ target_link_libraries(Library ${LIB})
 set_target_properties(Library PROPERTIES OUTPUT_NAME "GameLib")
 
 # Executable
-add_executable(Executable src/main.cpp)
+add_executable(Executable
+    src/main.cpp
+    src/library.cpp
+    src/core/debug/assert.cpp
+    src/core/debug/logging.cpp
+    src/platform/win32.cpp
+)
 target_include_directories(Executable PUBLIC src lib)
 target_link_libraries(Executable ${LIB})
 set_property(TARGET Executable PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

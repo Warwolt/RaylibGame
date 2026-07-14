@@ -39,7 +39,7 @@ void MainMenuScene::update(Game* game) {
 	}
 
 	const char* menu_items[MenuItems::Count] = {};
-	menu_items[MenuItems::Continue] = "Continue";
+	menu_items[MenuItems::Continue] = "Continue!";
 	menu_items[MenuItems::LoadGame] = "Load Game";
 	menu_items[MenuItems::NewGame] = "New Game";
 	menu_items[MenuItems::Settings] = "Settings";
