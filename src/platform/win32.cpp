@@ -87,7 +87,15 @@ static DWORD WINAPI run_command_thread(LPVOID void_args) {
 		args->on_command_done(exit_code);
 	}
 
+	/* Close process handles */
+	CloseHandle(process_info.hProcess);
+	CloseHandle(process_info.hThread);
+
+	/* Close read end of pipe */
+	CloseHandle(stdout_read);
+
 	/* Free thread args */
+	free((void*)args->command);
 	free((void*)args);
 
 	return 0;
