@@ -79,10 +79,8 @@ void HotReloading::update(Game* game_state, GameLibrary* game_library) {
 		case HotReloadState::ReadyToReload: {
 			game_state->debug.reload_state = HotReloadState::Idle;
 
-			/* Unload library */
-			FreeLibrary(game_library->handle);
-
 			/* Reload copied library */
+			FreeLibrary(game_library->handle);
 			*game_library = this->load_library().value();
 			LOG_INFO("Game library reloaded");
 		} break;
