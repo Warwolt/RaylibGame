@@ -20,7 +20,7 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: No
+AlwaysBreakTemplateDeclarations: Yes
 AttributeMacros : []
 BinPackArguments: false
 BinPackParameters: false
