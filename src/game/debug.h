@@ -1,6 +1,6 @@
 #pragma once
 
-#include <core/util/timestamped.h>
+#include <core/util/time.h>
 
 struct Game;
 

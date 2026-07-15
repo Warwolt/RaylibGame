@@ -5,13 +5,15 @@
 
 #include <raylib.h>
 
+using namespace std::chrono_literals;
+
 void render_debug_overlay(const Game& game) {
 	const std::vector<AnimationFrame<std::string>> frames = {
-		{ "Rebuilding.", 0.5 },
-		{ "Rebuilding..", 0.5 },
-		{ "Rebuilding...", 0.5 },
+		{ "Rebuilding.", 500ms },
+		{ "Rebuilding..", 500ms },
+		{ "Rebuilding...", 500ms },
 	};
-	const std::string text = current_animation_frame(frames, game.debug.reload_state.last_changed(), Raylib_GetTime());
+	const std::string text = current_animation_frame(frames, game.debug.reload_state.last_changed(), Time::now());
 
 	switch (game.debug.reload_state.value()) {
 		case HotReloadState::Rebuilding: {
