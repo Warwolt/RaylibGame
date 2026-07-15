@@ -6,18 +6,38 @@
 
 #include <cmath>
 
-void render_debug_overlay(const Game& game) {
-	const double elapsed_time = Raylib_GetTime() - game.debug.reload_state.last_changed();
-	const double period = 1.5; // seconds
-	const double t = fmod(elapsed_time, period) / period;
-	std::string text;
-	if (0.0 <= t && t < 0.33) {
-		text = "Rebuilding.";
-	} else if (0.33 <= t && t < 0.67) {
-		text = "Rebuilding..";
-	} else {
-		text = "Rebuilding...";
+struct AnimationFrame {
+	std::string value;
+	double duration; // seconds
+};
+
+std::string current_animation_frame(const std::vector<AnimationFrame>& frames, double animation_start, double time_now) {
+	/* Compute animation period */
+	double period = 0;
+	for (const AnimationFrame& frame : frames) {
+		period += frame.duration;
 	}
+
+	/* Find current frame */
+	double frame_start = 0;
+	const double playback_time = fmod(time_now - animation_start, period);
+	for (const AnimationFrame& frame : frames) {
+		if (frame_start <= playback_time && playback_time < frame_start + frame.duration) {
+			return frame.value;
+		}
+		frame_start += frame.duration;
+	}
+
+	return "";
+}
+
+void render_debug_overlay(const Game& game) {
+	const std::vector<AnimationFrame> frames = {
+		{ "Rebuilding.", 0.5 },
+		{ "Rebuilding..", 0.5 },
+		{ "Rebuilding...", 0.5 },
+	};
+	const std::string text = current_animation_frame(frames, game.debug.reload_state.last_changed(), Raylib_GetTime());
 
 	switch (game.debug.reload_state.value()) {
 		case HotReloadState::Rebuilding: {
