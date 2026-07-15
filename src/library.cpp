@@ -82,11 +82,8 @@ void HotReloading::update(Game* game_state, GameLibrary* game_library) {
 			/* Unload library */
 			FreeLibrary(game_library->handle);
 
-			/* Copy rebuilt library */
-			Win32_copy_file(library_path(), library_copy_path());
-
 			/* Reload copied library */
-			*game_library = load_game_library(this->library_copy_name).value();
+			*game_library = this->load_library().value();
 			LOG_INFO("Game library reloaded");
 		} break;
 	}
