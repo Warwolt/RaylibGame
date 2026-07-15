@@ -69,7 +69,7 @@ void HotReloading::update(Game* game_state, GameLibrary* game_library) {
 		} break;
 
 		case HotReloadState::Rebuilding:
-			// wait for `on_build_command_done` to be called
+			/* Wait for rebuild to finish */
 			if (g_rebuild_result) {
 				game_state->debug.reload_state = g_rebuild_result.value();
 				g_rebuild_result = {};
