@@ -10,8 +10,6 @@
 
 #include <string>
 
-Game* g_game_state = nullptr;
-
 int main(int argc, char** argv) {
 	Win32_enable_crash_handler();
 	Win32_set_process_dpi_aware();
@@ -34,17 +32,17 @@ int main(int argc, char** argv) {
 	game_library = result.value();
 
 	/* State */
-	g_game_state = game_library.initialize(argc, argv);
+	Game* game_state = game_library.initialize(argc, argv);
 
 	/* Run program */
-	while (!g_game_state->should_quit) {
-		game_library.update(g_game_state);
-		game_library.render(*g_game_state);
-		hot_reloading.update(g_game_state, &game_library);
+	while (!game_state->should_quit) {
+		game_library.update(game_state);
+		game_library.render(*game_state);
+		hot_reloading.update(game_state, &game_library);
 	}
 
 	/* Shutdown */
-	game_library.shutdown(g_game_state);
+	game_library.shutdown(game_state);
 	FreeLibrary(game_library.handle);
 	PROFILING_SHUTDOWN_PROFILER();
 	return 0;
