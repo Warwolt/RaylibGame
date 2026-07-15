@@ -1,10 +1,8 @@
-// include these as cpp files since they're not part of the public DLL interface
 #include "core/debug/assert.h"
-#include "platform/win32.h"
-
 #include "core/debug/profiling.h"
 #include "game/game.h"
 #include "library.h"
+#include "platform/win32.h"
 
 #include <raylib.h>
 
