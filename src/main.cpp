@@ -9,6 +9,7 @@
 #include <string>
 
 int main(int argc, char** argv) {
+	/* Initialize */
 	Win32_enable_crash_handler();
 	Win32_set_process_dpi_aware();
 	initialize_logging();
@@ -16,7 +17,7 @@ int main(int argc, char** argv) {
 	/* Initialize Tracy */
 	PROFILING_STARTUP_PROFILER();
 
-	/* Load Game DLL */
+	/* Load DLL */
 	HotReloading hot_reloading = {
 		.executable_directory = Win32_get_executable_directory(),
 		.library_name = "GameLib.dll",
@@ -29,10 +30,8 @@ int main(int argc, char** argv) {
 	}
 	game_library = result.value();
 
-	/* State */
-	Game* game_state = game_library.initialize(argc, argv);
-
 	/* Run program */
+	Game* game_state = game_library.initialize(argc, argv);
 	while (!game_state->should_quit) {
 		game_library.update(game_state);
 		game_library.render(*game_state);
