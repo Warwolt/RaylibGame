@@ -1,38 +1,12 @@
 #include "game/debug.h"
 
+#include "game/animation.h"
 #include "game/game.h"
 
 #include <raylib.h>
 
-#include <cmath>
-
-struct AnimationFrame {
-	std::string value;
-	double duration; // seconds
-};
-
-std::string current_animation_frame(const std::vector<AnimationFrame>& frames, double animation_start, double time_now) {
-	/* Compute animation period */
-	double period = 0;
-	for (const AnimationFrame& frame : frames) {
-		period += frame.duration;
-	}
-
-	/* Find current frame */
-	double frame_start = 0;
-	const double playback_time = fmod(time_now - animation_start, period);
-	for (const AnimationFrame& frame : frames) {
-		if (frame_start <= playback_time && playback_time < frame_start + frame.duration) {
-			return frame.value;
-		}
-		frame_start += frame.duration;
-	}
-
-	return "";
-}
-
 void render_debug_overlay(const Game& game) {
-	const std::vector<AnimationFrame> frames = {
+	const std::vector<AnimationFrame<std::string>> frames = {
 		{ "Rebuilding.", 0.5 },
 		{ "Rebuilding..", 0.5 },
 		{ "Rebuilding...", 0.5 },
