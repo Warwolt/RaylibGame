@@ -654,11 +654,12 @@ namespace ui {
 		return m_root_element;
 	}
 
-	void UserInterface::frame_begin() {
+	void UserInterface::frame_begin(const Input& input) {
 		ASSERT(!m_within_frame, "Missing call to UserInterface::frame_end?");
 		m_within_frame = true;
 		m_root_element = {};
 		m_parent_stack = { &m_root_element };
+		m_input = input;
 	}
 
 	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
@@ -680,6 +681,7 @@ namespace ui {
 			}
 		);
 		m_parent_stack.push_back(&parent->box()->children.back());
+		m_current_element = &parent->box()->children.back();
 	}
 
 	void UserInterface::box_end() {
@@ -710,6 +712,10 @@ namespace ui {
 				.content = Image { .id = image },
 			}
 		);
+	}
+
+	bool UserInterface::element_is_hovered() const {
+		return false;
 	}
 
 	Element* UserInterface::_current_parent() {

@@ -3,6 +3,7 @@
 #include "game/resource.h"
 
 #include <raylib.h>
+#include <raymath.h>
 
 #include <optional>
 #include <string>
@@ -331,7 +332,7 @@ namespace ui {
 		void draw(const ResourceManager& resources) const;
 		const Element& root_element() const;
 
-		void frame_begin();
+		void frame_begin(const Input& input);
 		void frame_end(const ResourceManager& resources, Vector2 window_size);
 
 		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {}, std::string debug_name = "");
@@ -340,10 +341,14 @@ namespace ui {
 		void text(std::string_view text, std::optional<Style> style = {}, std::string debug_name = "");
 		void image(ImageID image, std::optional<Style> style = {}, std::string debug_name = "");
 
+		bool element_is_hovered() const;
+
 	private:
 		bool m_within_frame = false;
 		Element m_root_element = {};
 		std::vector<Element*> m_parent_stack;
+		Element* m_current_element = nullptr;
+		Input m_input;
 
 		Element* _current_parent();
 	};

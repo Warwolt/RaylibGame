@@ -118,7 +118,8 @@ void MainMenuScene::update(Game* game) {
 		.height = ui::Pixels(indicator_size),
 	};
 
-	m_ui.frame_begin();
+	const ui::Input ui_input = {};
+	m_ui.frame_begin(ui_input);
 	{
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
