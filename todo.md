@@ -1,5 +1,4 @@
 # TODO
-- QoL: Render something while hot reload build is on going. Give visual feedback if hot reload went ok.
 - MainMenu scene with mouse+keyboard buttons
 - Gameplay scene with basic camera + character movement
 - Collision detection test screen
@@ -7,6 +6,7 @@
 - Bug: Fix clang format not formatting nested designated initializers
 
 # Done
+- QoL: Render something while hot reload build is on going. Give visual feedback if hot reload went ok.
 - The --clean-snapshots option should clean images _after_ tests have ran
 - Write crash dump file on fatal error
 - Integrate Tracy profiler so we can measure performance of UI system
