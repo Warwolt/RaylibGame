@@ -6,8 +6,12 @@ struct FontID {
 	static FontID default_font() {
 		return FontID { 0 };
 	};
+
+	bool operator==(const FontID& rhs) const = default;
 };
 
 struct ImageID {
 	int value = 0;
+
+	bool operator==(const ImageID& rhs) const = default;
 };

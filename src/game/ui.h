@@ -18,10 +18,14 @@ namespace ui {
 	struct Text {
 		std::string text;
 		std::vector<std::string_view> lines; // computed during layout, views into `text` member
+
+		bool operator==(const Text& rhs) const = default;
 	};
 
 	struct Image {
 		ImageID id;
+
+		bool operator==(const Image& rhs) const = default;
 	};
 
 	enum class Direction {
@@ -32,6 +36,8 @@ namespace ui {
 	struct Box {
 		Direction direction = Direction::Vertical;
 		std::vector<Element> children;
+
+		bool operator==(const Box& rhs) const = default;
 	};
 
 	using Content = std::variant<Box, Text, Image>;
@@ -39,9 +45,13 @@ namespace ui {
 	/* Style */
 	struct Pixels {
 		float value;
+
+		bool operator==(const Pixels& rhs) const = default;
 	};
 	struct Percentage {
 		float value;
+
+		bool operator==(const Percentage& rhs) const = default;
 		inline float fractional() const {
 			return value / 100.0f;
 		}
@@ -56,6 +66,8 @@ namespace ui {
 		Measure(Percentage percentage)
 			: value(percentage) {
 		}
+
+		bool operator==(const Measure& rhs) const = default;
 
 		inline bool is_pixels() const {
 			return std::holds_alternative<Pixels>(this->value);
@@ -74,14 +86,18 @@ namespace ui {
 		}
 	};
 
-	struct StaticPosition {};
+	struct StaticPosition {
+		bool operator==(const StaticPosition& rhs) const = default;
+	};
 	struct RelativePosition {
 		Measure x;
 		Measure y;
+		bool operator==(const RelativePosition& rhs) const = default;
 	};
 	struct AbsolutePosition {
 		Measure x;
 		Measure y;
+		bool operator==(const AbsolutePosition& rhs) const = default;
 	};
 	struct Position {
 		std::variant<StaticPosition, RelativePosition, AbsolutePosition> value;
@@ -97,6 +113,8 @@ namespace ui {
 		Position(AbsolutePosition absolute_position)
 			: value(absolute_position) {
 		}
+
+		bool operator==(const Position& rhs) const = default;
 
 		inline bool is_static_position() const {
 			return std::holds_alternative<StaticPosition>(this->value);
@@ -125,6 +143,8 @@ namespace ui {
 		float bottom;
 		float left;
 		float right;
+
+		bool operator==(const Edges& rhs) const = default;
 
 		inline float horizontal() const {
 			return this->left + this->right;
@@ -156,29 +176,39 @@ namespace ui {
 		ImageID image;
 		Edges image_slices; // for 9-slicing
 		bool image_fill_center;
+
+		bool operator==(const BorderStyle& rhs) const = default;
 	};
 
 	struct BackgroundStyle {
 		Color color;
 		ImageID image;
 		Fill fill = Fill::Stretch;
+
+		bool operator==(const BackgroundStyle& rhs) const = default;
 	};
 
 	struct FontStyle {
 		FontID id = FontID::default_font();
 		int size = 16;
 		Color color = WHITE;
+
+		bool operator==(const FontStyle& rhs) const = default;
 	};
 
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
+
+		bool operator==(const StyleDebug& rhs) const = default;
 	};
 
 	struct StyleOverride {
 		std::optional<Color> border_color;
 		std::optional<Color> background_color;
 		std::optional<Color> font_color;
+
+		bool operator==(const StyleOverride& rhs) const = default;
 	};
 
 	struct Style {
@@ -197,6 +227,8 @@ namespace ui {
 		StyleOverride hovered;
 		StyleOverride active;
 		StyleDebug debug;
+
+		bool operator==(const Style& rhs) const = default;
 
 		inline float horizontal_spacing() const {
 			return margin.horizontal() + border.edges.horizontal() + padding.horizontal();
@@ -217,6 +249,8 @@ namespace ui {
 		Rectangle border_box;
 		Rectangle padding_box;
 		Rectangle content_box;
+
+		bool operator==(const Layout& rhs) const = default;
 	};
 
 	/* State */
@@ -227,15 +261,12 @@ namespace ui {
 		Pressed,
 	};
 
-	struct Input {
-		Vector2 mouse_pos;
-		ButtonState left_mouse_button;
-	};
-
 	struct State {
 		bool is_hovered;
 		bool is_active;
 		bool is_clicked;
+
+		bool operator==(const State& rhs) const = default;
 	};
 
 	/* Element */
@@ -245,6 +276,8 @@ namespace ui {
 		Content content;
 		Layout layout; // computed with layout_element()
 		State state; // computed with update_element()
+
+		bool operator==(const Element& rhs) const = default;
 
 		inline bool is_box() const {
 			return std::holds_alternative<Box>(this->content);
@@ -281,6 +314,12 @@ namespace ui {
 		inline const Image* image() const {
 			return std::get_if<Image>(&this->content);
 		}
+	};
+
+	/* Input */
+	struct Input {
+		Vector2 mouse_pos;
+		ButtonState left_mouse_button;
 	};
 
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
