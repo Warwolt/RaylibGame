@@ -647,18 +647,19 @@ namespace ui {
 	}
 
 	void UserInterface::draw(const ResourceManager& resources) const {
-		draw_element(resources, m_root_element);
+		draw_element(resources, m_root_element.value());
 	}
 
 	const Element& UserInterface::root_element() const {
-		return m_root_element;
+		return m_root_element.value();
 	}
 
 	void UserInterface::frame_begin(const Input& input) {
 		ASSERT(!m_within_frame, "Missing call to UserInterface::frame_end?");
 		m_within_frame = true;
-		m_root_element = {};
-		m_parent_stack = { &m_root_element };
+		m_root_element.swap();
+		m_root_element.value() = {};
+		m_parent_stack = { &m_root_element.value() };
 		m_input = input;
 	}
 
@@ -667,12 +668,12 @@ namespace ui {
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(m_parent_stack.size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_within_frame = false;
-		layout_element(resources, window_size, &m_root_element);
+		layout_element(resources, window_size, &m_root_element.value());
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
-		Element* parent = _current_parent();
 		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		Element* parent = _current_parent();
 		parent->box()->children.push_back(
 			Element {
 				.debug_name = debug_name,
@@ -681,7 +682,6 @@ namespace ui {
 			}
 		);
 		m_parent_stack.push_back(&parent->box()->children.back());
-		m_current_element = &parent->box()->children.back();
 	}
 
 	void UserInterface::box_end() {

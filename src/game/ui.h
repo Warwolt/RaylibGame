@@ -344,13 +344,60 @@ namespace ui {
 		bool element_is_hovered() const;
 
 	private:
+		// FIXME: move this to util?
+		template <typename T>
+		class DoubleBuffered {
+		public:
+			DoubleBuffered() = default;
+
+			DoubleBuffered(T value)
+				: m_first(value) {
+			}
+
+			T& value() {
+				return m_index == 0 ? m_first : m_second;
+			}
+
+			const T& value() const {
+				return m_index == 0 ? m_first : m_second;
+			}
+
+			T& other() {
+				return m_index == 0 ? m_second : m_first;
+			}
+
+			const T& other() const {
+				return m_index == 0 ? m_second : m_first;
+			}
+
+			T* operator->() {
+				return m_index == 0 ? &m_first : &m_second;
+			}
+
+			const T* operator->() const {
+				return m_index == 0 ? &m_first : &m_second;
+			}
+
+			void swap() {
+				m_index = (m_index + 1) % 2;
+			}
+
+		private:
+			int m_index = 0;
+			T m_first = {};
+			T m_second = {};
+		};
+
 		bool m_within_frame = false;
-		Element m_root_element = {};
+
+		// struct Location { Element* parent, size_t next_sibling };
+		// std::vector<Location> m_traversal;
+		DoubleBuffered<Element> m_root_element;
 		std::vector<Element*> m_parent_stack;
-		Element* m_current_element = nullptr;
 		Input m_input;
 
 		Element* _current_parent();
+		// bool _handle_element_by_caching();
 	};
 
 } // namespace ui
