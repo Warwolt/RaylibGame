@@ -646,6 +646,36 @@ namespace ui {
 		}
 	}
 
+	ElementTreeIterator::ElementTreeIterator(Element* root) {
+		if (root) {
+			m_stack.push_back(root);
+		}
+	}
+
+	ElementTreeIterator::reference ElementTreeIterator::operator*() const {
+		return *m_stack.back();
+	}
+	ElementTreeIterator::pointer ElementTreeIterator::operator->() const {
+		return m_stack.back();
+	}
+
+	ElementTreeIterator& ElementTreeIterator::operator++() {
+		Element* current = m_stack.back();
+		m_stack.pop_back();
+		if (Box* box = current->box()) {
+			for (auto it = box->children.rbegin(); it != box->children.rend(); ++it) {
+				m_stack.push_back(&(*it));
+			}
+		}
+		return *this;
+	}
+
+	ElementTreeIterator ElementTreeIterator::operator++(int) {
+		ElementTreeIterator tmp = *this;
+		++(*this);
+		return tmp;
+	}
+
 	ElementTree::ElementTree() {
 		reset();
 	}

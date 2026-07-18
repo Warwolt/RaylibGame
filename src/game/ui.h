@@ -337,36 +337,11 @@ namespace ui {
 		using reference = Element&;
 
 		ElementTreeIterator() = default;
-		explicit ElementTreeIterator(Element* root) {
-			if (root) {
-				m_stack.push_back(root);
-			}
-		}
-
-		reference operator*() const {
-			return *m_stack.back();
-		}
-		pointer operator->() const {
-			return m_stack.back();
-		}
-
-		ElementTreeIterator& operator++() {
-			Element* current = m_stack.back();
-			m_stack.pop_back();
-			if (Box* box = current->box()) {
-				for (auto it = box->children.rbegin(); it != box->children.rend(); ++it) {
-					m_stack.push_back(&(*it));
-				}
-			}
-			return *this;
-		}
-
-		ElementTreeIterator operator++(int) {
-			ElementTreeIterator tmp = *this;
-			++(*this);
-			return tmp;
-		}
-
+		explicit ElementTreeIterator(Element* root);
+		reference operator*() const;
+		pointer operator->() const;
+		ElementTreeIterator& operator++();
+		ElementTreeIterator operator++(int);
 		bool operator==(const ElementTreeIterator& rhs) const = default;
 
 	private:
