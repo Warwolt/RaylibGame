@@ -660,8 +660,6 @@ namespace ui {
 		m_root_element.swap();
 		m_root_element.value() = {};
 		m_traversal = { { &m_root_element.value(), 0 } };
-		m_traversal_previous = { { &m_root_element.prev_value(), 0 } };
-		m_trees_are_in_sync = true;
 		m_input = input;
 	}
 

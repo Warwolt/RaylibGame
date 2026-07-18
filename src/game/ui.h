@@ -354,8 +354,6 @@ namespace ui {
 		Input m_input;
 		DoubleBuffer<Element> m_root_element;
 		std::vector<TreeLocation> m_traversal; // this frame's tree
-		std::vector<TreeLocation> m_traversal_previous; // previous frame's tree
-		bool m_trees_are_in_sync;
 
 		Element* _current_parent();
 		void _push_element(Element element);
