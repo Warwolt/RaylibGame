@@ -328,6 +328,48 @@ namespace ui {
 	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
 
+	class ElementTree {
+	public:
+		ElementTree() {
+			reset();
+		}
+
+		void reset() {
+			m_root = { .content = ui::Box {} };
+			m_parents = { &m_root };
+		}
+
+		Element& root() {
+			return m_root;
+		}
+
+		const Element& root() const {
+			return m_root;
+		}
+
+		std::vector<Element*>& parents() {
+			return m_parents;
+		}
+
+		void push_element(Element element) {
+			Element* parent = m_parents.back();
+			parent->box()->children.push_back(element);
+			if (element.is_box()) {
+				m_parents.push_back(&parent->box()->children.back());
+			}
+		}
+
+		void close_element() {
+			if (m_parents.size() > 1) {
+				m_parents.pop_back();
+			}
+		}
+
+	private:
+		Element m_root;
+		std::vector<Element*> m_parents;
+	};
+
 	class UserInterface {
 	public:
 		void draw(const ResourceManager& resources) const;
@@ -345,15 +387,9 @@ namespace ui {
 		bool element_is_hovered() const;
 
 	private:
-		struct TreeLocation {
-			Element* parent;
-			size_t next_child;
-		};
-
-		bool m_is_within_frame = false;
 		Input m_input;
-		DoubleBuffer<Element> m_root_element;
-		std::vector<TreeLocation> m_traversal; // this frame's tree
+		bool m_is_within_frame = false;
+		DoubleBuffer<ElementTree> m_tree;
 
 		Element* _current_parent();
 		void _push_element(Element element);

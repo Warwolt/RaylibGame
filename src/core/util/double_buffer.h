@@ -9,19 +9,19 @@ public:
 		: m_first(value) {
 	}
 
-	T& value() {
+	T& current() {
 		return m_index == 0 ? m_first : m_second;
 	}
 
-	const T& value() const {
+	const T& current() const {
 		return m_index == 0 ? m_first : m_second;
 	}
 
-	T& prev_value() {
+	T& previous() {
 		return m_index == 0 ? m_second : m_first;
 	}
 
-	const T& prev_value() const {
+	const T& previous() const {
 		return m_index == 0 ? m_second : m_first;
 	}
 
