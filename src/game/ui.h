@@ -347,14 +347,26 @@ namespace ui {
 	private:
 		bool m_within_frame = false;
 
-		// struct Location { Element* parent, size_t next_sibling };
-		// std::vector<Location> m_traversal;
+		// FIXME: how to traverse?
+		//
+		// We now have 2 element trees via DoubleBuffer.
+		// Each frame, we can look back at the previous tree.
+		//
+		// However, how do handle the _traversal_ of the two trees? We have the
+		// current tree and the previous tree. The current tree is being
+		// constructed by calls to the public methods of this class, and the
+		// previous tree remains from the previous frame.
+		//
+		// We need some way of traversing _both_ trees as long as they're in sync.
+		// How do we keep track of the traversal?
+		// How do we know when they're out of sync and we should rely on caching anymore?
+
 		DoubleBuffer<Element> m_root_element;
 		std::vector<Element*> m_parent_stack;
 		Input m_input;
 
 		Element* _current_parent();
-		// void _push_element(Element element);
+		void _push_element(Element element);
 	};
 
 } // namespace ui

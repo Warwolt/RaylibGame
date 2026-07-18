@@ -672,15 +672,14 @@ namespace ui {
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
-		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
-		Element* parent = _current_parent();
-		parent->box()->children.push_back(
+		_push_element(
 			Element {
 				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
 				.content = Box { .direction = direction },
 			}
 		);
+		Element* parent = _current_parent();
 		m_parent_stack.push_back(&parent->box()->children.back());
 	}
 
@@ -691,9 +690,7 @@ namespace ui {
 	}
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string debug_name) {
-		Element* parent = _current_parent();
-		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
-		parent->box()->children.push_back(
+		_push_element(
 			Element {
 				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
@@ -703,9 +700,7 @@ namespace ui {
 	}
 
 	void UserInterface::image(ImageID image, std::optional<Style> style, std::string debug_name) {
-		Element* parent = _current_parent();
-		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
-		parent->box()->children.push_back(
+		_push_element(
 			Element {
 				.debug_name = debug_name,
 				.style = style.value_or(Style {}),
@@ -721,5 +716,11 @@ namespace ui {
 	Element* UserInterface::_current_parent() {
 		ASSERT(!m_parent_stack.empty(), "Forgot to add root element to parent stack?");
 		return m_parent_stack.back();
+	}
+
+	void UserInterface::_push_element(Element element) {
+		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		Element* parent = _current_parent();
+		parent->box()->children.push_back(element);
 	}
 }
