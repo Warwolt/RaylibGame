@@ -328,41 +328,68 @@ namespace ui {
 	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
 
+	class ElementTreeIterator {
+	public:
+		using iterator_category = std::forward_iterator_tag;
+		using value_type = Element;
+		using difference_type = std::ptrdiff_t;
+		using pointer = Element*;
+		using reference = Element&;
+
+		ElementTreeIterator() = default;
+		explicit ElementTreeIterator(Element* root) {
+			if (root) {
+				m_stack.push_back(root);
+			}
+		}
+
+		reference operator*() const {
+			return *m_stack.back();
+		}
+		pointer operator->() const {
+			return m_stack.back();
+		}
+
+		ElementTreeIterator& operator++() {
+			Element* current = m_stack.back();
+			m_stack.pop_back();
+			if (Box* box = current->box()) {
+				for (auto it = box->children.rbegin(); it != box->children.rend(); ++it) {
+					m_stack.push_back(&(*it));
+				}
+			}
+			return *this;
+		}
+
+		ElementTreeIterator operator++(int) {
+			ElementTreeIterator tmp = *this;
+			++(*this);
+			return tmp;
+		}
+
+		bool operator==(const ElementTreeIterator& rhs) const = default;
+
+	private:
+		std::vector<Element*> m_stack;
+	};
+
 	class ElementTree {
 	public:
-		ElementTree() {
-			reset();
-		}
+		ElementTree();
 
-		void reset() {
-			m_root = { .content = ui::Box {} };
-			m_parents = { &m_root };
-		}
+		Element& root();
+		const Element& root() const;
+		std::vector<Element*>& parents();
 
-		Element& root() {
-			return m_root;
-		}
+		void reset();
+		void push_element(Element element);
+		void close_element();
 
-		const Element& root() const {
-			return m_root;
+		ElementTreeIterator begin() {
+			return ElementTreeIterator(&m_root);
 		}
-
-		std::vector<Element*>& parents() {
-			return m_parents;
-		}
-
-		void push_element(Element element) {
-			Element* parent = m_parents.back();
-			parent->box()->children.push_back(element);
-			if (element.is_box()) {
-				m_parents.push_back(&parent->box()->children.back());
-			}
-		}
-
-		void close_element() {
-			if (m_parents.size() > 1) {
-				m_parents.pop_back();
-			}
+		ElementTreeIterator end() {
+			return ElementTreeIterator();
 		}
 
 	private:

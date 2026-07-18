@@ -646,6 +646,41 @@ namespace ui {
 		}
 	}
 
+	ElementTree::ElementTree() {
+		reset();
+	}
+
+	Element& ElementTree::root() {
+		return m_root;
+	}
+
+	const Element& ElementTree::root() const {
+		return m_root;
+	}
+
+	std::vector<Element*>& ElementTree::parents() {
+		return m_parents;
+	}
+
+	void ElementTree::reset() {
+		m_root = { .debug_name = "root", .content = ui::Box {} };
+		m_parents = { &m_root };
+	}
+
+	void ElementTree::push_element(Element element) {
+		Element* parent = m_parents.back();
+		parent->box()->children.push_back(element);
+		if (element.is_box()) {
+			m_parents.push_back(&parent->box()->children.back());
+		}
+	}
+
+	void ElementTree::close_element() {
+		if (m_parents.size() > 1) {
+			m_parents.pop_back();
+		}
+	}
+
 	void UserInterface::draw(const ResourceManager& resources) const {
 		draw_element(resources, m_tree.current().root());
 	}

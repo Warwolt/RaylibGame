@@ -38,7 +38,7 @@ TEST(UserInterfaceTests, FrameBegin_TreeIsCleared) {
 	ui.frame_end(resources, window_size);
 	ui.frame_begin(input);
 
-	EXPECT_EQ(ui.root_element(), ui::Element {});
+	EXPECT_EQ(ui.root_element(), ui::Element { .debug_name = "root" });
 }
 
 TEST(UserInterfaceTests, FrameEnd_WithoutFrameBegin_GivesError) {

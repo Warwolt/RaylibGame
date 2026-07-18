@@ -85,6 +85,7 @@ add_executable(UnitTests
     test/unit_tests/unit_test_main.cpp
     test/unit_tests/ui_element_unit_tests.cpp
     test/unit_tests/user_interface_tests.cpp
+    test/unit_tests/ui_element_tree_tests.cpp
 )
 target_include_directories(UnitTests PUBLIC src lib)
 target_link_libraries(UnitTests PUBLIC ${LIB} gtest gmock)
