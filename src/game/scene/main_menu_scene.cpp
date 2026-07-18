@@ -1,5 +1,6 @@
 #include "game/scene/main_menu_scene.h"
 
+#include "core/debug/logging.h"
 #include "core/debug/profiling.h"
 
 #include "game/game.h"
@@ -76,8 +77,7 @@ void MainMenuScene::update(Game* game) {
 			},
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
-			.background = { .color = Color { 20, 37, 136, 255 }, }
-
+			.background = { .color = Color { 20, 37, 136, 255 }, },
 		};
 	const ui::Style image_style {
 			.width = ui::Pixels(200),
@@ -105,7 +105,10 @@ void MainMenuScene::update(Game* game) {
 			.font = {
 				.size = 32,
 				.color = WHITE,
-			}
+			},
+			.debug = {
+				.show_content_outline = true,
+			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
@@ -118,14 +121,17 @@ void MainMenuScene::update(Game* game) {
 		.height = ui::Pixels(indicator_size),
 	};
 
-	const ui::Input ui_input = {};
+	const ui::Input ui_input = {
+		.mouse_pos = Raylib_GetMousePosition(),
+		.left_mouse_button = ui::get_button_state(MOUSE_BUTTON_LEFT),
+	};
 	m_ui.frame_begin(ui_input);
 	{
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
 			{
-				m_ui.box_begin(ui::Direction::Vertical, title_container_style);
+				m_ui.box_begin(ui::Direction::Vertical, title_container_style, "Title Container");
 				{
 					m_ui.text("Video Game", ui::Style { .alignment = ui::Alignment::Center, .font = { .size = 64 } });
 				}
@@ -142,6 +148,11 @@ void MainMenuScene::update(Game* game) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 						m_ui.text(menu_items[i], menu_item_image_style);
+						// move focus on hover
+						if (m_ui.element_is_hovered()) {
+							m_menu_index = i;
+							LOG_DEBUG("m_menu_index = %d", i);
+						}
 					}
 					m_ui.box_end();
 				}

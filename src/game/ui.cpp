@@ -417,6 +417,19 @@ namespace ui {
 		}
 	}
 
+	ButtonState get_button_state(int button) {
+		if (Raylib_IsMouseButtonPressed(button)) {
+			return ButtonState::Pressed;
+		}
+		if (Raylib_IsMouseButtonDown(button)) {
+			return ButtonState::Down;
+		}
+		if (Raylib_IsMouseButtonReleased(button)) {
+			return ButtonState::Released;
+		}
+		return ButtonState::Up;
+	}
+
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		PROFILING_SCOPE();
 		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
@@ -435,6 +448,10 @@ namespace ui {
 	}
 
 	bool update_element(const Input& input, Element* element) {
+		if (element->debug_name == "Title Container") {
+			//
+		}
+
 		/* Hovered */
 		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
 
@@ -724,6 +741,8 @@ namespace ui {
 		m_is_within_frame = true;
 		m_tree.swap();
 		m_tree.current().reset();
+		m_prev_tree_it = m_tree.previous().begin();
+		++m_prev_tree_it; // increment to skip root
 		m_input = input;
 	}
 
@@ -733,10 +752,10 @@ namespace ui {
 		ASSERT(m_tree->parents().size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_is_within_frame = false;
 		layout_element(resources, window_size, &m_tree.current().root());
+		update_element(m_input, &m_tree.current().root());
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
-		/* Push box */
 		_push_element(
 			Element {
 				.debug_name = debug_name,
@@ -773,12 +792,32 @@ namespace ui {
 	}
 
 	bool UserInterface::element_is_hovered() const {
-		return false;
+		return m_element_is_hovered;
 	}
 
 	void UserInterface::_push_element(Element element) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
+
+		/* Copy state from corresponding element in previous tree */
+		// FIXME: write some note here explaining why we're doing this
+		if (m_prev_tree_it != m_tree.previous().end()) {
+			Element& prev_element = *m_prev_tree_it;
+			if (_elements_are_similar(element, prev_element)) {
+				element.state = prev_element.state;
+				m_element_is_hovered = element.state.is_hovered;
+				++m_prev_tree_it;
+			} else {
+				m_prev_tree_it = m_tree.previous().end();
+			}
+		}
+
 		m_tree.current().push_element(element);
+	}
+
+	bool UserInterface::_elements_are_similar(const Element& lhs, const Element& rhs) {
+		const bool same_style = lhs.style == rhs.style;
+		const bool same_content_type = (lhs.is_box() && rhs.is_box()) || (lhs.is_text() && rhs.is_text()) || (lhs.is_image() && rhs.is_image());
+		return same_style && same_content_type;
 	}
 
 } // namespace ui

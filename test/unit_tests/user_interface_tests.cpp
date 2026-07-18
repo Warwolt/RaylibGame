@@ -166,14 +166,23 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 TEST(UserInterfaceTests, BoxElement_Hover) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
-	const Vector2 window_size = { 100, 100 };
+	const Vector2 window_size = { 1000, 1000 };
 
-	const ui::Input input = {};
+	const ui::Input input = {
+		.mouse_pos = { 150, 150 }, // middle of the box
+	};
 	bool is_hovered = false;
 	for (int i = 0; i < 2; i++) {
 		ui.frame_begin(input);
 		{
-			ui.box_begin();
+			ui.box_begin(
+				ui::Direction::Horizontal,
+				ui::Style {
+					.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
+					.width = ui::Pixels(100),
+					.height = ui::Pixels(100),
+				}
+			);
 			if (ui.element_is_hovered()) {
 				is_hovered = true;
 			}

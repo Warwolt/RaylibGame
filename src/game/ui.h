@@ -324,6 +324,7 @@ namespace ui {
 		ButtonState left_mouse_button;
 	};
 
+	ButtonState get_button_state(int button);
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
 	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
@@ -392,9 +393,12 @@ namespace ui {
 		Input m_input;
 		bool m_is_within_frame = false;
 		DoubleBuffer<ElementTree> m_tree;
+		ElementTreeIterator m_prev_tree_it;
 
-		Element* _current_parent();
+		bool m_element_is_hovered = false;
+
 		void _push_element(Element element);
+		bool _elements_are_similar(const Element& lhs, const Element& rhs);
 	};
 
 } // namespace ui
