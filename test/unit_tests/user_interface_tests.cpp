@@ -163,7 +163,7 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 #pragma endregion
 #pragma region interaction
 
-TEST(UserInterfaceTests, BoxElement_Hover) {
+TEST(UserInterfaceTests, BoxElement_Hovered) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = { 1000, 1000 };
@@ -194,4 +194,6 @@ TEST(UserInterfaceTests, BoxElement_Hover) {
 	EXPECT_TRUE(is_hovered);
 }
 
-#pragma endregion
+TEST(USerInterfaceTests, Bug) {
+	FAIL() << "Write a test where re-arranging elements in a list still keeps track of element state";
+}

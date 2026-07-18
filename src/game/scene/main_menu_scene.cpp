@@ -106,6 +106,9 @@ void MainMenuScene::update(Game* game) {
 				.size = 32,
 				.color = WHITE,
 			},
+			.hovered = {
+				.background_color = RED,
+			},
 			.debug = {
 				.show_content_outline = true,
 			},
@@ -131,7 +134,7 @@ void MainMenuScene::update(Game* game) {
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
 			{
-				m_ui.box_begin(ui::Direction::Vertical, title_container_style, "Title Container");
+				m_ui.box_begin(ui::Direction::Vertical, title_container_style);
 				{
 					m_ui.text("Video Game", ui::Style { .alignment = ui::Alignment::Center, .font = { .size = 64 } });
 				}
@@ -148,10 +151,8 @@ void MainMenuScene::update(Game* game) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 						m_ui.text(menu_items[i], menu_item_image_style);
-						// move focus on hover
 						if (m_ui.element_is_hovered()) {
 							m_menu_index = i;
-							LOG_DEBUG("m_menu_index = %d", i);
 						}
 					}
 					m_ui.box_end();

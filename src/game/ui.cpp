@@ -798,8 +798,22 @@ namespace ui {
 	void UserInterface::_push_element(Element element) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 
+		// FIXME:
+		// This doesn't handle rendering lists of elements well at all. As soon
+		// as the list changes (e.g. move focus indicator) we lose track of
+		// interaction state.
+		//
+		// We need some way of keeping identity stable inside a list, so that we
+		// can find the corresponding prevous element even if things get
+		// re-arranged.
+		//
+		// I think this might even be an indication of the weakness of the
+		// current approach?
+		//
+		// How do we define element identity in such a way that it allows us to
+		// keep track of element state between trees?
+
 		/* Copy state from corresponding element in previous tree */
-		// FIXME: write some note here explaining why we're doing this
 		if (m_prev_tree_it != m_tree.previous().end()) {
 			Element& prev_element = *m_prev_tree_it;
 			if (_elements_are_similar(element, prev_element)) {
