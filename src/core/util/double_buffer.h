@@ -17,11 +17,11 @@ public:
 		return m_index == 0 ? m_first : m_second;
 	}
 
-	T& other() {
+	T& prev_value() {
 		return m_index == 0 ? m_second : m_first;
 	}
 
-	const T& other() const {
+	const T& prev_value() const {
 		return m_index == 0 ? m_second : m_first;
 	}
 

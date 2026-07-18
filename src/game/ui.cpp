@@ -655,23 +655,26 @@ namespace ui {
 	}
 
 	void UserInterface::frame_begin(const Input& input) {
-		ASSERT(!m_within_frame, "Missing call to UserInterface::frame_end?");
-		m_within_frame = true;
+		ASSERT(!m_is_within_frame, "Missing call to UserInterface::frame_end?");
+		m_is_within_frame = true;
 		m_root_element.swap();
 		m_root_element.value() = {};
-		m_parent_stack = { &m_root_element.value() };
+		m_traversal = { { &m_root_element.value(), 0 } };
+		m_traversal_previous = { { &m_root_element.prev_value(), 0 } };
+		m_trees_are_in_sync = true;
 		m_input = input;
 	}
 
 	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
 		PROFILING_SCOPE();
-		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
-		ASSERT(m_parent_stack.size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
-		m_within_frame = false;
+		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
+		ASSERT(m_traversal.size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		m_is_within_frame = false;
 		layout_element(resources, window_size, &m_root_element.value());
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
+		/* Push box */
 		_push_element(
 			Element {
 				.debug_name = debug_name,
@@ -679,14 +682,27 @@ namespace ui {
 				.content = Box { .direction = direction },
 			}
 		);
-		Element* parent = _current_parent();
-		m_parent_stack.push_back(&parent->box()->children.back());
+
+		/* Move location to box we just added */
+		Element* parent = m_traversal.back().parent;
+		m_traversal.push_back(
+			TreeLocation {
+				.parent = &parent->box()->children.back(),
+				.next_child = 0,
+			}
+		);
+
+		/* Follow in previous tree if we're still in sync */
+		// if (m_traversal.trees_are_in_sync) {
+		// 	Element* prev_parent = m_traversal.previous_parents.back();
+		// 	m_traversal.previous_parents.push_back(&prev_parent->box()->children.back());
+		// }
 	}
 
 	void UserInterface::box_end() {
-		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
-		ASSERT(m_parent_stack.size() > 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
-		m_parent_stack.pop_back();
+		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
+		ASSERT(m_traversal.size() > 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		m_traversal.pop_back();
 	}
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string debug_name) {
@@ -714,13 +730,19 @@ namespace ui {
 	}
 
 	Element* UserInterface::_current_parent() {
-		ASSERT(!m_parent_stack.empty(), "Forgot to add root element to parent stack?");
-		return m_parent_stack.back();
+		ASSERT(!m_traversal.empty(), "Forgot to add root element to parent stack?");
+		return m_traversal.back().parent;
 	}
 
 	void UserInterface::_push_element(Element element) {
-		ASSERT(m_within_frame, "Missing call to UserInterface::frame_begin?");
+		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
+
+		// if (equivalent element exists in the previous tree) {
+		// 		copy State from element in previous tree to current element
+		// }
+
 		Element* parent = _current_parent();
 		parent->box()->children.push_back(element);
 	}
-}
+
+} // namespace ui
