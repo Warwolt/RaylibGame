@@ -1,11 +1,12 @@
 #pragma once
 
-#include "core/util/double_buffer.h"
+#include "core/util/tracked_value.h"
 #include "game/resource.h"
 
 #include <raylib.h>
 #include <raymath.h>
 
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -264,11 +265,19 @@ namespace ui {
 	};
 
 	struct State {
-		bool is_hovered;
-		bool is_active;
-		bool is_clicked;
+		TrackedValue<bool> is_hovered;
+		TrackedValue<bool> is_active;
+		TrackedValue<bool> is_clicked;
 
 		bool operator==(const State& rhs) const = default;
+	};
+
+	struct Handlers {
+		std::function<void()> on_click;
+
+		bool operator==(const Handlers& /*rhs*/) const {
+			return true;
+		}
 	};
 
 	/* Element */
@@ -278,6 +287,7 @@ namespace ui {
 		Content content;
 		Layout layout; // computed with layout_element()
 		State state; // computed with update_element()
+		Handlers handlers;
 
 		bool operator==(const Element& rhs) const = default;
 
@@ -387,15 +397,10 @@ namespace ui {
 		void text(std::string_view text, std::optional<Style> style = {}, std::string debug_name = "");
 		void image(ImageID image, std::optional<Style> style = {}, std::string debug_name = "");
 
-		bool element_is_hovered() const;
-
 	private:
 		Input m_input;
 		bool m_is_within_frame = false;
-		DoubleBuffer<ElementTree> m_tree;
-		ElementTreeIterator m_prev_tree_it;
-
-		bool m_element_is_hovered = false;
+		ElementTree m_tree;
 
 		void _push_element(Element element);
 		bool _elements_are_similar(const Element& lhs, const Element& rhs);

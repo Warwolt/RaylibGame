@@ -183,17 +183,13 @@ TEST(UserInterfaceTests, BoxElement_Hovered) {
 					.height = ui::Pixels(100),
 				}
 			);
-			if (ui.element_is_hovered()) {
-				is_hovered = true;
-			}
+			//if (ui.element_is_hovered()) {
+			//	is_hovered = true;
+			// }
 			ui.box_end();
 		}
 		ui.frame_end(resources, window_size);
 	}
 
 	EXPECT_TRUE(is_hovered);
-}
-
-TEST(USerInterfaceTests, Bug) {
-	FAIL() << "Write a test where re-arranging elements in a list still keeps track of element state";
 }

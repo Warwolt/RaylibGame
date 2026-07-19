@@ -151,9 +151,9 @@ void MainMenuScene::update(Game* game) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 						m_ui.text(menu_items[i], menu_item_image_style);
-						if (m_ui.element_is_hovered()) {
-							m_menu_index = i;
-						}
+						// if (m_ui.element_is_hovered()) {
+						//	m_menu_index = i;
+						// }
 					}
 					m_ui.box_end();
 				}

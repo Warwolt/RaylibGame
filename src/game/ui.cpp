@@ -448,10 +448,6 @@ namespace ui {
 	}
 
 	bool update_element(const Input& input, Element* element) {
-		if (element->debug_name == "Title Container") {
-			//
-		}
-
 		/* Hovered */
 		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
 
@@ -729,30 +725,27 @@ namespace ui {
 	}
 
 	void UserInterface::draw(const ResourceManager& resources) const {
-		draw_element(resources, m_tree.current().root());
+		draw_element(resources, m_tree.root());
 	}
 
 	const Element& UserInterface::root_element() const {
-		return m_tree.current().root();
+		return m_tree.root();
 	}
 
 	void UserInterface::frame_begin(const Input& input) {
 		ASSERT(!m_is_within_frame, "Missing call to UserInterface::frame_end?");
 		m_is_within_frame = true;
-		m_tree.swap();
-		m_tree.current().reset();
-		m_prev_tree_it = m_tree.previous().begin();
-		++m_prev_tree_it; // increment to skip root
+		m_tree.reset();
 		m_input = input;
 	}
 
 	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
 		PROFILING_SCOPE();
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-		ASSERT(m_tree->parents().size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		ASSERT(m_tree.parents().size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_is_within_frame = false;
-		layout_element(resources, window_size, &m_tree.current().root());
-		update_element(m_input, &m_tree.current().root());
+		layout_element(resources, window_size, &m_tree.root());
+		update_element(m_input, &m_tree.root());
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
@@ -767,8 +760,8 @@ namespace ui {
 
 	void UserInterface::box_end() {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-		ASSERT(m_tree.current().parents().size() > 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
-		m_tree.current().close_element();
+		ASSERT(m_tree.parents().size() > 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		m_tree.close_element();
 	}
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string debug_name) {
@@ -791,41 +784,9 @@ namespace ui {
 		);
 	}
 
-	bool UserInterface::element_is_hovered() const {
-		return m_element_is_hovered;
-	}
-
 	void UserInterface::_push_element(Element element) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-
-		// FIXME:
-		// This doesn't handle rendering lists of elements well at all. As soon
-		// as the list changes (e.g. move focus indicator) we lose track of
-		// interaction state.
-		//
-		// We need some way of keeping identity stable inside a list, so that we
-		// can find the corresponding prevous element even if things get
-		// re-arranged.
-		//
-		// I think this might even be an indication of the weakness of the
-		// current approach?
-		//
-		// How do we define element identity in such a way that it allows us to
-		// keep track of element state between trees?
-
-		/* Copy state from corresponding element in previous tree */
-		if (m_prev_tree_it != m_tree.previous().end()) {
-			Element& prev_element = *m_prev_tree_it;
-			if (_elements_are_similar(element, prev_element)) {
-				element.state = prev_element.state;
-				m_element_is_hovered = element.state.is_hovered;
-				++m_prev_tree_it;
-			} else {
-				m_prev_tree_it = m_tree.previous().end();
-			}
-		}
-
-		m_tree.current().push_element(element);
+		m_tree.push_element(element);
 	}
 
 	bool UserInterface::_elements_are_similar(const Element& lhs, const Element& rhs) {
