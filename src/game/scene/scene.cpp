@@ -33,19 +33,39 @@ public:
 	}
 
 	void initialize(Game* game) {
-		std::visit([game](auto& scene) { scene.initialize(game); }, m_instance);
+		std::visit(
+			[game](auto& scene) {
+				scene.initialize(game);
+			},
+			m_instance
+		);
 	}
 
 	void deinitialize(Game* game) {
-		std::visit([game](auto& scene) { scene.deinitialize(game); }, m_instance);
+		std::visit(
+			[game](auto& scene) {
+				scene.deinitialize(game);
+			},
+			m_instance
+		);
 	}
 
 	void update(Game* game) {
-		std::visit([game](auto& scene) { scene.update(game); }, m_instance);
+		std::visit(
+			[game](auto& scene) {
+				scene.update(game);
+			},
+			m_instance
+		);
 	}
 
 	void render(const Game& game) const {
-		std::visit([&game](auto& scene) { scene.render(game); }, m_instance);
+		std::visit(
+			[&game](auto& scene) {
+				scene.render(game);
+			},
+			m_instance
+		);
 	}
 
 private:
