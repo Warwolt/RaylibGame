@@ -701,6 +701,18 @@ namespace ui {
 		return m_root;
 	}
 
+	Element& ElementTree::current_element() {
+		Element* parent = m_parents.back();
+		std::vector<Element>& children = m_parents.back()->box()->children;
+		return children.empty() ? *parent : children.back();
+	}
+
+	const Element& ElementTree::current_element() const {
+		const Element* parent = m_parents.back();
+		const std::vector<Element>& children = m_parents.back()->box()->children;
+		return children.empty() ? *parent : children.back();
+	}
+
 	std::vector<Element*>& ElementTree::parents() {
 		return m_parents;
 	}
@@ -732,20 +744,33 @@ namespace ui {
 		return m_tree.root();
 	}
 
-	void UserInterface::frame_begin(const Input& input) {
+	void UserInterface::frame_begin() {
 		ASSERT(!m_is_within_frame, "Missing call to UserInterface::frame_end?");
 		m_is_within_frame = true;
 		m_tree.reset();
-		m_input = input;
 	}
 
-	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
+	void UserInterface::frame_end(const Input& input, const ResourceManager& resources, Vector2 window_size) {
 		PROFILING_SCOPE();
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(m_tree.parents().size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_is_within_frame = false;
 		layout_element(resources, window_size, &m_tree.root());
-		update_element(m_input, &m_tree.root());
+		update_element(input, &m_tree.root());
+
+		/* Call event handlers */
+		for (Element& element : m_tree) {
+			/* On hover */
+			if (element.handlers.on_hover && element.state.is_hovered.has_changed()) {
+				element.handlers.on_hover(element.state.is_hovered);
+			}
+
+			/* Free handlers */
+			// Workaround to support DLL based hot reloading.
+			// We can't store function pointers between frames, since those
+			// might point to addresses in a DLL that might've been unloaded.
+			element.handlers = {};
+		}
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
@@ -782,6 +807,11 @@ namespace ui {
 				.content = Image { .id = image },
 			}
 		);
+	}
+
+	void UserInterface::on_hover(std::function<void(bool is_hovered)> handle_hover) {
+		Element& element = m_tree.current_element();
+		element.handlers.on_hover = handle_hover;
 	}
 
 	void UserInterface::_push_element(Element element) {

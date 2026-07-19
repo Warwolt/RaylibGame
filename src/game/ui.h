@@ -273,7 +273,7 @@ namespace ui {
 	};
 
 	struct Handlers {
-		std::function<void()> on_click;
+		std::function<void(bool is_hovered)> on_hover;
 
 		bool operator==(const Handlers& /*rhs*/) const {
 			return true;
@@ -365,6 +365,8 @@ namespace ui {
 
 		Element& root();
 		const Element& root() const;
+		Element& current_element(); // most recent non-closed element
+		const Element& current_element() const;
 		std::vector<Element*>& parents();
 
 		void reset();
@@ -388,8 +390,8 @@ namespace ui {
 		void draw(const ResourceManager& resources) const;
 		const Element& root_element() const;
 
-		void frame_begin(const Input& input);
-		void frame_end(const ResourceManager& resources, Vector2 window_size);
+		void frame_begin();
+		void frame_end(const Input& input, const ResourceManager& resources, Vector2 window_size);
 
 		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {}, std::string debug_name = "");
 		void box_end();
@@ -397,8 +399,9 @@ namespace ui {
 		void text(std::string_view text, std::optional<Style> style = {}, std::string debug_name = "");
 		void image(ImageID image, std::optional<Style> style = {}, std::string debug_name = "");
 
+		void on_hover(std::function<void(bool is_hovered)> handle_hover);
+
 	private:
-		Input m_input;
 		bool m_is_within_frame = false;
 		ElementTree m_tree;
 

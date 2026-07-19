@@ -64,6 +64,11 @@ void MainMenuScene::update(Game* game) {
 		}
 	}
 
+	const ui::Input input = {
+		.mouse_pos = Raylib_GetMousePosition(),
+		.left_mouse_button = ui::get_button_state(MOUSE_BUTTON_LEFT),
+	};
+
 	const ui::Style menu_style = {
 		.alignment = ui::Alignment::Center,
 		.background = { .image = m_images.mario64_skybox },
@@ -106,29 +111,19 @@ void MainMenuScene::update(Game* game) {
 				.size = 32,
 				.color = WHITE,
 			},
-			.hovered = {
-				.background_color = RED,
-			},
-			.debug = {
-				.show_content_outline = true,
-			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
 		.position =
 			ui::AbsolutePosition {
-				.x = ui::Pixels(-indicator_size),
+				.x = ui::Pixels(-indicator_size - 10),
 				.y = ui::Pixels(-10),
 			},
 		.width = ui::Pixels(indicator_size),
 		.height = ui::Pixels(indicator_size),
 	};
 
-	const ui::Input ui_input = {
-		.mouse_pos = Raylib_GetMousePosition(),
-		.left_mouse_button = ui::get_button_state(MOUSE_BUTTON_LEFT),
-	};
-	m_ui.frame_begin(ui_input);
+	m_ui.frame_begin();
 	{
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
@@ -151,9 +146,11 @@ void MainMenuScene::update(Game* game) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 						m_ui.text(menu_items[i], menu_item_image_style);
-						// if (m_ui.element_is_hovered()) {
-						//	m_menu_index = i;
-						// }
+						m_ui.on_hover([this, i](bool is_hovered) {
+							if (is_hovered) {
+								m_menu_index = i;
+							}
+						});
 					}
 					m_ui.box_end();
 				}
@@ -162,7 +159,7 @@ void MainMenuScene::update(Game* game) {
 		}
 		m_ui.box_end();
 	}
-	m_ui.frame_end(game->resources, game->window.size());
+	m_ui.frame_end(input, game->resources, game->window.size());
 }
 
 void MainMenuScene::render(const Game& game) const {

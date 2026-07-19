@@ -15,11 +15,10 @@ TEST(UserInterfaceTests, DefaultConstructed_RootIsEmptyBox) {
 
 TEST(UserInterfaceTests, FrameBegin_FrameBegin_GivesError) {
 	ui::UserInterface ui;
-	const ui::Input input = {};
 	EXPECT_DEATH(
 		{
-			ui.frame_begin(input);
-			ui.frame_begin(input);
+			ui.frame_begin();
+			ui.frame_begin();
 		},
 		"Missing call to UserInterface::frame_end?"
 	);
@@ -31,12 +30,12 @@ TEST(UserInterfaceTests, FrameBegin_TreeIsCleared) {
 	const Vector2 window_size = {};
 	const ui::Input input = {};
 
-	ui.frame_begin(input);
+	ui.frame_begin();
 	{
 		ui.text("Hello world");
 	}
-	ui.frame_end(resources, window_size);
-	ui.frame_begin(input);
+	ui.frame_end(input, resources, window_size);
+	ui.frame_begin();
 
 	EXPECT_EQ(ui.root_element(), ui::Element { .debug_name = "root" });
 }
@@ -45,11 +44,12 @@ TEST(UserInterfaceTests, FrameEnd_WithoutFrameBegin_GivesError) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = {};
+	const ui::Input input = {};
 
 	EXPECT_DEATH(
 		{
 			// ui.frame_begin();
-			ui.frame_end(resources, window_size);
+			ui.frame_end(input, resources, window_size);
 		},
 		"Missing call to UserInterface::frame_begin?"
 	);
@@ -61,11 +61,11 @@ TEST(UserInterfaceTests, TextElement) {
 	const Vector2 window_size = {};
 	const ui::Input input = {};
 
-	ui.frame_begin(input);
+	ui.frame_begin();
 	{
 		ui.text("Hello world");
 	}
-	ui.frame_end(resources, window_size);
+	ui.frame_end(input, resources, window_size);
 
 	const ui::Element& root = ui.root_element();
 	ASSERT_TRUE(root.is_box());
@@ -82,7 +82,7 @@ TEST(UserInterfaceTests, BoxElement_BoxBegin_WithoutBoxEnd_GivesError) {
 
 	EXPECT_DEATH(
 		{
-			ui.frame_begin(input);
+			ui.frame_begin();
 			{
 				ui.box_begin();
 				{
@@ -91,7 +91,7 @@ TEST(UserInterfaceTests, BoxElement_BoxBegin_WithoutBoxEnd_GivesError) {
 				}
 				ui.box_end();
 			}
-			ui.frame_end(resources, window_size);
+			ui.frame_end(input, resources, window_size);
 		},
 		"UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?"
 	);
@@ -105,7 +105,7 @@ TEST(UserInterfaceTests, BoxElement_BoxEnd_WithoutBoxBegin_GivesError) {
 
 	EXPECT_DEATH(
 		{
-			ui.frame_begin(input);
+			ui.frame_begin();
 			{
 				ui.box_begin();
 				{
@@ -114,7 +114,7 @@ TEST(UserInterfaceTests, BoxElement_BoxEnd_WithoutBoxBegin_GivesError) {
 				}
 				ui.box_end();
 			}
-			ui.frame_end(resources, window_size);
+			ui.frame_end(input, resources, window_size);
 		},
 		"UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?"
 	);
@@ -126,7 +126,7 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 	const Vector2 window_size = {};
 	const ui::Input input = {};
 
-	ui.frame_begin(input);
+	ui.frame_begin();
 	{
 		ui.box_begin();
 		{
@@ -140,7 +140,7 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 		}
 		ui.box_end();
 	}
-	ui.frame_end(resources, window_size);
+	ui.frame_end(input, resources, window_size);
 
 	const ui::Element& root = ui.root_element();
 	// root
@@ -171,25 +171,23 @@ TEST(UserInterfaceTests, BoxElement_Hovered) {
 	const ui::Input input = {
 		.mouse_pos = { 150, 150 }, // middle of the box
 	};
-	bool is_hovered = false;
-	for (int i = 0; i < 2; i++) {
-		ui.frame_begin(input);
+	bool box_is_hovered = false;
+	ui.frame_begin();
+	{
+		const ui::Style box_style = {
+			.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
+			.width = ui::Pixels(100),
+			.height = ui::Pixels(100),
+		};
+		ui.box_begin(ui::Direction::Horizontal, box_style);
 		{
-			ui.box_begin(
-				ui::Direction::Horizontal,
-				ui::Style {
-					.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
-					.width = ui::Pixels(100),
-					.height = ui::Pixels(100),
-				}
-			);
-			//if (ui.element_is_hovered()) {
-			//	is_hovered = true;
-			// }
-			ui.box_end();
+			ui.on_hover([&](bool is_hovered) {
+				box_is_hovered = is_hovered;
+			});
 		}
-		ui.frame_end(resources, window_size);
+		ui.box_end();
 	}
+	ui.frame_end(input, resources, window_size);
 
-	EXPECT_TRUE(is_hovered);
+	EXPECT_TRUE(box_is_hovered);
 }
