@@ -27,11 +27,11 @@ namespace ui {
 		layout_element(resources, window_size, &m_tree.root());
 	}
 
-	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string debug_name) {
+	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		m_tree.push_element(
 			Element {
-				.debug_name = debug_name,
+				.id = id,
 				.style = style.value_or(Style {}),
 				.content = Box { .direction = direction },
 			}
@@ -44,22 +44,22 @@ namespace ui {
 		m_tree.close_element();
 	}
 
-	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string debug_name) {
+	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		m_tree.push_element(
 			Element {
-				.debug_name = debug_name,
+				.id = id,
 				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
 			}
 		);
 	}
 
-	void UserInterface::image(ImageID image, std::optional<Style> style, std::string debug_name) {
+	void UserInterface::image(ImageID image, std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		m_tree.push_element(
 			Element {
-				.debug_name = debug_name,
+				.id = id,
 				.style = style.value_or(Style {}),
 				.content = Image { .id = image },
 			}

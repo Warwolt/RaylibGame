@@ -57,7 +57,7 @@ namespace ui {
 	}
 
 	void Tree::reset() {
-		m_root = { .debug_name = "root", .content = ui::Box {} };
+		m_root = { .id = "root", .content = ui::Box {} };
 		m_parents = { &m_root };
 	}
 

@@ -20,11 +20,11 @@ namespace ui {
 		void frame_begin();
 		void frame_end(const ResourceManager& resources, Vector2 window_size);
 
-		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {}, std::string debug_name = "");
+		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {}, std::string id = "");
 		void box_end();
 
-		void text(std::string_view text, std::optional<Style> style = {}, std::string debug_name = "");
-		void image(ImageID image, std::optional<Style> style = {}, std::string debug_name = "");
+		void text(std::string_view text, std::optional<Style> style = {}, std::string id = "");
+		void image(ImageID image, std::optional<Style> style = {}, std::string id = "");
 
 	private:
 		bool m_is_within_frame = false;

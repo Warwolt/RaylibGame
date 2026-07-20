@@ -242,7 +242,7 @@ namespace ui {
 
 	/* Element */
 	struct Element {
-		std::string debug_name;
+		std::string id;
 		Style style;
 		Content content;
 		Layout layout; // computed with layout_element()
