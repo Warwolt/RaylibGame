@@ -38,7 +38,7 @@ namespace ui {
 
 		void reset();
 		void push_element(Element element);
-		void close_element();
+		void close_element(); // i.e. close current box element
 		bool has_open_element() const;
 
 		TreeIterator begin();
