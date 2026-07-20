@@ -2,11 +2,6 @@
 
 #include "core/debug/assert.h"
 #include "core/debug/profiling.h"
-#include "core/util.h"
-
-#include <algorithm>
-#include <array>
-#include <numeric>
 
 namespace ui {
 

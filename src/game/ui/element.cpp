@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <array>
-#include <numeric>
 
 namespace ui {
 
