@@ -1,4 +1,4 @@
-#include "game/ui.h"
+#include "game/ui/user_interface.h"
 
 #include "test/snapshot_tests/snapshots.h"
 

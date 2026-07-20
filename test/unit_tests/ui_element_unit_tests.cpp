@@ -1,4 +1,4 @@
-#include "game/ui.h"
+#include "game/ui/user_interface.h"
 
 #include <gtest/gtest.h>
 #include <raylib.h>

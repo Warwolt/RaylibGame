@@ -3,7 +3,7 @@
 struct Game;
 
 #include "game/resource_id.h"
-#include "game/ui.h"
+#include "game/ui/user_interface.h"
 
 class MainMenuScene {
 public:

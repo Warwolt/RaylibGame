@@ -5,7 +5,7 @@
 #include "game/game.h"
 #include "game/resource.h"
 #include "game/scene/scene_id.h"
-#include "game/ui.h"
+#include "game/ui/user_interface.h"
 
 #include <raylib.h>
 #include <raymath.h>
