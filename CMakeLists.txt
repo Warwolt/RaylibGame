@@ -30,8 +30,8 @@ add_subdirectory(lib/tracy)
 # Source files
 set(SRC
     src/core/debug/assert.cpp
-    src/core/debug/logging.cpp
     src/core/debug/assert.cpp
+    src/core/debug/logging.cpp
     src/core/util.cpp
     src/core/util/time.cpp
     src/game/debug.cpp
@@ -40,9 +40,10 @@ set(SRC
     src/game/scene/gameplay_scene.cpp
     src/game/scene/main_menu_scene.cpp
     src/game/scene/scene.cpp
+    src/game/ui/element.cpp
     src/game/ui/user_interface.cpp
-    src/platform/window.cpp
     src/platform/win32.cpp
+    src/platform/window.cpp
 )
 set(LIB
     raylib
@@ -83,8 +84,8 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
     test/unit_tests/unit_test_main.cpp
-    test/unit_tests/ui_element_unit_tests.cpp
-    test/unit_tests/user_interface_tests.cpp
+    test/unit_tests/ui_element_tests.cpp
+    test/unit_tests/ui_user_interface_tests.cpp
 )
 target_include_directories(UnitTests PUBLIC src lib)
 target_link_libraries(UnitTests PUBLIC ${LIB} gtest gmock)
