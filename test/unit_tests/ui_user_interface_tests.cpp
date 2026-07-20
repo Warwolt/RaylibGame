@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "game/ui.h"
+#include "game/ui/user_interface.h"
 
 #include "game/resource.h"
 

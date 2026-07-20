@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/resource.h"
+#include "game/resource_id.h"
 
 #include <raylib.h>
 
@@ -9,6 +9,8 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+
+class ResourceManager;
 
 namespace ui {
 
@@ -240,7 +242,7 @@ namespace ui {
 
 	/* Element */
 	struct Element {
-		std::string debug_name;
+		std::string id;
 		Style style;
 		Content content;
 		Layout layout; // computed with layout_element()
@@ -286,27 +288,5 @@ namespace ui {
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
 	bool update_element(const Input& input, Element* element);
 	void draw_element(const ResourceManager& resources, const Element& element);
-
-	class UserInterface {
-	public:
-		void draw(const ResourceManager& resources) const;
-		const Element& root_element() const;
-
-		void frame_begin();
-		void frame_end(const ResourceManager& resources, Vector2 window_size);
-
-		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {}, std::string debug_name = "");
-		void box_end();
-
-		void text(std::string_view text, std::optional<Style> style = {}, std::string debug_name = "");
-		void image(ImageID image, std::optional<Style> style = {}, std::string debug_name = "");
-
-	private:
-		bool m_within_frame = false;
-		Element m_root_element = {};
-		std::vector<Element*> m_parent_stack;
-
-		Element* _current_parent();
-	};
 
 } // namespace ui

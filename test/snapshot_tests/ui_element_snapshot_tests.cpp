@@ -1,4 +1,4 @@
-#include "game/ui.h"
+#include "game/ui/user_interface.h"
 
 #include "test/snapshot_tests/snapshots.h"
 
@@ -12,7 +12,7 @@ constexpr int SCREEN_HEIGHT = 432;
 constexpr Vector2 SCREEN_SIZE = { SCREEN_WIDTH, SCREEN_HEIGHT };
 #define LIGHTGREEN Color(191, 240, 172, 255)
 
-class UIElementSnapshotTests : public ::testing::Test {
+class ElementSnapshotTests : public ::testing::Test {
 public:
 	static ResourceManager m_resources;
 	static ImageID m_big_test_image;
@@ -35,12 +35,12 @@ public:
 	}
 };
 
-ResourceManager UIElementSnapshotTests::m_resources;
-ImageID UIElementSnapshotTests::m_big_test_image;
-ImageID UIElementSnapshotTests::m_small_test_image;
-ImageID UIElementSnapshotTests::m_nine_slice_image;
+ResourceManager ElementSnapshotTests::m_resources;
+ImageID ElementSnapshotTests::m_big_test_image;
+ImageID ElementSnapshotTests::m_small_test_image;
+ImageID ElementSnapshotTests::m_nine_slice_image;
 
-TEST_F(UIElementSnapshotTests, Box_100_100_Gives_50_50) {
+TEST_F(ElementSnapshotTests, Box_100_100_Gives_50_50) {
 	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -69,7 +69,7 @@ TEST_F(UIElementSnapshotTests, Box_100_100_Gives_50_50) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
+TEST_F(ElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 	ui::Element element = {
 		.content = ui::Box {
 			.direction = ui::Direction::Horizontal,
@@ -141,7 +141,7 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 	return element;
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
 	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
@@ -152,7 +152,7 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart_Vertical) {
+TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Vertical) {
 	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
@@ -161,7 +161,7 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_StartStart_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Horizontal) {
 	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
@@ -170,7 +170,7 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter_Vertical) {
+TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Vertical) {
 	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
@@ -179,7 +179,7 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_CenterCenter_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Horizontal) {
 	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
@@ -188,7 +188,7 @@ TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
+TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
 	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
@@ -258,7 +258,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 	};
 }
 
-TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
 	ui::Element element = box_with_position(
 		ui::Direction::Horizontal,
 		ui::RelativePosition {
@@ -275,7 +275,7 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_RelativePosition_Percentage_Horizontal) {
 	ui::Element element = box_with_position(
 		ui::Direction::Horizontal,
 		ui::RelativePosition {
@@ -290,7 +290,7 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Vertical) {
+TEST_F(ElementSnapshotTests, Box_RelativePosition_Pixels_Vertical) {
 	ui::Element element = box_with_position(
 		ui::Direction::Vertical,
 		ui::RelativePosition {
@@ -305,7 +305,7 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition_Pixels_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Vertical) {
+TEST_F(ElementSnapshotTests, Box_RelativePosition_Percentage_Vertical) {
 	ui::Element element = box_with_position(
 		ui::Direction::Vertical,
 		ui::RelativePosition {
@@ -320,7 +320,7 @@ TEST_F(UIElementSnapshotTests, Box_RelativePosition_Percentage_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Horizontal) {
 	ui::Element element = box_with_position(
 		ui::Direction::Horizontal,
 		ui::AbsolutePosition {
@@ -335,7 +335,7 @@ TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Horizont
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Horizontal) {
 	ui::Element element = box_with_position(
 		ui::Direction::Horizontal,
 		ui::AbsolutePosition {
@@ -350,7 +350,7 @@ TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Hori
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Vertical) {
+TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Vertical) {
 	ui::Element element = box_with_position(
 		ui::Direction::Vertical,
 		ui::AbsolutePosition {
@@ -365,7 +365,7 @@ TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Vertical
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vertical) {
+TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vertical) {
 	ui::Element element = box_with_position(
 		ui::Direction::Vertical,
 		ui::AbsolutePosition {
@@ -380,7 +380,7 @@ TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vert
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_AbsolutePosition_CanOverflowParent_Pixels) {
+TEST_F(ElementSnapshotTests, Box_AbsolutePosition_CanOverflowParent_Pixels) {
 	ui::Element element = {
 		.style = {
 			.position = ui::AbsolutePosition {
@@ -440,7 +440,7 @@ ui::Element box_fit_content(ui::Direction direction, std::vector<ui::Element> ch
 	};
 }
 
-TEST_F(UIElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
+TEST_F(ElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
 	ui::Element element = box_fit_content(ui::Direction::Horizontal, {});
 
 	ui::layout_element(m_resources, SCREEN_SIZE, &element);
@@ -449,7 +449,7 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_FitContent_TextChild_FitsText) {
+TEST_F(ElementSnapshotTests, Box_FitContent_TextChild_FitsText) {
 	ui::Element element = box_fit_content(
 		ui::Direction::Horizontal,
 		{
@@ -468,7 +468,7 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_TextChild_FitsText) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Horizontal) {
 	ui::Element element = box_fit_content(
 		ui::Direction::Horizontal,
 		{
@@ -493,7 +493,7 @@ TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Horizonta
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Vertical) {
+TEST_F(ElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Vertical) {
 	ui::Element element = box_fit_content(
 		ui::Direction::Vertical,
 		{
@@ -552,7 +552,7 @@ ui::Element button_box() {
 	};
 }
 
-TEST_F(UIElementSnapshotTests, Box_DefaultStyle) {
+TEST_F(ElementSnapshotTests, Box_DefaultStyle) {
 	ui::Element element = button_box();
 	element.state.is_hovered = false;
 	element.state.is_active = false;
@@ -565,7 +565,7 @@ TEST_F(UIElementSnapshotTests, Box_DefaultStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_HoveredStyle) {
+TEST_F(ElementSnapshotTests, Box_HoveredStyle) {
 	ui::Element element = button_box();
 	element.state.is_hovered = true;
 	element.state.is_active = false;
@@ -576,7 +576,7 @@ TEST_F(UIElementSnapshotTests, Box_HoveredStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Box_ActiveStyle) {
+TEST_F(ElementSnapshotTests, Box_ActiveStyle) {
 	ui::Element element = button_box();
 	element.state.is_hovered = true;
 	element.state.is_active = true;
@@ -587,7 +587,7 @@ TEST_F(UIElementSnapshotTests, Box_ActiveStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Text_LeftAligned) {
+TEST_F(ElementSnapshotTests, Text_LeftAligned) {
 	ui::Element element = {
 		.style = {
 			.width = ui::Percentage(100),
@@ -606,7 +606,7 @@ TEST_F(UIElementSnapshotTests, Text_LeftAligned) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Text_CenterAligned) {
+TEST_F(ElementSnapshotTests, Text_CenterAligned) {
 	ui::Element element = {
 		.style = {
 			.width = ui::Percentage(100),
@@ -625,7 +625,7 @@ TEST_F(UIElementSnapshotTests, Text_CenterAligned) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Text_RightAligned) {
+TEST_F(ElementSnapshotTests, Text_RightAligned) {
 	ui::Element element = {
 		.style = {
 			.width = ui::Percentage(100),
@@ -644,7 +644,7 @@ TEST_F(UIElementSnapshotTests, Text_RightAligned) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
+TEST_F(ElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 	ui::Element element = {
 		.style = {
 			.width = ui::Percentage(100),
@@ -704,7 +704,7 @@ TEST_F(UIElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_DefaultStyle_UsesIntrinsicSize) {
+TEST_F(ElementSnapshotTests, Image_DefaultStyle_UsesIntrinsicSize) {
 	ui::Element element = {
 		.content =
 			ui::Image {
@@ -758,7 +758,7 @@ ui::Element image_relative_size(ui::Style parent_style, ui::Direction direction,
 	};
 }
 
-TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
+TEST_F(ElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
 	ui::Element element = image_relative_size(
 		ui::Style {
 			.width = ui::Percentage(100),
@@ -774,7 +774,7 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
+TEST_F(ElementSnapshotTests, Image_RelativeSize_FitVertically) {
 	ui::Element element = image_relative_size(
 		ui::Style {
 			.width = ui::Percentage(50),
@@ -790,7 +790,7 @@ TEST_F(UIElementSnapshotTests, Image_RelativeSize_FitVertically) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_PixelSize_FitsInContainer) {
+TEST_F(ElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 	ui::Element element = {
 		.content =
 			ui::Box {
@@ -842,7 +842,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
+TEST_F(ElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 	Texture2D texture = m_resources.get_image(m_big_test_image);
 	ASSERT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
 	ASSERT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
@@ -880,7 +880,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
+TEST_F(ElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 	Texture2D texture = m_resources.get_image(m_big_test_image);
 	ASSERT_GT(texture.width, SCREEN_SIZE.x) << "Test image is too small for test to make sense!";
 	ASSERT_GT(texture.height, SCREEN_SIZE.y) << "Test image is too small for test to make sense!";
@@ -916,7 +916,7 @@ TEST_F(UIElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BackgroundImage_FillByRepeat) {
+TEST_F(ElementSnapshotTests, BackgroundImage_FillByRepeat) {
 	ui::Element element = {
 		.style = {
 			.background = {
@@ -933,7 +933,7 @@ TEST_F(UIElementSnapshotTests, BackgroundImage_FillByRepeat) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BackgroundImage_FillByStretch) {
+TEST_F(ElementSnapshotTests, BackgroundImage_FillByStretch) {
 	ui::Element element = {
 		.style = {
 			.background = {
@@ -950,7 +950,7 @@ TEST_F(UIElementSnapshotTests, BackgroundImage_FillByStretch) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
+TEST_F(ElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 	ui::Element element = {
 		.style = {
 			.border = {
@@ -969,7 +969,7 @@ TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(UIElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
+TEST_F(ElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
 	ui::Element element = {
 		.style = {
 			.border = {
