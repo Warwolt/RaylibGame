@@ -27,7 +27,7 @@ namespace ui {
 	void UserInterface::frame_end(const ResourceManager& resources, Vector2 window_size) {
 		PROFILING_SCOPE();
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-		ASSERT(m_tree.parents().size() == 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		ASSERT(!m_tree.has_open_element(), "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_is_within_frame = false;
 		layout_element(resources, window_size, &m_tree.root());
 	}
@@ -45,7 +45,7 @@ namespace ui {
 
 	void UserInterface::box_end() {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-		ASSERT(m_tree.parents().size() > 1, "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
+		ASSERT(m_tree.has_open_element(), "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_tree.close_element();
 	}
 

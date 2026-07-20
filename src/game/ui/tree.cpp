@@ -56,10 +56,6 @@ namespace ui {
 		return children.empty() ? *parent : children.back();
 	}
 
-	std::vector<Element*>& Tree::parents() {
-		return m_parents;
-	}
-
 	void Tree::reset() {
 		m_root = { .debug_name = "root", .content = ui::Box {} };
 		m_parents = { &m_root };
@@ -77,6 +73,10 @@ namespace ui {
 		if (m_parents.size() > 1) {
 			m_parents.pop_back();
 		}
+	}
+
+	bool Tree::has_open_element() const {
+		return m_parents.size() > 1;
 	}
 
 	TreeIterator Tree::begin() {

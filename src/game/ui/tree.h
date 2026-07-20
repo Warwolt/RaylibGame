@@ -32,14 +32,14 @@ namespace ui {
 
 		Element& root();
 		const Element& root() const;
+
 		Element& current_element(); // most recent non-closed element
 		const Element& current_element() const;
-
-		std::vector<Element*>& parents(); // FIXME: can we avoid this somehow?
 
 		void reset();
 		void push_element(Element element);
 		void close_element();
+		bool has_open_element() const;
 
 		TreeIterator begin();
 		TreeIterator end();
