@@ -41,6 +41,7 @@ set(SRC
     src/game/scene/main_menu_scene.cpp
     src/game/scene/scene.cpp
     src/game/ui/element.cpp
+    src/game/ui/tree.cpp
     src/game/ui/user_interface.cpp
     src/platform/win32.cpp
     src/platform/window.cpp
@@ -85,6 +86,7 @@ add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
     test/unit_tests/unit_test_main.cpp
     test/unit_tests/ui_element_tests.cpp
+    test/unit_tests/ui_tree_tests.cpp
     test/unit_tests/ui_user_interface_tests.cpp
 )
 target_include_directories(UnitTests PUBLIC src lib)
