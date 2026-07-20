@@ -2,6 +2,7 @@
 
 #include "game/resource.h"
 #include "game/ui/element.h"
+#include "game/ui/tree.h"
 
 #include <raylib.h>
 
@@ -28,11 +29,8 @@ namespace ui {
 		void image(ImageID image, std::optional<Style> style = {}, std::string debug_name = "");
 
 	private:
-		bool m_within_frame = false;
-		Element m_root_element = {};
-		std::vector<Element*> m_parent_stack;
-
-		Element* _current_parent();
+		bool m_is_within_frame = false;
+		Tree m_tree;
 	};
 
 } // namespace ui
