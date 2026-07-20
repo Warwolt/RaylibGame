@@ -7,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -221,32 +222,12 @@ namespace ui {
 		Rectangle content_box;
 	};
 
-	/* State */
-	enum class ButtonState {
-		Up,
-		Released,
-		Down,
-		Pressed,
-	};
-
-	struct Input {
-		Vector2 mouse_pos;
-		ButtonState left_mouse_button;
-	};
-
-	struct State {
-		bool is_hovered;
-		bool is_active;
-		bool is_clicked;
-	};
-
 	/* Element */
 	struct Element {
 		std::string id;
 		Style style;
 		Content content;
 		Layout layout; // computed with layout_element()
-		State state; // computed with update_element()
 
 		inline bool is_box() const {
 			return std::holds_alternative<Box>(this->content);
@@ -285,8 +266,38 @@ namespace ui {
 		}
 	};
 
+	/* State */
+	enum class ButtonState {
+		Up,
+		Released,
+		Down,
+		Pressed,
+	};
+
+	struct Input {
+		Vector2 mouse_pos;
+		ButtonState left_mouse_button;
+	};
+
+	struct State {
+		bool is_hovered;
+		bool is_active;
+		bool is_clicked;
+	};
+
+	struct Context {
+		std::unordered_map<std::string, State> element_states; // computed with update_element()
+
+		State* state(const Element& element);
+		const State* state(const Element& element) const;
+		bool is_active(const Element& element) const;
+		bool is_hovered(const Element& element) const;
+		bool is_clicked(const Element& element) const;
+	};
+
+	/* API */
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
-	bool update_element(const Input& input, Element* element);
-	void draw_element(const ResourceManager& resources, const Element& element);
+	bool update_element(const Input& input, Context* context, Element* element);
+	void draw_element(const ResourceManager& resources, const Context& context, const Element& element);
 
 } // namespace ui

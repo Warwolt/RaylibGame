@@ -6,7 +6,7 @@
 namespace ui {
 
 	void UserInterface::draw(const ResourceManager& resources) const {
-		draw_element(resources, m_tree.root());
+		draw_element(resources, m_context, m_tree.root());
 	}
 
 	const Element& UserInterface::root_element() const {

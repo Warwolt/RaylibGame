@@ -28,6 +28,7 @@ namespace ui {
 
 	private:
 		bool m_is_within_frame = false;
+		Context m_context;
 		Tree m_tree;
 	};
 
