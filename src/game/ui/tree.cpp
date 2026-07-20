@@ -79,4 +79,11 @@ namespace ui {
 		}
 	}
 
+	TreeIterator Tree::begin() {
+		return TreeIterator(&m_root);
+	}
+	TreeIterator Tree::end() {
+		return TreeIterator();
+	}
+
 } // namespace ui
