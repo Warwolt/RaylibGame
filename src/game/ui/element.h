@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/util/tracked.h"
 #include "game/resource_id.h"
+#include "game/ui/context.h"
 #include "platform/input.h"
 
 #include <raylib.h>
@@ -9,7 +9,6 @@
 #include <optional>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -266,23 +265,6 @@ namespace ui {
 		inline const Image* image() const {
 			return std::get_if<Image>(&this->content);
 		}
-	};
-
-	/* State */
-	struct State {
-		Tracked<bool> is_hovered;
-		Tracked<bool> is_active;
-		Tracked<bool> is_clicked;
-	};
-
-	struct Context {
-		std::unordered_map<std::string, State> element_states; // computed with update_element()
-
-		State* state(const Element& element);
-		const State* state(const Element& element) const;
-		Tracked<bool> is_active(const Element& element) const;
-		Tracked<bool> is_hovered(const Element& element) const;
-		Tracked<bool> is_clicked(const Element& element) const;
 	};
 
 	/* API */

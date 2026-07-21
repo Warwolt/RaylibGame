@@ -40,6 +40,7 @@ set(SRC
     src/game/scene/gameplay_scene.cpp
     src/game/scene/main_menu_scene.cpp
     src/game/scene/scene.cpp
+    src/game/ui/context.cpp
     src/game/ui/element.cpp
     src/game/ui/tree.cpp
     src/game/ui/user_interface.cpp
