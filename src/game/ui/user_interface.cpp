@@ -69,8 +69,13 @@ namespace ui {
 
 	bool UserInterface::element_is_hovered() const {
 		const Element& element = m_tree.current_element();
-		ASSERT(!element.id.empty(), "element_is_hovered() called when current element lacks id");
+		ASSERT(!element.id.empty(), "element_is_hovered called when current element lacks id!");
 		return m_context.is_hovered(element);
 	}
 
+	bool UserInterface::element_is_active() const {
+		const Element& element = m_tree.current_element();
+		ASSERT(!element.id.empty(), "element_is_active called when current element lacks id!");
+		return m_context.is_active(element);
+	}
 }

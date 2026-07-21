@@ -145,7 +145,49 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 
 #pragma region interaction
 
-TEST(UserInterfaceTests, BoxElement_Hovered) {
+TEST(UserInterfaceTests, BoxElement_IsHovered_WithoutId_GivesError) {
+	ui::UserInterface ui;
+	const ResourceManager resources;
+	const Vector2 window_size = {};
+	const ui::Input input = {};
+	EXPECT_DEATH(
+		{
+			ui.frame_begin();
+			{
+				ui.box_begin(); // id argument omitted
+				{
+					ui.element_is_hovered();
+				}
+				ui.box_end();
+			}
+			ui.frame_end(input, resources, window_size);
+		},
+		"element_is_hovered called when current element lacks id!"
+	);
+}
+
+TEST(UserInterfaceTests, BoxElement_IsActive_WithoutId_GivesError) {
+	ui::UserInterface ui;
+	const ResourceManager resources;
+	const Vector2 window_size = {};
+	const ui::Input input = {};
+	EXPECT_DEATH(
+		{
+			ui.frame_begin();
+			{
+				ui.box_begin(); // id argument omitted
+				{
+					ui.element_is_active();
+				}
+				ui.box_end();
+			}
+			ui.frame_end(input, resources, window_size);
+		},
+		"element_is_active called when current element lacks id!"
+	);
+}
+
+TEST(UserInterfaceTests, BoxElement_IsHovered) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = { 1000, 1000 };
@@ -174,6 +216,45 @@ TEST(UserInterfaceTests, BoxElement_Hovered) {
 	}
 
 	EXPECT_TRUE(is_hovered);
+}
+
+TEST(UserInterfaceTests, BoxElement_IsActive) {
+	ui::UserInterface ui;
+	const ResourceManager resources;
+	const Vector2 window_size = { 1000, 1000 };
+
+	const ui::Input inputs[2] = {
+		{
+			.mouse_pos = { 150, 150 }, // middle of the box
+			.left_mouse_button = ui::ButtonState::Pressed,
+		},
+		{
+			.mouse_pos = { 150, 150 },
+			.left_mouse_button = ui::ButtonState::Down,
+		},
+	};
+	bool is_active = false;
+	for (int i = 0; i < 2; i++) {
+		const ui::Input input = inputs[i];
+		ui.frame_begin();
+		{
+			const ui::Style box_style = {
+				.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
+				.width = ui::Pixels(100),
+				.height = ui::Pixels(100),
+			};
+			ui.box_begin(ui::Direction::Horizontal, box_style, "box");
+			{
+				if (ui.element_is_active()) {
+					is_active = true;
+				}
+			}
+			ui.box_end();
+		}
+		ui.frame_end(input, resources, window_size);
+	}
+
+	EXPECT_TRUE(is_active);
 }
 
 #pragma endregion

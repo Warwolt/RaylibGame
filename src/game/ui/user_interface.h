@@ -27,6 +27,7 @@ namespace ui {
 		void image(ImageID image, std::optional<Style> style = {}, std::string id = "");
 
 		bool element_is_hovered() const;
+		bool element_is_active() const;
 
 	private:
 		bool m_is_within_frame = false;
