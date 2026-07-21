@@ -300,4 +300,7 @@ namespace ui {
 	bool update_element(const Input& input, Context* context, Element* element);
 	void draw_element(const ResourceManager& resources, const Context& context, const Element& element);
 
+	/* Util */
+	ButtonState read_button_state(int button);
+
 } // namespace ui

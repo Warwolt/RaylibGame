@@ -1,5 +1,6 @@
 #include "game/scene/main_menu_scene.h"
 
+#include "core/debug/logging.h"
 #include "core/debug/profiling.h"
 
 #include "game/game.h"
@@ -105,7 +106,10 @@ void MainMenuScene::update(Game* game) {
 			.font = {
 				.size = 32,
 				.color = WHITE,
-			}
+			},
+			.hovered = {
+				.background_color = RED,
+			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
@@ -134,13 +138,24 @@ void MainMenuScene::update(Game* game) {
 
 			m_ui.box_begin(ui::Direction::Vertical, menu_container);
 			{
+				/* Menu */
 				for (int i = 0; i < MenuItems::Count; i++) {
+					/* Menu item */
 					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container);
 					{
+						/* Focus indicator */
 						if (m_menu_index == i) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
-						m_ui.text(menu_items[i], menu_item_image_style);
+
+						/* Menu text */
+						m_ui.text(menu_items[i], menu_item_image_style, menu_items[i]);
+						if (m_ui.element_is_hovered()) {
+							m_menu_index = i;
+						}
+						if (m_ui.element_is_clicked()) {
+							LOG_DEBUG("pressed %d", i);
+						}
 					}
 					m_ui.box_end();
 				}
@@ -149,7 +164,11 @@ void MainMenuScene::update(Game* game) {
 		}
 		m_ui.box_end();
 	}
-	ui::Input input = {};
+
+	ui::Input input = {
+		.mouse_pos = Raylib_GetMousePosition(),
+		.left_mouse_button = ui::read_button_state(MOUSE_BUTTON_LEFT),
+	};
 	m_ui.frame_end(input, game->resources, game->window.size());
 }
 
