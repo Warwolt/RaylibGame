@@ -107,15 +107,12 @@ void MainMenuScene::update(Game* game) {
 				.size = 32,
 				.color = WHITE,
 			},
-			.hovered = {
-				.background_color = RED,
-			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
 		.position =
 			ui::AbsolutePosition {
-				.x = ui::Pixels(-indicator_size),
+				.x = ui::Pixels(-indicator_size - 10),
 				.y = ui::Pixels(-10),
 			},
 		.width = ui::Pixels(indicator_size),
