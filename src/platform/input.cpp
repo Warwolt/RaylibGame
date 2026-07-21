@@ -16,6 +16,20 @@ static ButtonState read_mouse_button(int button) {
 	return state;
 }
 
+static ButtonState read_keyboard_key(int key) {
+	ButtonState state = ButtonState::Up;
+	if (Raylib_IsKeyPressed(key)) {
+		state = ButtonState::Pressed;
+	} else if (Raylib_IsKeyDown(key)) {
+		state = ButtonState::Down;
+	} else if (Raylib_IsKeyReleased(key)) {
+		state = ButtonState::Released;
+	} else if (Raylib_IsKeyUp(key)) {
+		state = ButtonState::Up;
+	}
+	return state;
+}
+
 Input read_input(const Window& window) {
 	Input input;
 
@@ -32,7 +46,9 @@ Input read_input(const Window& window) {
 	}
 
 	/* Keyboard */
-
+	for (int i = 0; i < 336; i++) {
+		input.keyboard_keys[(KeyboardKey)i] = read_keyboard_key(i);
+	}
 
 	return input;
 }

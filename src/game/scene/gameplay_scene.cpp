@@ -13,7 +13,7 @@ void GameplayScene::deinitialize(Game* /*game*/) {
 
 void GameplayScene::update(Game* game) {
 	PROFILING_SCOPE();
-	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
+	if (game->input.key_pressed(KEY_ESCAPE)) {
 		game->scenes.pop_scene(game);
 	}
 }

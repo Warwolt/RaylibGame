@@ -35,7 +35,7 @@ namespace MenuItems {
 
 void MainMenuScene::update(Game* game) {
 	PROFILING_SCOPE();
-	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
+	if (game->input.key_pressed(KEY_ESCAPE)) {
 		game->scenes.pop_scene(game);
 	}
 
@@ -46,13 +46,13 @@ void MainMenuScene::update(Game* game) {
 	menu_items[MenuItems::Settings] = "Settings";
 	menu_items[MenuItems::Quit] = "Quit";
 
-	if (Raylib_IsKeyPressed(KEY_DOWN)) {
+	if (game->input.key_pressed(KEY_DOWN)) {
 		m_menu_index = (MenuItems::Count + m_menu_index + 1) % MenuItems::Count;
 	}
-	if (Raylib_IsKeyPressed(KEY_UP)) {
+	if (game->input.key_pressed(KEY_UP)) {
 		m_menu_index = (MenuItems::Count + m_menu_index - 1) % MenuItems::Count;
 	}
-	if (Raylib_IsKeyPressed(KEY_ENTER)) {
+	if (game->input.key_pressed(KEY_ENTER)) {
 		switch (m_menu_index) {
 			case MenuItems::Continue: {
 				game->scenes.push_scene(game, SceneID::Gameplay);
