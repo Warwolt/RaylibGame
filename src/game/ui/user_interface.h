@@ -26,9 +26,9 @@ namespace ui {
 		void text(std::string_view text, std::optional<Style> style = {}, std::string id = "");
 		void image(ImageID image, std::optional<Style> style = {}, std::string id = "");
 
-		bool element_is_hovered() const;
-		bool element_is_active() const;
-		bool element_is_clicked() const;
+		Tracked<bool> element_is_hovered() const;
+		Tracked<bool> element_is_active() const;
+		Tracked<bool> element_is_clicked() const;
 
 	private:
 		bool m_is_within_frame = false;

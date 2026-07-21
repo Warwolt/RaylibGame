@@ -433,21 +433,21 @@ namespace ui {
 		return &it->second;
 	}
 
-	bool Context::is_active(const Element& element) const {
+	Tracked<bool> Context::is_active(const Element& element) const {
 		if (const State* state = this->state(element)) {
 			return state->is_active;
 		}
 		return false;
 	}
 
-	bool Context::is_hovered(const Element& element) const {
+	Tracked<bool> Context::is_hovered(const Element& element) const {
 		if (const State* state = this->state(element)) {
 			return state->is_hovered;
 		}
 		return false;
 	}
 
-	bool Context::is_clicked(const Element& element) const {
+	Tracked<bool> Context::is_clicked(const Element& element) const {
 		if (const State* state = this->state(element)) {
 			return state->is_clicked;
 		}

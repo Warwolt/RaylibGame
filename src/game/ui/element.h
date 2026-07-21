@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/util/tracked.h"
 #include "game/resource_id.h"
 #include "platform/input.h"
 
@@ -269,9 +270,9 @@ namespace ui {
 
 	/* State */
 	struct State {
-		bool is_hovered;
-		bool is_active;
-		bool is_clicked;
+		Tracked<bool> is_hovered;
+		Tracked<bool> is_active;
+		Tracked<bool> is_clicked;
 	};
 
 	struct Context {
@@ -279,9 +280,9 @@ namespace ui {
 
 		State* state(const Element& element);
 		const State* state(const Element& element) const;
-		bool is_active(const Element& element) const;
-		bool is_hovered(const Element& element) const;
-		bool is_clicked(const Element& element) const;
+		Tracked<bool> is_active(const Element& element) const;
+		Tracked<bool> is_hovered(const Element& element) const;
+		Tracked<bool> is_clicked(const Element& element) const;
 	};
 
 	/* API */

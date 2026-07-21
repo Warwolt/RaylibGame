@@ -147,7 +147,7 @@ void MainMenuScene::update(Game* game) {
 
 						/* Menu text */
 						m_ui.text(menu_items[i], menu_item_image_style, menu_items[i]);
-						if (m_ui.element_is_hovered()) {
+						if (m_ui.element_is_hovered().has_changed_to(true)) {
 							m_menu_index = i;
 						}
 						if (m_ui.element_is_clicked()) {
