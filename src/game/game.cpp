@@ -49,8 +49,9 @@ void Game_update(Game* game) {
 
 	/* Check input */
 	game->should_quit = Raylib_WindowShouldClose();
+	game->input = read_input(game->window);
 
-	if (Raylib_IsKeyPressed(KEY_F11)) {
+	if (game->input.key_pressed(KEY_F11)) {
 		game->window.toggle_fullscreen();
 	}
 

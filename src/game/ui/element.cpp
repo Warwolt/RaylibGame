@@ -4,6 +4,7 @@
 #include "core/debug/profiling.h"
 #include "core/util.h"
 #include "game/resource.h"
+#include "platform/input.h"
 
 #include <algorithm>
 #include <array>
@@ -417,6 +418,42 @@ namespace ui {
 		}
 	}
 
+	State* Context::state(const Element& element) {
+		if (element.id.empty()) {
+			return nullptr;
+		}
+		return &this->element_states[element.id];
+	}
+
+	const State* Context::state(const Element& element) const {
+		auto it = this->element_states.find(element.id);
+		if (it == this->element_states.end()) {
+			return nullptr;
+		}
+		return &it->second;
+	}
+
+	Tracked<bool> Context::is_active(const Element& element) const {
+		if (const State* state = this->state(element)) {
+			return state->is_active;
+		}
+		return false;
+	}
+
+	Tracked<bool> Context::is_hovered(const Element& element) const {
+		if (const State* state = this->state(element)) {
+			return state->is_hovered;
+		}
+		return false;
+	}
+
+	Tracked<bool> Context::is_clicked(const Element& element) const {
+		if (const State* state = this->state(element)) {
+			return state->is_clicked;
+		}
+		return false;
+	}
+
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
 		PROFILING_SCOPE();
 		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
@@ -430,50 +467,56 @@ namespace ui {
 		compute_element_positions(top_left, containing_box, element);
 	}
 
-	static bool key_is_down(ButtonState state) {
-		return state == ButtonState::Down || state == ButtonState::Pressed;
-	}
+	bool update_element(const Input& input, Context* context, Element* element) {
+		State* state = context->state(*element);
 
-	bool update_element(const Input& input, Element* element) {
-		/* Hovered */
-		element->state.is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
+		/* Update hovered & active if element has associated state */
+		if (state) {
+			/* Hovered */
+			state->is_hovered = Raylib_CheckCollisionPointRec(input.mouse_position, element->layout.border_box);
 
-		/* Active */
-		if (element->state.is_active) {
-			// element stays active as long as button is held down
-			element->state.is_active = key_is_down(input.left_mouse_button);
-		} else {
-			// element becomes active if pressed while hovered
-			element->state.is_active = element->state.is_hovered && input.left_mouse_button == ButtonState::Pressed;
+			/* Active */
+			if (state->is_active) {
+				// element stays active as long as button is held down
+				state->is_active = input.left_mouse_button_pressed() || input.left_mouse_button_down();
+			} else {
+				// element becomes active if pressed while hovered
+				state->is_active = state->is_hovered && input.left_mouse_button_pressed();
+			}
 		}
 
 		/* Update children */
 		bool any_child_clicked = false;
 		if (ui::Box* box = element->box()) {
 			for (Element& child : box->children) {
-				any_child_clicked |= update_element(input, &child);
+				any_child_clicked |= update_element(input, context, &child);
 			}
 		}
 
-		/* Clicked */
-		if (any_child_clicked) {
-			element->state.is_clicked = true; // propagate clicks
-		} else {
-			element->state.is_clicked = element->state.is_hovered && input.left_mouse_button == ButtonState::Released;
+		/* Update clicked if element has associated state */
+		bool click_handled = any_child_clicked;
+		if (state) {
+			if (any_child_clicked) {
+				state->is_clicked = true; // propagate clicks
+				click_handled = true;
+			} else {
+				const bool element_is_clicked = state->is_hovered && input.left_mouse_button_released();
+				state->is_clicked = element_is_clicked;
+				click_handled = element_is_clicked;
+			}
 		}
-		const bool click_handled = any_child_clicked || element->state.is_clicked;
 
 		return click_handled;
 	}
 
-	void draw_element(const ResourceManager& resources, const Element& element) {
+	void draw_element(const ResourceManager& resources, const Context& context, const Element& element) {
 		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element);
 
 		/* Draw padding box */
 		Color background_color = element.style.background.color;
-		if (element.state.is_active) {
+		if (context.is_active(element)) {
 			background_color = element.style.active.background_color.value_or(background_color);
-		} else if (element.state.is_hovered) {
+		} else if (context.is_hovered(element)) {
 			background_color = element.style.hovered.background_color.value_or(background_color);
 		}
 		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
@@ -481,9 +524,9 @@ namespace ui {
 		/* Draw border */
 		{
 			Color border_color = element.style.border.color;
-			if (element.state.is_active) {
+			if (context.is_active(element)) {
 				border_color = element.style.active.border_color.value_or(border_color);
-			} else if (element.state.is_hovered) {
+			} else if (context.is_hovered(element)) {
 				border_color = element.style.hovered.border_color.value_or(border_color);
 			}
 
@@ -587,9 +630,9 @@ namespace ui {
 						.y = element.layout.content_box.y + line_num * element.style.font.size + top_padding,
 					};
 					Color font_color = element.style.font.color;
-					if (element.state.is_active) {
+					if (context.is_active(element)) {
 						font_color = element.style.active.font_color.value_or(font_color);
-					} else if (element.state.is_hovered) {
+					} else if (context.is_hovered(element)) {
 						font_color = element.style.hovered.font_color.value_or(font_color);
 					}
 					const std::string line_str(line);
@@ -632,13 +675,13 @@ namespace ui {
 			/* Draw statically and relatively positioned children first */
 			for (const Element& child : box->children) {
 				if (!child.style.position.is_absolute_position()) {
-					draw_element(resources, child);
+					draw_element(resources, context, child);
 				}
 			}
 			/* Draw absolutely positioned children last */
 			for (const Element& child : box->children) {
 				if (child.style.position.is_absolute_position()) {
-					draw_element(resources, child);
+					draw_element(resources, context, child);
 				}
 			}
 		} else {

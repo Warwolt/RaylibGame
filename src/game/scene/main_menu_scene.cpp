@@ -1,5 +1,6 @@
 #include "game/scene/main_menu_scene.h"
 
+#include "core/debug/logging.h"
 #include "core/debug/profiling.h"
 
 #include "game/game.h"
@@ -34,7 +35,7 @@ namespace MenuItems {
 
 void MainMenuScene::update(Game* game) {
 	PROFILING_SCOPE();
-	if (Raylib_IsKeyPressed(KEY_ESCAPE)) {
+	if (game->input.key_pressed(KEY_ESCAPE)) {
 		game->scenes.pop_scene(game);
 	}
 
@@ -45,13 +46,13 @@ void MainMenuScene::update(Game* game) {
 	menu_items[MenuItems::Settings] = "Settings";
 	menu_items[MenuItems::Quit] = "Quit";
 
-	if (Raylib_IsKeyPressed(KEY_DOWN)) {
+	if (game->input.key_pressed(KEY_DOWN)) {
 		m_menu_index = (MenuItems::Count + m_menu_index + 1) % MenuItems::Count;
 	}
-	if (Raylib_IsKeyPressed(KEY_UP)) {
+	if (game->input.key_pressed(KEY_UP)) {
 		m_menu_index = (MenuItems::Count + m_menu_index - 1) % MenuItems::Count;
 	}
-	if (Raylib_IsKeyPressed(KEY_ENTER)) {
+	if (game->input.key_pressed(KEY_ENTER)) {
 		switch (m_menu_index) {
 			case MenuItems::Continue: {
 				game->scenes.push_scene(game, SceneID::Gameplay);
@@ -105,13 +106,13 @@ void MainMenuScene::update(Game* game) {
 			.font = {
 				.size = 32,
 				.color = WHITE,
-			}
+			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
 		.position =
 			ui::AbsolutePosition {
-				.x = ui::Pixels(-indicator_size),
+				.x = ui::Pixels(-indicator_size - 10),
 				.y = ui::Pixels(-10),
 			},
 		.width = ui::Pixels(indicator_size),
@@ -134,13 +135,24 @@ void MainMenuScene::update(Game* game) {
 
 			m_ui.box_begin(ui::Direction::Vertical, menu_container);
 			{
+				/* Menu */
 				for (int i = 0; i < MenuItems::Count; i++) {
+					/* Menu item */
 					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container);
 					{
+						/* Focus indicator */
 						if (m_menu_index == i) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
-						m_ui.text(menu_items[i], menu_item_image_style);
+
+						/* Menu text */
+						m_ui.text(menu_items[i], menu_item_image_style, menu_items[i]);
+						if (m_ui.element_is_hovered().has_changed_to(true)) {
+							m_menu_index = i;
+						}
+						if (m_ui.element_is_clicked()) {
+							LOG_DEBUG("pressed %d", i);
+						}
 					}
 					m_ui.box_end();
 				}
@@ -149,7 +161,8 @@ void MainMenuScene::update(Game* game) {
 		}
 		m_ui.box_end();
 	}
-	m_ui.frame_end(game->resources, game->window.size());
+
+	m_ui.frame_end(game->input, game->resources, game->window.size());
 }
 
 void MainMenuScene::render(const Game& game) const {

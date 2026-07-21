@@ -43,6 +43,7 @@ set(SRC
     src/game/ui/element.cpp
     src/game/ui/tree.cpp
     src/game/ui/user_interface.cpp
+    src/platform/input.cpp
     src/platform/win32.cpp
     src/platform/window.cpp
 )
