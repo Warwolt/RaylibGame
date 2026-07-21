@@ -78,4 +78,10 @@ namespace ui {
 		ASSERT(!element.id.empty(), "element_is_active called when current element lacks id!");
 		return m_context.is_active(element);
 	}
+
+	bool UserInterface::element_is_clicked() const {
+		const Element& element = m_tree.current_element();
+		ASSERT(!element.id.empty(), "element_is_clicked called when current element lacks id!");
+		return m_context.is_clicked(element);
+	}
 }

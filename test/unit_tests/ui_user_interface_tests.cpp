@@ -187,6 +187,26 @@ TEST(UserInterfaceTests, BoxElement_IsActive_WithoutId_GivesError) {
 	);
 }
 
+TEST(UserInterfaceTests, BoxElement_IsClicked_WithoutId_GivesError) {
+	ui::UserInterface ui;
+	const ResourceManager resources;
+	const Vector2 window_size = {};
+	const ui::Input input = {};
+	EXPECT_DEATH(
+		{
+			ui.frame_begin();
+			{
+				ui.box_begin(); // id argument omitted
+				{
+					ui.element_is_clicked();
+				}
+				ui.box_end();
+			}
+			ui.frame_end(input, resources, window_size);
+		},
+		"element_is_clicked called when current element lacks id!"
+	);
+}
 TEST(UserInterfaceTests, BoxElement_IsHovered) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
@@ -257,4 +277,46 @@ TEST(UserInterfaceTests, BoxElement_IsActive) {
 	EXPECT_TRUE(is_active);
 }
 
+TEST(UserInterfaceTests, BoxElement_IsClicked) {
+	ui::UserInterface ui;
+	const ResourceManager resources;
+	const Vector2 window_size = { 1000, 1000 };
+
+	const ui::Input inputs[3] = {
+		{
+			.mouse_pos = { 150, 150 }, // middle of the box
+			.left_mouse_button = ui::ButtonState::Pressed,
+		},
+		{
+			.mouse_pos = { 150, 150 },
+			.left_mouse_button = ui::ButtonState::Released,
+		},
+		{
+			.mouse_pos = { 150, 150 },
+			.left_mouse_button = ui::ButtonState::Up,
+		},
+	};
+	bool is_clicked = false;
+	for (int i = 0; i < 3; i++) {
+		const ui::Input input = inputs[i];
+		ui.frame_begin();
+		{
+			const ui::Style box_style = {
+				.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
+				.width = ui::Pixels(100),
+				.height = ui::Pixels(100),
+			};
+			ui.box_begin(ui::Direction::Horizontal, box_style, "box");
+			{
+				if (ui.element_is_clicked()) {
+					is_clicked = true;
+				}
+			}
+			ui.box_end();
+		}
+		ui.frame_end(input, resources, window_size);
+	}
+
+	EXPECT_TRUE(is_clicked);
+}
 #pragma endregion

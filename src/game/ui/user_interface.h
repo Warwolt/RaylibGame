@@ -28,6 +28,7 @@ namespace ui {
 
 		bool element_is_hovered() const;
 		bool element_is_active() const;
+		bool element_is_clicked() const;
 
 	private:
 		bool m_is_within_frame = false;
