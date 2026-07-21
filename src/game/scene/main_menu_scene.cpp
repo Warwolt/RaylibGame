@@ -149,7 +149,8 @@ void MainMenuScene::update(Game* game) {
 		}
 		m_ui.box_end();
 	}
-	m_ui.frame_end(game->resources, game->window.size());
+	ui::Input input = {};
+	m_ui.frame_end(input, game->resources, game->window.size());
 }
 
 void MainMenuScene::render(const Game& game) const {

@@ -4,6 +4,8 @@
 
 #include "game/resource.h"
 
+#pragma region layout
+
 TEST(UserInterfaceTests, DefaultConstructed_RootIsEmptyBox) {
 	ui::UserInterface ui;
 	const ui::Element& root_element = ui.root_element();
@@ -24,12 +26,13 @@ TEST(UserInterfaceTests, FrameBegin_FrameBegin_GivesError) {
 
 TEST(UserInterfaceTests, FrameEnd_WithoutFrameBegin_GivesError) {
 	ui::UserInterface ui;
+	ui::Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 	EXPECT_DEATH(
 		{
 			// ui.frame_begin();
-			ui.frame_end(resources, window_size);
+			ui.frame_end(input, resources, window_size);
 		},
 		"Missing call to UserInterface::frame_begin?"
 	);
@@ -37,6 +40,7 @@ TEST(UserInterfaceTests, FrameEnd_WithoutFrameBegin_GivesError) {
 
 TEST(UserInterfaceTests, TextElement) {
 	ui::UserInterface ui;
+	ui::Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 
@@ -44,7 +48,7 @@ TEST(UserInterfaceTests, TextElement) {
 	{
 		ui.text("Hello world");
 	}
-	ui.frame_end(resources, window_size);
+	ui.frame_end(input, resources, window_size);
 
 	const ui::Element& root = ui.root_element();
 	ASSERT_TRUE(root.is_box());
@@ -55,6 +59,7 @@ TEST(UserInterfaceTests, TextElement) {
 
 TEST(UserInterfaceTests, BoxElement_BoxBegin_WithoutBoxEnd_GivesError) {
 	ui::UserInterface ui;
+	ui::Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 	EXPECT_DEATH(
@@ -68,7 +73,7 @@ TEST(UserInterfaceTests, BoxElement_BoxBegin_WithoutBoxEnd_GivesError) {
 				}
 				ui.box_end();
 			}
-			ui.frame_end(resources, window_size);
+			ui.frame_end(input, resources, window_size);
 		},
 		"UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?"
 	);
@@ -76,6 +81,7 @@ TEST(UserInterfaceTests, BoxElement_BoxBegin_WithoutBoxEnd_GivesError) {
 
 TEST(UserInterfaceTests, BoxElement_BoxEnd_WithoutBoxBegin_GivesError) {
 	ui::UserInterface ui;
+	ui::Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 	EXPECT_DEATH(
@@ -89,7 +95,7 @@ TEST(UserInterfaceTests, BoxElement_BoxEnd_WithoutBoxBegin_GivesError) {
 				}
 				ui.box_end();
 			}
-			ui.frame_end(resources, window_size);
+			ui.frame_end(input, resources, window_size);
 		},
 		"UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?"
 	);
@@ -97,6 +103,7 @@ TEST(UserInterfaceTests, BoxElement_BoxEnd_WithoutBoxBegin_GivesError) {
 
 TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 	ui::UserInterface ui;
+	ui::Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 
@@ -114,7 +121,7 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 		}
 		ui.box_end();
 	}
-	ui.frame_end(resources, window_size);
+	ui.frame_end(input, resources, window_size);
 
 	const ui::Element& root = ui.root_element();
 	// root
@@ -133,3 +140,40 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 	ASSERT_TRUE(root.box()->children[1].box()->children[0].is_text());
 	ASSERT_EQ(root.box()->children[1].box()->children[0].text()->text, "World");
 }
+
+#pragma endregion layouting
+
+#pragma region interaction
+
+TEST(UserInterfaceTests, BoxElement_Hovered) {
+	ui::UserInterface ui;
+	const ResourceManager resources;
+	const Vector2 window_size = { 1000, 1000 };
+
+	const ui::Input input = {
+		.mouse_pos = { 150, 150 }, // middle of the box
+	};
+	bool is_hovered = false;
+	for (int i = 0; i < 2; i++) {
+		ui.frame_begin();
+		{
+			const ui::Style box_style = {
+				.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
+				.width = ui::Pixels(100),
+				.height = ui::Pixels(100),
+			};
+			ui.box_begin(ui::Direction::Horizontal, box_style, "box");
+			{
+				if (ui.element_is_hovered()) {
+					is_hovered = true;
+				}
+			}
+			ui.box_end();
+		}
+		ui.frame_end(input, resources, window_size);
+	}
+
+	EXPECT_TRUE(is_hovered);
+}
+
+#pragma endregion

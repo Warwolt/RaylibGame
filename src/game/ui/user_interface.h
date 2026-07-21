@@ -18,13 +18,15 @@ namespace ui {
 		const Element& root_element() const;
 
 		void frame_begin();
-		void frame_end(const ResourceManager& resources, Vector2 window_size);
+		void frame_end(const Input& input, const ResourceManager& resources, Vector2 window_size);
 
 		void box_begin(Direction direction = Direction::Vertical, std::optional<Style> style = {}, std::string id = "");
 		void box_end();
 
 		void text(std::string_view text, std::optional<Style> style = {}, std::string id = "");
 		void image(ImageID image, std::optional<Style> style = {}, std::string id = "");
+
+		bool element_is_hovered() const;
 
 	private:
 		bool m_is_within_frame = false;
