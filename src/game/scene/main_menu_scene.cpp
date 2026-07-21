@@ -165,19 +165,7 @@ void MainMenuScene::update(Game* game) {
 		m_ui.box_end();
 	}
 
-	Input input = {
-		// FIXME: this mouse position needs to be relative the viewport!
-		// Mouse input doesn't work properly in full screen, GetMousePosition
-		// gives position relative window, but we need relative the scaled viewport.
-		//
-		// Probably we should have some kind of input handling layer, that deals
-		// with calling into Raylib and maybe doing things like mapping
-		// mouse/keyboard/gamepad inputs into semantical input.
-		//
-		.mouse_pos = Raylib_GetMousePosition(),
-		.left_mouse_button = read_button_state(MOUSE_BUTTON_LEFT),
-	};
-	m_ui.frame_end(input, game->resources, game->window.size());
+	m_ui.frame_end(game->input, game->resources, game->window.size());
 }
 
 void MainMenuScene::render(const Game& game) const {

@@ -36,7 +36,6 @@ set(SRC
     src/core/util/time.cpp
     src/game/debug.cpp
     src/game/game.cpp
-    src/game/input/input.cpp
     src/game/resource.cpp
     src/game/scene/gameplay_scene.cpp
     src/game/scene/main_menu_scene.cpp
@@ -44,6 +43,7 @@ set(SRC
     src/game/ui/element.cpp
     src/game/ui/tree.cpp
     src/game/ui/user_interface.cpp
+    src/platform/input.cpp
     src/platform/win32.cpp
     src/platform/window.cpp
 )

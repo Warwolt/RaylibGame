@@ -3,8 +3,8 @@
 #include "core/debug/assert.h"
 #include "core/debug/profiling.h"
 #include "core/util.h"
-#include "game/input/input.h"
 #include "game/resource.h"
+#include "platform/input.h"
 
 #include <algorithm>
 #include <array>
@@ -477,7 +477,7 @@ namespace ui {
 		/* Update hovered & active if element has associated state */
 		if (state) {
 			/* Hovered */
-			state->is_hovered = Raylib_CheckCollisionPointRec(input.mouse_pos, element->layout.border_box);
+			state->is_hovered = Raylib_CheckCollisionPointRec(input.mouse_position, element->layout.border_box);
 
 			/* Active */
 			if (state->is_active) {

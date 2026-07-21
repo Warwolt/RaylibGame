@@ -1,7 +1,7 @@
 #pragma once
 
-#include "game/input/input.h"
 #include "game/resource_id.h"
+#include "platform/input.h"
 
 #include <raylib.h>
 

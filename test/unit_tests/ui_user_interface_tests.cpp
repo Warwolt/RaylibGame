@@ -213,7 +213,7 @@ TEST(UserInterfaceTests, BoxElement_IsHovered) {
 	const Vector2 window_size = { 1000, 1000 };
 
 	const Input input = {
-		.mouse_pos = { 150, 150 }, // middle of the box
+		.mouse_position = { 150, 150 }, // middle of the box
 	};
 	bool is_hovered = false;
 	for (int i = 0; i < 2; i++) {
@@ -245,11 +245,11 @@ TEST(UserInterfaceTests, BoxElement_IsActive) {
 
 	const Input inputs[2] = {
 		{
-			.mouse_pos = { 150, 150 }, // middle of the box
+			.mouse_position = { 150, 150 }, // middle of the box
 			.left_mouse_button = ButtonState::Pressed,
 		},
 		{
-			.mouse_pos = { 150, 150 },
+			.mouse_position = { 150, 150 },
 			.left_mouse_button = ButtonState::Down,
 		},
 	};
@@ -284,15 +284,15 @@ TEST(UserInterfaceTests, BoxElement_IsClicked) {
 
 	const Input inputs[3] = {
 		{
-			.mouse_pos = { 150, 150 }, // middle of the box
+			.mouse_position = { 150, 150 }, // middle of the box
 			.left_mouse_button = ButtonState::Pressed,
 		},
 		{
-			.mouse_pos = { 150, 150 },
+			.mouse_position = { 150, 150 },
 			.left_mouse_button = ButtonState::Released,
 		},
 		{
-			.mouse_pos = { 150, 150 },
+			.mouse_position = { 150, 150 },
 			.left_mouse_button = ButtonState::Up,
 		},
 	};
