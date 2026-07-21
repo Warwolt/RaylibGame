@@ -2,7 +2,7 @@
 
 #include "platform/window.h"
 
-static ButtonState read_button_state(int button) {
+static ButtonState read_mouse_button(int button) {
 	ButtonState state = ButtonState::Up;
 	if (Raylib_IsMouseButtonPressed(button)) {
 		state = ButtonState::Pressed;
@@ -17,16 +17,22 @@ static ButtonState read_button_state(int button) {
 }
 
 Input read_input(const Window& window) {
+	Input input;
+
+	/* Mouse */
 	const Vector2 global_mouse_position = Raylib_GetMousePosition();
 	const Rectangle letterbox = window.letterbox();
 	const int scale = window.letterbox_scale();
-	const Vector2 letterbox_mouse_position = {
+	input.mouse_position = {
 		.x = (global_mouse_position.x - letterbox.x) / scale,
 		.y = (global_mouse_position.y - letterbox.y) / scale,
 	};
+	for (int i = 0; i < 6; i++) {
+		input.mouse_buttons[(MouseButton)i] = read_mouse_button(i);
+	}
 
-	return {
-		.mouse_position = letterbox_mouse_position,
-		.left_mouse_button = read_button_state(MOUSE_BUTTON_LEFT),
-	};
+	/* Keyboard */
+
+
+	return input;
 }

@@ -467,6 +467,7 @@ namespace ui {
 		compute_element_positions(top_left, containing_box, element);
 	}
 
+	// FIXME: can we remove this? just us down?
 	static bool key_is_down(ButtonState button) {
 		return button == ButtonState::Down || button == ButtonState::Pressed;
 	}
@@ -482,10 +483,10 @@ namespace ui {
 			/* Active */
 			if (state->is_active) {
 				// element stays active as long as button is held down
-				state->is_active = key_is_down(input.left_mouse_button);
+				state->is_active = key_is_down(input.left_mouse_button());
 			} else {
 				// element becomes active if pressed while hovered
-				state->is_active = state->is_hovered && input.left_mouse_button == ButtonState::Pressed;
+				state->is_active = state->is_hovered && input.left_mouse_button_pressed();
 			}
 		}
 
@@ -504,7 +505,7 @@ namespace ui {
 				state->is_clicked = true; // propagate clicks
 				click_handled = true;
 			} else {
-				const bool element_is_clicked = state->is_hovered && input.left_mouse_button == ButtonState::Released;
+				const bool element_is_clicked = state->is_hovered && input.left_mouse_button_released();
 				state->is_clicked = element_is_clicked;
 				click_handled = element_is_clicked;
 			}

@@ -246,11 +246,11 @@ TEST(UserInterfaceTests, BoxElement_IsActive) {
 	const Input inputs[2] = {
 		{
 			.mouse_position = { 150, 150 }, // middle of the box
-			.left_mouse_button = ButtonState::Pressed,
+			.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed }, },
 		},
 		{
 			.mouse_position = { 150, 150 },
-			.left_mouse_button = ButtonState::Down,
+			.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Down }, },
 		},
 	};
 	bool is_active = false;
@@ -285,15 +285,15 @@ TEST(UserInterfaceTests, BoxElement_IsClicked) {
 	const Input inputs[3] = {
 		{
 			.mouse_position = { 150, 150 }, // middle of the box
-			.left_mouse_button = ButtonState::Pressed,
+			.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed }, },
 		},
 		{
 			.mouse_position = { 150, 150 },
-			.left_mouse_button = ButtonState::Released,
+			.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Released }, },
 		},
 		{
 			.mouse_position = { 150, 150 },
-			.left_mouse_button = ButtonState::Up,
+			.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Up }, },
 		},
 	};
 	bool is_clicked = false;
