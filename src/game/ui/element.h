@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/input/input.h"
 #include "game/resource_id.h"
 
 #include <raylib.h>
@@ -267,18 +268,6 @@ namespace ui {
 	};
 
 	/* State */
-	enum class ButtonState {
-		Up,
-		Released,
-		Down,
-		Pressed,
-	};
-
-	struct Input {
-		Vector2 mouse_pos;
-		ButtonState left_mouse_button;
-	};
-
 	struct State {
 		bool is_hovered;
 		bool is_active;
@@ -299,8 +288,5 @@ namespace ui {
 	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
 	bool update_element(const Input& input, Context* context, Element* element);
 	void draw_element(const ResourceManager& resources, const Context& context, const Element& element);
-
-	/* Util */
-	ButtonState read_button_state(int button);
 
 } // namespace ui

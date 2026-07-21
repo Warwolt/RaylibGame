@@ -26,7 +26,7 @@ TEST(UserInterfaceTests, FrameBegin_FrameBegin_GivesError) {
 
 TEST(UserInterfaceTests, FrameEnd_WithoutFrameBegin_GivesError) {
 	ui::UserInterface ui;
-	ui::Input input = {};
+	Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 	EXPECT_DEATH(
@@ -40,7 +40,7 @@ TEST(UserInterfaceTests, FrameEnd_WithoutFrameBegin_GivesError) {
 
 TEST(UserInterfaceTests, TextElement) {
 	ui::UserInterface ui;
-	ui::Input input = {};
+	Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 
@@ -59,7 +59,7 @@ TEST(UserInterfaceTests, TextElement) {
 
 TEST(UserInterfaceTests, BoxElement_BoxBegin_WithoutBoxEnd_GivesError) {
 	ui::UserInterface ui;
-	ui::Input input = {};
+	Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 	EXPECT_DEATH(
@@ -81,7 +81,7 @@ TEST(UserInterfaceTests, BoxElement_BoxBegin_WithoutBoxEnd_GivesError) {
 
 TEST(UserInterfaceTests, BoxElement_BoxEnd_WithoutBoxBegin_GivesError) {
 	ui::UserInterface ui;
-	ui::Input input = {};
+	Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 	EXPECT_DEATH(
@@ -103,7 +103,7 @@ TEST(UserInterfaceTests, BoxElement_BoxEnd_WithoutBoxBegin_GivesError) {
 
 TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 	ui::UserInterface ui;
-	ui::Input input = {};
+	Input input = {};
 	ResourceManager resources;
 	Vector2 window_size = {};
 
@@ -149,7 +149,7 @@ TEST(UserInterfaceTests, BoxElement_IsHovered_WithoutId_GivesError) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = {};
-	const ui::Input input = {};
+	const Input input = {};
 	EXPECT_DEATH(
 		{
 			ui.frame_begin();
@@ -170,7 +170,7 @@ TEST(UserInterfaceTests, BoxElement_IsActive_WithoutId_GivesError) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = {};
-	const ui::Input input = {};
+	const Input input = {};
 	EXPECT_DEATH(
 		{
 			ui.frame_begin();
@@ -191,7 +191,7 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_WithoutId_GivesError) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = {};
-	const ui::Input input = {};
+	const Input input = {};
 	EXPECT_DEATH(
 		{
 			ui.frame_begin();
@@ -212,7 +212,7 @@ TEST(UserInterfaceTests, BoxElement_IsHovered) {
 	const ResourceManager resources;
 	const Vector2 window_size = { 1000, 1000 };
 
-	const ui::Input input = {
+	const Input input = {
 		.mouse_pos = { 150, 150 }, // middle of the box
 	};
 	bool is_hovered = false;
@@ -243,19 +243,19 @@ TEST(UserInterfaceTests, BoxElement_IsActive) {
 	const ResourceManager resources;
 	const Vector2 window_size = { 1000, 1000 };
 
-	const ui::Input inputs[2] = {
+	const Input inputs[2] = {
 		{
 			.mouse_pos = { 150, 150 }, // middle of the box
-			.left_mouse_button = ui::ButtonState::Pressed,
+			.left_mouse_button = ButtonState::Pressed,
 		},
 		{
 			.mouse_pos = { 150, 150 },
-			.left_mouse_button = ui::ButtonState::Down,
+			.left_mouse_button = ButtonState::Down,
 		},
 	};
 	bool is_active = false;
 	for (int i = 0; i < 2; i++) {
-		const ui::Input input = inputs[i];
+		const Input input = inputs[i];
 		ui.frame_begin();
 		{
 			const ui::Style box_style = {
@@ -282,23 +282,23 @@ TEST(UserInterfaceTests, BoxElement_IsClicked) {
 	const ResourceManager resources;
 	const Vector2 window_size = { 1000, 1000 };
 
-	const ui::Input inputs[3] = {
+	const Input inputs[3] = {
 		{
 			.mouse_pos = { 150, 150 }, // middle of the box
-			.left_mouse_button = ui::ButtonState::Pressed,
+			.left_mouse_button = ButtonState::Pressed,
 		},
 		{
 			.mouse_pos = { 150, 150 },
-			.left_mouse_button = ui::ButtonState::Released,
+			.left_mouse_button = ButtonState::Released,
 		},
 		{
 			.mouse_pos = { 150, 150 },
-			.left_mouse_button = ui::ButtonState::Up,
+			.left_mouse_button = ButtonState::Up,
 		},
 	};
 	bool is_clicked = false;
 	for (int i = 0; i < 3; i++) {
-		const ui::Input input = inputs[i];
+		const Input input = inputs[i];
 		ui.frame_begin();
 		{
 			const ui::Style box_style = {

@@ -3,6 +3,7 @@
 #include "core/debug/assert.h"
 #include "core/debug/profiling.h"
 #include "core/util.h"
+#include "game/input/input.h"
 #include "game/resource.h"
 
 #include <algorithm>
@@ -690,23 +691,6 @@ namespace ui {
 		} else {
 			ABORT("Unhandled ui::Content case!");
 		}
-	}
-
-	ButtonState read_button_state(int button) {
-		ButtonState state = ButtonState::Up;
-		if (Raylib_IsMouseButtonPressed(button)) {
-			state = ButtonState::Pressed;
-		}
-		else if (Raylib_IsMouseButtonDown(button)) {
-			state = ButtonState::Down;
-		}
-		else if (Raylib_IsMouseButtonReleased(button)) {
-			state = ButtonState::Released;
-		}
-		else if (Raylib_IsMouseButtonUp(button)) {
-			state = ButtonState::Up;
-		}
-		return state;
 	}
 
 } // namespace ui
