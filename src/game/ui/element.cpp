@@ -434,7 +434,7 @@ namespace ui {
 	bool update_element(const Input& input, Context* context, Element* element) {
 		State* state = context->state(*element);
 
-		/* Update hovered, focused & active if element has associated state */
+		/* Update hovered & active if element has associated state */
 		if (state) {
 			/* Hovered */
 			state->is_hovered = Raylib_CheckCollisionPointRec(input.mouse_position, element->layout.border_box);
