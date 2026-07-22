@@ -439,9 +439,6 @@ namespace ui {
 			/* Hovered */
 			state->is_hovered = Raylib_CheckCollisionPointRec(input.mouse_position, element->layout.border_box);
 
-			/* Focused */
-			state->is_focused = element->id == context->focused_element;
-
 			/* Active */
 			if (state->is_active) {
 				// element stays active as long as button is held down
@@ -455,32 +452,45 @@ namespace ui {
 		/* Update children */
 		bool any_child_clicked = false;
 		if (ui::Box* box = element->box()) {
-			std::optional<size_t> focused_index;
+			/* Recurse through child child */
+			std::optional<size_t> focused_child_index;
 			for (size_t i = 0; i < box->children.size(); i++) {
 				Element& child = box->children[i];
 				/* Update child */
 				any_child_clicked |= update_element(input, context, &child);
 				if (context->is_focused(child)) {
-					focused_index = i;
+					focused_child_index = i;
 				}
 			}
 
-			/* Update child focus */
-			// note: we do this outside the loop so we don't update focus more than once per frame.
-			if (focused_index.has_value()) {
-				switch (box->direction) {
-					case Direction::Horizontal: {
-						if (input.key_pressed(KEY_UP)) {
-							LOG_DEBUG("Focus up");
-						}
-						if (input.key_pressed(KEY_DOWN)) {
-							LOG_DEBUG("Focus down");
-						}
-					} break;
+			/* Update focus */
+			// Note: We do this outside the above loop so we don't update focus
+			// more than once per frame when we recurse through the children.
+			if (focused_child_index.has_value()) {
+				const bool box_is_horizontal = box->direction == Direction::Horizontal;
+				const bool should_focus_previous = box_is_horizontal ? input.key_pressed(KEY_LEFT) : input.key_pressed(KEY_UP);
+				const bool should_focus_next = box_is_horizontal ? input.key_pressed(KEY_RIGHT) : input.key_pressed(KEY_DOWN);
 
-					case Direction::Vertical: {
-						// FIXME: todo
-					} break;
+				if (should_focus_previous) {
+					// search among previous siblings, focus first one that has an id
+					for (size_t i = 0; i + 1 < focused_child_index.value(); i++) {
+						Element& sibling = box->children[focused_child_index.value() - i];
+						if (!sibling.id.empty()) {
+							context->focus_element(sibling);
+							break;
+						}
+					}
+				}
+
+				if (should_focus_next) {
+					// search among next siblings, focus first one that has an id
+					for (size_t i = focused_child_index.value() + 1; i < box->children.size(); i++) {
+						Element& sibling = box->children[i];
+						if (!sibling.id.empty()) {
+							context->focus_element(sibling);
+							break;
+						}
+					}
 				}
 			}
 		}

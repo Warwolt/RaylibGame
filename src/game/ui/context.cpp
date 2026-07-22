@@ -1,5 +1,6 @@
 #include "game/ui/context.h"
 
+#include "core/debug/assert.h"
 #include "game/ui/element.h"
 
 namespace ui {
@@ -19,6 +20,11 @@ namespace ui {
 		return &it->second;
 	}
 
+	void Context::focus_element(const Element& element) {
+		ASSERT(!element.id.empty(), "Cannot focus an element without id!");
+		this->focused_element_id = element.id;
+	}
+
 	Tracked<bool> Context::is_hovered(const Element& element) const {
 		if (const State* state = this->state(element)) {
 			return state->is_hovered;
@@ -27,10 +33,10 @@ namespace ui {
 	}
 
 	Tracked<bool> Context::is_focused(const Element& element) const {
-		if (const State* state = this->state(element)) {
-			return state->is_focused;
+		if (element.id.empty()) {
+			return false;
 		}
-		return false;
+		return { focused_element_id.value() == element.id, focused_element_id.previous() == element.id };
 	}
 
 	Tracked<bool> Context::is_active(const Element& element) const {

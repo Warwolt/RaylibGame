@@ -92,8 +92,8 @@ namespace ui {
 	}
 
 	void UserInterface::initially_focus_element(std::string id) {
-		if (m_context.focused_element.empty()) {
-			m_context.focused_element = id;
+		if (m_context.focused_element_id->empty()) {
+			m_context.focused_element_id = id;
 		}
 	}
 }

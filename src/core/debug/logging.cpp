@@ -31,6 +31,7 @@
 #define BACKGROUND_WHITE "\033[47m"
 
 static bool g_should_add_colors = true;
+static std::string g_prefix;
 
 static const char* log_level_to_str(LogLevel level) {
 	switch (level) {
@@ -83,6 +84,10 @@ void disable_log_colors() {
 	g_should_add_colors = false;
 }
 
+void set_log_prefix(std::string prefix) {
+	g_prefix = prefix;
+}
+
 void debug_log(LogLevel log_level, const char* file_path, int line, const char* fmt, ...) {
 	const bool debugger_is_present = IsDebuggerPresent();
 	char buffer[1024] = { 0 };
@@ -91,6 +96,11 @@ void debug_log(LogLevel log_level, const char* file_path, int line, const char* 
 	/* Add color */
 	if (g_should_add_colors && !debugger_is_present) {
 		offset += snprintf(buffer + offset, 1024 - offset, log_level_color(log_level));
+	}
+
+	/* Add prefix */
+	if (!g_prefix.empty()) {
+		offset += snprintf(buffer + offset, 1024 - offset, "%s ", g_prefix.c_str());
 	}
 
 	/* Add timestamp */

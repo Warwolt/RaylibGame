@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 typedef enum LogLevel {
 	LogLevel_Debug = 0,
 	LogLevel_Info = 1,
@@ -10,6 +12,7 @@ typedef enum LogLevel {
 
 void initialize_logging();
 void disable_log_colors();
+void set_log_prefix(std::string prefix);
 void debug_log(LogLevel level, const char* file_path, int line, const char* fmt, ...);
 
 #define LOG_DEBUG(...) debug_log(LogLevel_Debug, __FILE__, __LINE__, __VA_ARGS__)

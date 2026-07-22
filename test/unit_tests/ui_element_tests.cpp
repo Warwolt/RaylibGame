@@ -45,17 +45,7 @@ ui::Element box_element_with_child() {
 	};
 }
 
-// Child box occupies upper half of parent
-//
-// +---------+---------+
-// |         |         |
-// |  child  |  child  |
-// |         |         |
-// +---------+---------|
-// |      parent       |
-// |                   |
-// +-------------------+
-ui::Element box_element_with_two_children() {
+ui::Element box_element_with_three_children(ui::Direction direction) {
 	return ui::Element {
 		.id = "box_parent",
 		.style = {
@@ -63,21 +53,18 @@ ui::Element box_element_with_two_children() {
 			.height = ui::Pixels(size.y),
 		},
 		.content = ui::Box {
+			.direction = direction,
 			.children = {
 				ui::Element {
 				.id = "box_child_1",
-					.style = {
-						.width = ui::Pixels(size.x / 2),
-						.height = ui::Pixels(size.y / 2),
-					},
 					.content = ui::Box {},
 				},
 				ui::Element {
 				.id = "box_child_2",
-					.style = {
-						.width = ui::Pixels(size.x / 2),
-						.height = ui::Pixels(size.y / 2),
-					},
+					.content = ui::Box {},
+				},
+				ui::Element {
+				.id = "box_child_3",
 					.content = ui::Box {},
 				},
 			},
@@ -260,24 +247,118 @@ TEST(ElementTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
 
 #pragma region focus
 
-TEST(ElementTests, BoxWithTwoChildren_InitialFocus) {
+TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Horizontal) {
 	ResourceManager resources;
 	ui::Context context = {
-		.focused_element = "box_child_1",
+		.focused_element_id = "box_child_1",
 	};
-	ui::Element element = box_element_with_two_children();
-	const ui::Element& child1 = element.box()->children[0];
-	const ui::Element& child2 = element.box()->children[1];
-	ui::State* parent_state = context.state(element);
-	ui::State* child1_state = context.state(child1);
-	ui::State* child2_state = context.state(child2);
+	ui::Element parent = box_element_with_three_children(ui::Direction::Horizontal);
+	const ui::Element& child1 = parent.box()->children[0];
+	const ui::Element& child2 = parent.box()->children[1];
+	const ui::Element& child3 = parent.box()->children[2];
 
-	const Input input = {};
-	ui::update_element(input, &context, &element);
+	/* Initially, child 1 focused */
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), true);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), false);
 
-	EXPECT_EQ(parent_state->is_focused, false);
-	EXPECT_EQ(child1_state->is_focused, true);
-	EXPECT_EQ(child2_state->is_focused, false);
+	/* Can't focus previously beyond child 1 */
+	const Input input1 = {
+		.keyboard_keys = { { KEY_LEFT, ButtonState::Pressed } },
+	};
+	ui::update_element(input1, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), true);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), false);
+
+	/* Focus child 2 */
+	const Input input2 = {
+		.keyboard_keys = { { KEY_RIGHT, ButtonState::Pressed } },
+	};
+	ui::update_element(input2, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), false);
+	EXPECT_EQ(context.is_focused(child2), true);
+	EXPECT_EQ(context.is_focused(child3), false);
+
+	/* Focus child 3 */
+	const Input input3 = {
+		.keyboard_keys = { { KEY_RIGHT, ButtonState::Pressed } },
+	};
+	ui::update_element(input3, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), false);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), true);
+
+	/* Can't focus beyond child 3 */
+	const Input input4 = {
+		.keyboard_keys = { { KEY_RIGHT, ButtonState::Pressed } },
+	};
+	ui::update_element(input4, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), false);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), true);
+}
+
+TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Vertical) {
+	ResourceManager resources;
+	ui::Context context = {
+		.focused_element_id = "box_child_1",
+	};
+	ui::Element parent = box_element_with_three_children(ui::Direction::Vertical);
+	const ui::Element& child1 = parent.box()->children[0];
+	const ui::Element& child2 = parent.box()->children[1];
+	const ui::Element& child3 = parent.box()->children[2];
+
+	/* Initially, child 1 focused */
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), true);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), false);
+
+	/* Can't focus previously beyond child 1 */
+	const Input input1 = {
+		.keyboard_keys = { { KEY_UP, ButtonState::Pressed } },
+	};
+	ui::update_element(input1, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), true);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), false);
+
+	/* Focus child 2 */
+	const Input input2 = {
+		.keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } },
+	};
+	ui::update_element(input2, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), false);
+	EXPECT_EQ(context.is_focused(child2), true);
+	EXPECT_EQ(context.is_focused(child3), false);
+
+	/* Focus child 3 */
+	const Input input3 = {
+		.keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } },
+	};
+	ui::update_element(input3, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), false);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), true);
+
+	/* Can't focus beyond child 3 */
+	const Input input4 = {
+		.keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } },
+	};
+	ui::update_element(input4, &context, &parent);
+	EXPECT_EQ(context.is_focused(parent), false);
+	EXPECT_EQ(context.is_focused(child1), false);
+	EXPECT_EQ(context.is_focused(child2), false);
+	EXPECT_EQ(context.is_focused(child3), true);
 }
 
 #pragma endregion
