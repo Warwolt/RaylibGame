@@ -39,31 +39,6 @@ void MainMenuScene::update(Game* game) {
 		game->scenes.pop_scene(game);
 	}
 
-	const char* menu_items[MenuItems::Count] = {};
-	menu_items[MenuItems::Continue] = "Continue";
-	menu_items[MenuItems::LoadGame] = "Load Game";
-	menu_items[MenuItems::NewGame] = "New Game";
-	menu_items[MenuItems::Settings] = "Settings";
-	menu_items[MenuItems::Quit] = "Quit";
-
-	if (game->input.key_pressed(KEY_DOWN)) {
-		m_menu_index = (MenuItems::Count + m_menu_index + 1) % MenuItems::Count;
-	}
-	if (game->input.key_pressed(KEY_UP)) {
-		m_menu_index = (MenuItems::Count + m_menu_index - 1) % MenuItems::Count;
-	}
-	if (game->input.key_pressed(KEY_ENTER)) {
-		switch (m_menu_index) {
-			case MenuItems::Continue: {
-				game->scenes.push_scene(game, SceneID::Gameplay);
-			} break;
-
-			case MenuItems::Quit: {
-				game->scenes.pop_scene(game);
-			} break;
-		}
-	}
-
 	const ui::Style menu_style = {
 		.alignment = ui::Alignment::Center,
 		.background = { .image = m_images.mario64_skybox },
@@ -119,9 +94,15 @@ void MainMenuScene::update(Game* game) {
 		.height = ui::Pixels(indicator_size),
 	};
 
+	const char* menu_items[MenuItems::Count] = {};
+	menu_items[MenuItems::Continue] = "Continue";
+	menu_items[MenuItems::LoadGame] = "Load Game";
+	menu_items[MenuItems::NewGame] = "New Game";
+	menu_items[MenuItems::Settings] = "Settings";
+	menu_items[MenuItems::Quit] = "Quit";
 	m_ui.frame_begin();
 	{
-		m_ui.initially_focus_element(menu_items[2]);
+		m_ui.set_initially_focused_element(menu_items[2]);
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
@@ -141,8 +122,22 @@ void MainMenuScene::update(Game* game) {
 					/* Menu item */
 					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container, menu_items[i]);
 					{
+						/* Click */
 						if (m_ui.element_is_clicked()) {
-							LOG_DEBUG("Clicked %s", menu_items[i]);
+							switch (i) {
+								case MenuItems::Continue: {
+									game->scenes.push_scene(game, SceneID::Gameplay);
+								} break;
+
+								case MenuItems::Quit: {
+									game->scenes.pop_scene(game);
+								} break;
+							}
+						}
+
+						/* On hover */
+						if (m_ui.element_is_hovered().has_changed_to(true)) {
+							m_ui.focus_current_element();
 						}
 
 						/* Focus indicator */

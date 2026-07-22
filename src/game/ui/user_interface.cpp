@@ -91,9 +91,15 @@ namespace ui {
 		return m_context.is_clicked(element);
 	}
 
-	void UserInterface::initially_focus_element(std::string id) {
+	void UserInterface::set_initially_focused_element(std::string id) {
 		if (m_context.focused_element_id->empty()) {
 			m_context.focused_element_id = id;
 		}
+	}
+
+	void UserInterface::focus_current_element() {
+		const Element& element = m_tree.current_element();
+		ASSERT(!element.id.empty(), "focus_current_element called when current element lacks id!");
+		m_context.focus_element(element);
 	}
 }

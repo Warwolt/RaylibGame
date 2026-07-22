@@ -471,8 +471,8 @@ namespace ui {
 				const bool should_focus_previous = box_is_horizontal ? input.key_pressed(KEY_LEFT) : input.key_pressed(KEY_UP);
 				const bool should_focus_next = box_is_horizontal ? input.key_pressed(KEY_RIGHT) : input.key_pressed(KEY_DOWN);
 
+				// search among  siblings, focus first one that has an id
 				if (should_focus_previous) {
-					// search among previous siblings, focus first one that has an id
 					for (int i = (int)focused_child_index.value() - 1; i >= 0; i--) {
 						Element& sibling = box->children[i];
 						if (!sibling.id.empty()) {
@@ -481,9 +481,7 @@ namespace ui {
 						}
 					}
 				}
-
 				if (should_focus_next) {
-					// search among next siblings, focus first one that has an id
 					for (size_t i = focused_child_index.value() + 1; i < box->children.size(); i++) {
 						Element& sibling = box->children[i];
 						if (!sibling.id.empty()) {
@@ -502,9 +500,11 @@ namespace ui {
 				state->is_clicked = true; // propagate clicks
 				click_handled = true;
 			} else {
-				const bool element_is_clicked = state->is_hovered && input.left_mouse_button_released();
-				state->is_clicked = element_is_clicked;
-				click_handled = element_is_clicked;
+				const bool element_is_mouse_clicked = state->is_hovered && input.left_mouse_button_released();
+				const bool element_is_keyboard_clicked = context->is_focused(*element) && input.key_pressed(KEY_ENTER);
+				const bool is_clicked = element_is_mouse_clicked || element_is_keyboard_clicked;
+				state->is_clicked = is_clicked;
+				click_handled = is_clicked;
 			}
 		}
 
