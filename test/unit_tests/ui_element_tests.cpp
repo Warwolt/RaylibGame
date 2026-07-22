@@ -15,14 +15,14 @@ constexpr Vector2 outside = { size.x + 1, size.y + 1 };
 
 // Child box occupies upper left quadrant of parent
 //
-// +---------+--------+
-// |         |        |
-// |  child  |        |
-// |         |        |
-// +---------+        |
-// |      parent      |
-// |                  |
-// +------------------+
+// +---------+---------+
+// |         |         |
+// |  child  |         |
+// |         |         |
+// +---------+         |
+// |      parent       |
+// |                   |
+// +-------------------+
 ui::Element box_element_with_child() {
 	return ui::Element {
 		.id = "box_parent",
@@ -44,6 +44,48 @@ ui::Element box_element_with_child() {
 		},
 	};
 }
+
+// Child box occupies upper half of parent
+//
+// +---------+---------+
+// |         |         |
+// |  child  |  child  |
+// |         |         |
+// +---------+---------|
+// |      parent       |
+// |                   |
+// +-------------------+
+ui::Element box_element_with_two_children() {
+	return ui::Element {
+		.id = "box_parent",
+		.style = {
+			.width = ui::Pixels(size.x),
+			.height = ui::Pixels(size.y),
+		},
+		.content = ui::Box {
+			.children = {
+				ui::Element {
+				.id = "box_child_1",
+					.style = {
+						.width = ui::Pixels(size.x / 2),
+						.height = ui::Pixels(size.y / 2),
+					},
+					.content = ui::Box {},
+				},
+				ui::Element {
+				.id = "box_child_2",
+					.style = {
+						.width = ui::Pixels(size.x / 2),
+						.height = ui::Pixels(size.y / 2),
+					},
+					.content = ui::Box {},
+				},
+			},
+		},
+	};
+}
+
+#pragma region click
 
 TEST(ElementTests, BoxElementWithChild_IsHovered) {
 	ResourceManager resources;
@@ -165,3 +207,30 @@ TEST(ElementTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
 	EXPECT_EQ(parent_state->is_active, false);
 	EXPECT_EQ(child_state->is_active, false);
 }
+
+#pragma endregion
+
+#pragma region focus
+
+TEST(ElementTests, BoxWithTwoChildren_InitialFocus) {
+	ResourceManager resources;
+	ui::Context context = {
+		.focused_element = "box_child_1",
+	};
+	ui::Element element = box_element_with_two_children();
+	const ui::Element& child1 = element.box()->children[0];
+	const ui::Element& child2 = element.box()->children[1];
+	ui::State* parent_state = context.state(element);
+	ui::State* child1_state = context.state(child1);
+	ui::State* child2_state = context.state(child2);
+
+	ui::update_element(Input {}, &context, &element);
+
+	EXPECT_EQ(parent_state->is_focused, false);
+	EXPECT_EQ(child1_state->is_focused, true);
+	EXPECT_EQ(child2_state->is_focused, false);
+}
+
+// BoxWithTwoChildren_ChangeFocusWithKeyboard_Horizontal
+
+#pragma endregion

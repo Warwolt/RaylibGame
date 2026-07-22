@@ -434,7 +434,7 @@ namespace ui {
 	bool update_element(const Input& input, Context* context, Element* element) {
 		State* state = context->state(*element);
 
-		/* Update hovered & active if element has associated state */
+		/* Update hovered, focused & active if element has associated state */
 		if (state) {
 			/* Hovered */
 			state->is_hovered = Raylib_CheckCollisionPointRec(input.mouse_position, element->layout.border_box);
@@ -455,8 +455,33 @@ namespace ui {
 		/* Update children */
 		bool any_child_clicked = false;
 		if (ui::Box* box = element->box()) {
-			for (Element& child : box->children) {
+			std::optional<size_t> focused_index;
+			for (size_t i = 0; i < box->children.size(); i++) {
+				Element& child = box->children[i];
+				/* Update child */
 				any_child_clicked |= update_element(input, context, &child);
+				if (context->is_focused(child)) {
+					focused_index = i;
+				}
+			}
+
+			/* Update child focus */
+			// note: we do this outside the loop so we don't update focus more than once per frame.
+			if (focused_index.has_value()) {
+				switch (box->direction) {
+					case Direction::Horizontal: {
+						if (input.key_pressed(KEY_UP)) {
+							LOG_DEBUG("Focus up");
+						}
+						if (input.key_pressed(KEY_DOWN)) {
+							LOG_DEBUG("Focus down");
+						}
+					} break;
+
+					case Direction::Vertical: {
+						// FIXME: todo
+					} break;
+				}
 			}
 		}
 
