@@ -101,22 +101,34 @@ TEST(ElementTests, BoxElementWithChild_IsHovered) {
 	EXPECT_EQ(child_state->is_hovered, false);
 
 	/* Hover top left */
-	ui::update_element(Input { .mouse_position = top_left }, &context, &element);
+	const Input input1 = {
+		.mouse_position = top_left,
+	};
+	ui::update_element(input1, &context, &element);
 	EXPECT_EQ(parent_state->is_hovered, true);
 	EXPECT_EQ(child_state->is_hovered, true);
 
 	/* Hover middle */
-	ui::update_element(Input { .mouse_position = middle }, &context, &element);
+	const Input input2 = {
+		.mouse_position = middle,
+	};
+	ui::update_element(input2, &context, &element);
 	EXPECT_EQ(parent_state->is_hovered, true);
 	EXPECT_EQ(child_state->is_hovered, true);
 
 	/* Hover bottom right */
-	ui::update_element(Input { .mouse_position = bottom_right }, &context, &element);
+	const Input input3 = {
+		.mouse_position = bottom_right,
+	};
+	ui::update_element(input3, &context, &element);
 	EXPECT_EQ(parent_state->is_hovered, true);
 	EXPECT_EQ(child_state->is_hovered, false);
 
 	/* Hover outside */
-	ui::update_element(Input { .mouse_position = outside }, &context, &element);
+	const Input input4 = {
+		.mouse_position = outside,
+	};
+	ui::update_element(input4, &context, &element);
 	EXPECT_EQ(parent_state->is_hovered, false);
 	EXPECT_EQ(child_state->is_hovered, false);
 }
@@ -135,22 +147,38 @@ TEST(ElementTests, BoxElementWithChild_IsActive) {
 	EXPECT_EQ(child_state->is_active, false);
 
 	/* Click top left */
-	ui::update_element(Input { .mouse_position = top_left, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } } }, &context, &element);
+	const Input input1 = {
+		.mouse_position = top_left,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } },
+	};
+	ui::update_element(input1, &context, &element);
 	EXPECT_EQ(parent_state->is_active, true);
 	EXPECT_EQ(child_state->is_active, true);
 
 	/* Hold down button top left */
-	ui::update_element(Input { .mouse_position = top_left, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Down } } }, &context, &element);
+	const Input input2 = {
+		.mouse_position = top_left,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Down } },
+	};
+	ui::update_element(input2, &context, &element);
 	EXPECT_EQ(parent_state->is_active, true);
 	EXPECT_EQ(child_state->is_active, true);
 
 	/* Release top left */
-	ui::update_element(Input { .mouse_position = top_left, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Released } } }, &context, &element);
+	const Input input3 = {
+		.mouse_position = top_left,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Released } },
+	};
+	ui::update_element(input3, &context, &element);
 	EXPECT_EQ(parent_state->is_active, false);
 	EXPECT_EQ(child_state->is_active, false);
 
 	/* Click outside box */
-	ui::update_element(Input { .mouse_position = outside, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } } }, &context, &element);
+	const Input input4 = {
+		.mouse_position = outside,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } },
+	};
+	ui::update_element(input4, &context, &element);
 	EXPECT_EQ(parent_state->is_active, false);
 	EXPECT_EQ(child_state->is_active, false);
 }
@@ -169,22 +197,38 @@ TEST(ElementTests, BoxElementWithChild_IsClicked) {
 	EXPECT_EQ(child_state->is_clicked, false);
 
 	/* Mouse down while hovering, not clicked */
-	ui::update_element(Input { .mouse_position = top_left, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } } }, &context, &element);
+	const Input input1 = {
+		.mouse_position = top_left,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } },
+	};
+	ui::update_element(input1, &context, &element);
 	EXPECT_EQ(parent_state->is_clicked, false);
 	EXPECT_EQ(child_state->is_clicked, false);
 
 	/* Mouse up while hovering child, both child and parent is clicked */
-	ui::update_element(Input { .mouse_position = top_left, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Released } } }, &context, &element);
+	const Input input2 = {
+		.mouse_position = top_left,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Released } },
+	};
+	ui::update_element(input2, &context, &element);
 	EXPECT_EQ(parent_state->is_clicked, true);
 	EXPECT_EQ(child_state->is_clicked, true);
 
 	/* Mouse down while hovering only parent, not clicked */
-	ui::update_element(Input { .mouse_position = bottom_right, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } } }, &context, &element);
+	const Input input3 = {
+		.mouse_position = bottom_right,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed } },
+	};
+	ui::update_element(input3, &context, &element);
 	EXPECT_EQ(parent_state->is_clicked, false);
 	EXPECT_EQ(child_state->is_clicked, false);
 
 	/* Mouse up while hovering only parent, only parent is clicked */
-	ui::update_element(Input { .mouse_position = bottom_right, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Released } } }, &context, &element);
+	const Input input4 = {
+		.mouse_position = bottom_right,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Released } },
+	};
+	ui::update_element(input4, &context, &element);
 	EXPECT_EQ(parent_state->is_clicked, true);
 	EXPECT_EQ(child_state->is_clicked, false);
 }
@@ -203,7 +247,11 @@ TEST(ElementTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
 	EXPECT_EQ(child_state->is_active, false);
 
 	/* Drag mouse to top left while button down */
-	ui::update_element(Input { .mouse_position = top_left, .mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Down } } }, &context, &element);
+	const Input input = {
+		.mouse_position = top_left,
+		.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Down } },
+	};
+	ui::update_element(input, &context, &element);
 	EXPECT_EQ(parent_state->is_active, false);
 	EXPECT_EQ(child_state->is_active, false);
 }
@@ -224,13 +272,12 @@ TEST(ElementTests, BoxWithTwoChildren_InitialFocus) {
 	ui::State* child1_state = context.state(child1);
 	ui::State* child2_state = context.state(child2);
 
-	ui::update_element(Input {}, &context, &element);
+	const Input input = {};
+	ui::update_element(input, &context, &element);
 
 	EXPECT_EQ(parent_state->is_focused, false);
 	EXPECT_EQ(child1_state->is_focused, true);
 	EXPECT_EQ(child2_state->is_focused, false);
 }
-
-// BoxWithTwoChildren_ChangeFocusWithKeyboard_Horizontal
 
 #pragma endregion
