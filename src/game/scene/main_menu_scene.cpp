@@ -121,6 +121,7 @@ void MainMenuScene::update(Game* game) {
 
 	m_ui.frame_begin();
 	{
+		m_ui.initially_focus_element(menu_items[0]);
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
@@ -138,21 +139,19 @@ void MainMenuScene::update(Game* game) {
 				/* Menu */
 				for (int i = 0; i < MenuItems::Count; i++) {
 					/* Menu item */
-					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container);
+					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container, menu_items[i]);
 					{
+						if (m_ui.element_is_clicked()) {
+							LOG_DEBUG("Clicked %s", menu_items[i]);
+						}
+
 						/* Focus indicator */
-						if (m_menu_index == i) {
+						if (m_ui.element_is_focused()) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 
 						/* Menu text */
-						m_ui.text(menu_items[i], menu_item_image_style, menu_items[i]);
-						if (m_ui.element_is_hovered().has_changed_to(true)) {
-							m_menu_index = i;
-						}
-						if (m_ui.element_is_clicked()) {
-							LOG_DEBUG("pressed %d", i);
-						}
+						m_ui.text(menu_items[i], menu_item_image_style);
 					}
 					m_ui.box_end();
 				}

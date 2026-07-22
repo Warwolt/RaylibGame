@@ -19,16 +19,23 @@ namespace ui {
 		return &it->second;
 	}
 
-	Tracked<bool> Context::is_active(const Element& element) const {
+	Tracked<bool> Context::is_hovered(const Element& element) const {
 		if (const State* state = this->state(element)) {
-			return state->is_active;
+			return state->is_hovered;
 		}
 		return false;
 	}
 
-	Tracked<bool> Context::is_hovered(const Element& element) const {
+	Tracked<bool> Context::is_focused(const Element& element) const {
 		if (const State* state = this->state(element)) {
-			return state->is_hovered;
+			return state->is_focused;
+		}
+		return false;
+	}
+
+	Tracked<bool> Context::is_active(const Element& element) const {
+		if (const State* state = this->state(element)) {
+			return state->is_active;
 		}
 		return false;
 	}

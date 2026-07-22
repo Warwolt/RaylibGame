@@ -27,8 +27,12 @@ namespace ui {
 		void image(ImageID image, std::optional<Style> style = {}, std::string id = "");
 
 		Tracked<bool> element_is_hovered() const;
+		Tracked<bool> element_is_focused() const;
 		Tracked<bool> element_is_active() const;
 		Tracked<bool> element_is_clicked() const;
+
+		void initially_focus_element(std::string id);
+		void focus_element(std::string id);
 
 	private:
 		bool m_is_within_frame = false;

@@ -439,6 +439,9 @@ namespace ui {
 			/* Hovered */
 			state->is_hovered = Raylib_CheckCollisionPointRec(input.mouse_position, element->layout.border_box);
 
+			/* Focused */
+			state->is_focused = element->id == context->focused_element;
+
 			/* Active */
 			if (state->is_active) {
 				// element stays active as long as button is held down
