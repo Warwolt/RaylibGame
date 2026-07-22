@@ -247,6 +247,64 @@ TEST(ElementTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
 
 #pragma region focus
 
+struct TestStep {
+	std::string message;
+	Input input;
+	bool parent_is_focused;
+	bool child1_is_focused;
+	bool child2_is_focused;
+	bool child3_is_focused;
+};
+
+std::vector<TestStep> change_focus_with_keyboard_steps(ui::Direction direction) {
+	KeyboardKey previous_key = direction == ui::Direction::Horizontal ? KEY_LEFT : KEY_UP;
+	KeyboardKey next_key = direction == ui::Direction::Horizontal ? KEY_RIGHT : KEY_DOWN;
+	return {
+		{
+			.message = "Moving focus to next element when on child1 should focus child2.",
+			.input = { .keyboard_keys = { { next_key, ButtonState::Pressed } } },
+			.child1_is_focused = false,
+			.child2_is_focused = true,
+			.child3_is_focused = false,
+		},
+		{
+			.message = "Moving focus to next element when on child2 should focus child3.",
+			.input = { .keyboard_keys = { { next_key, ButtonState::Pressed } } },
+			.child1_is_focused = false,
+			.child2_is_focused = false,
+			.child3_is_focused = true,
+		},
+		{
+			.message = "Moving focus to next element when on child3 should do nothing.",
+			.input = { .keyboard_keys = { { next_key, ButtonState::Pressed } } },
+			.child1_is_focused = false,
+			.child2_is_focused = false,
+			.child3_is_focused = true,
+		},
+		{
+			.message = "Moving focus to previous element when on child3 should focus child2.",
+			.input = { .keyboard_keys = { { previous_key, ButtonState::Pressed } } },
+			.child1_is_focused = false,
+			.child2_is_focused = true,
+			.child3_is_focused = false,
+		},
+		{
+			.message = "Moving focus to previous element when on child2 should focus child1.",
+			.input = { .keyboard_keys = { { previous_key, ButtonState::Pressed } } },
+			.child1_is_focused = true,
+			.child2_is_focused = false,
+			.child3_is_focused = false,
+		},
+		{
+			.message = "Moving focus to previous element when on child1 should do nothing.",
+			.input = { .keyboard_keys = { { previous_key, ButtonState::Pressed } } },
+			.child1_is_focused = true,
+			.child2_is_focused = false,
+			.child3_is_focused = false,
+		},
+	};
+}
+
 TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Horizontal) {
 	ResourceManager resources;
 	ui::Context context = {
@@ -257,51 +315,19 @@ TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Horizontal) {
 	const ui::Element& child2 = parent.box()->children[1];
 	const ui::Element& child3 = parent.box()->children[2];
 
-	/* Initially, child 1 focused */
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), true);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), false);
+	std::vector<TestStep> test_steps = change_focus_with_keyboard_steps(ui::Direction::Horizontal);
 
-	/* Can't focus previously beyond child 1 */
-	const Input input1 = {
-		.keyboard_keys = { { KEY_LEFT, ButtonState::Pressed } },
-	};
-	ui::update_element(input1, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), true);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), false);
-
-	/* Focus child 2 */
-	const Input input2 = {
-		.keyboard_keys = { { KEY_RIGHT, ButtonState::Pressed } },
-	};
-	ui::update_element(input2, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), false);
-	EXPECT_EQ(context.is_focused(child2), true);
-	EXPECT_EQ(context.is_focused(child3), false);
-
-	/* Focus child 3 */
-	const Input input3 = {
-		.keyboard_keys = { { KEY_RIGHT, ButtonState::Pressed } },
-	};
-	ui::update_element(input3, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), false);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), true);
-
-	/* Can't focus beyond child 3 */
-	const Input input4 = {
-		.keyboard_keys = { { KEY_RIGHT, ButtonState::Pressed } },
-	};
-	ui::update_element(input4, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), false);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), true);
+	for (int i = 0; i < test_steps.size(); i++) {
+		const TestStep& test_step = test_steps[i];
+		ui::update_element(test_step.input, &context, &parent);
+		EXPECT_EQ(context.is_focused(parent), false);
+		EXPECT_EQ(context.is_focused(child1), test_step.child1_is_focused);
+		EXPECT_EQ(context.is_focused(child2), test_step.child2_is_focused);
+		EXPECT_EQ(context.is_focused(child3), test_step.child3_is_focused);
+		if (::testing::Test::HasFailure()) {
+			printf("%s(%d): step %d info: %s\n\n", __FILE__, __LINE__, i + 1, test_step.message.c_str());
+		}
+	}
 }
 
 TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Vertical) {
@@ -314,51 +340,19 @@ TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Vertical) {
 	const ui::Element& child2 = parent.box()->children[1];
 	const ui::Element& child3 = parent.box()->children[2];
 
-	/* Initially, child 1 focused */
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), true);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), false);
+	std::vector<TestStep> test_steps = change_focus_with_keyboard_steps(ui::Direction::Vertical);
 
-	/* Can't focus previously beyond child 1 */
-	const Input input1 = {
-		.keyboard_keys = { { KEY_UP, ButtonState::Pressed } },
-	};
-	ui::update_element(input1, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), true);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), false);
-
-	/* Focus child 2 */
-	const Input input2 = {
-		.keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } },
-	};
-	ui::update_element(input2, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), false);
-	EXPECT_EQ(context.is_focused(child2), true);
-	EXPECT_EQ(context.is_focused(child3), false);
-
-	/* Focus child 3 */
-	const Input input3 = {
-		.keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } },
-	};
-	ui::update_element(input3, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), false);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), true);
-
-	/* Can't focus beyond child 3 */
-	const Input input4 = {
-		.keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } },
-	};
-	ui::update_element(input4, &context, &parent);
-	EXPECT_EQ(context.is_focused(parent), false);
-	EXPECT_EQ(context.is_focused(child1), false);
-	EXPECT_EQ(context.is_focused(child2), false);
-	EXPECT_EQ(context.is_focused(child3), true);
+	for (int i = 0; i < test_steps.size(); i++) {
+		const TestStep& test_step = test_steps[i];
+		ui::update_element(test_step.input, &context, &parent);
+		EXPECT_EQ(context.is_focused(parent), false);
+		EXPECT_EQ(context.is_focused(child1), test_step.child1_is_focused);
+		EXPECT_EQ(context.is_focused(child2), test_step.child2_is_focused);
+		EXPECT_EQ(context.is_focused(child3), test_step.child3_is_focused);
+		if (::testing::Test::HasFailure()) {
+			printf("%s(%d): step %d info: %s\n\n", __FILE__, __LINE__, i + 1, test_step.message.c_str());
+		}
+	}
 }
 
 #pragma endregion

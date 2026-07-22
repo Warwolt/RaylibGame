@@ -121,7 +121,7 @@ void MainMenuScene::update(Game* game) {
 
 	m_ui.frame_begin();
 	{
-		m_ui.initially_focus_element(menu_items[0]);
+		m_ui.initially_focus_element(menu_items[2]);
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });

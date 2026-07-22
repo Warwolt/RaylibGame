@@ -473,8 +473,8 @@ namespace ui {
 
 				if (should_focus_previous) {
 					// search among previous siblings, focus first one that has an id
-					for (size_t i = 0; i + 1 < focused_child_index.value(); i++) {
-						Element& sibling = box->children[focused_child_index.value() - i];
+					for (int i = (int)focused_child_index.value() - 1; i >= 0; i--) {
+						Element& sibling = box->children[i];
 						if (!sibling.id.empty()) {
 							context->focus_element(sibling);
 							break;
