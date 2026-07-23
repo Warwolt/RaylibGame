@@ -1,5 +1,6 @@
 #include "platform/input.h"
 
+#include "core/util.h"
 #include "platform/window.h"
 
 static ButtonState read_mouse_button(int button) {
@@ -30,6 +31,82 @@ static ButtonState read_keyboard_key(int key) {
 	return state;
 }
 
+std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings() {
+	return {
+		// clang-format off
+		{ ACTION_UP, { KEY_UP }  },
+		{ ACTION_LEFT, { KEY_LEFT } },
+		{ ACTION_DOWN, { KEY_DOWN } },
+		{ ACTION_RIGHT, { KEY_RIGHT } },
+		{ ACTION_SELECT, { KEY_ENTER, KEY_Z } },
+		{ ACTION_BACK, { KEY_ESCAPE, KEY_X } },
+		// clang-format on
+	};
+}
+
+ButtonState Input::left_mouse_button() const {
+	auto it = mouse_buttons.find(MOUSE_BUTTON_LEFT);
+	return it == mouse_buttons.end() ? ButtonState::Up : it->second;
+}
+
+bool Input::left_mouse_button_up() const {
+	return left_mouse_button() == ButtonState::Up;
+}
+
+bool Input::left_mouse_button_released() const {
+	return left_mouse_button() == ButtonState::Released;
+}
+
+bool Input::left_mouse_button_down() const {
+	return left_mouse_button() == ButtonState::Down;
+}
+
+bool Input::left_mouse_button_pressed() const {
+	return left_mouse_button() == ButtonState::Pressed;
+}
+
+ButtonState Input::keyboard_key(KeyboardKey key) const {
+	auto it = keyboard_keys.find(key);
+	return it == keyboard_keys.end() ? ButtonState::Up : it->second;
+}
+
+bool Input::key_up(KeyboardKey key) const {
+	return keyboard_key(key) == ButtonState::Up;
+}
+
+bool Input::key_released(KeyboardKey key) const {
+	return keyboard_key(key) == ButtonState::Released;
+}
+
+bool Input::key_down(KeyboardKey key) const {
+	return keyboard_key(key) == ButtonState::Down;
+}
+
+bool Input::key_pressed(KeyboardKey key) const {
+	return keyboard_key(key) == ButtonState::Pressed;
+}
+
+ButtonState Input::input_action(InputAction action) const {
+	auto it = input_actions.find(action);
+	return it == input_actions.end() ? ButtonState::Up : it->second;
+}
+
+bool Input::action_up(InputAction action) const {
+	return input_action(action) == ButtonState::Up;
+}
+
+bool Input::action_released(InputAction action) const {
+	return input_action(action) == ButtonState::Released;
+}
+
+bool Input::action_down(InputAction action) const {
+	return input_action(action) == ButtonState::Down;
+}
+
+bool Input::action_pressed(InputAction action) const {
+	return input_action(action) == ButtonState::Pressed;
+}
+
 Input read_input(const Window& window) {
 	Input input;
 
@@ -48,6 +125,19 @@ Input read_input(const Window& window) {
 	/* Keyboard */
 	for (int i = 0; i < 336; i++) {
 		input.keyboard_keys[(KeyboardKey)i] = read_keyboard_key(i);
+	}
+
+	/* Actions */
+	for (auto& [action, keys] : input.keyboard_bindings) {
+		if (util::any_of(keys, [&](KeyboardKey key) { return input.key_down(key); })) {
+			input.input_actions[action] = ButtonState::Down;
+		} else if (util::any_of(keys, [&](KeyboardKey key) { return input.key_pressed(key); })) {
+			input.input_actions[action] = ButtonState::Pressed;
+		} else if (util::any_of(keys, [&](KeyboardKey key) { return input.key_up(key); })) {
+			input.input_actions[action] = ButtonState::Up;
+		} else if (util::any_of(keys, [&](KeyboardKey key) { return input.key_released(key); })) {
+			input.input_actions[action] = ButtonState::Released;
+		}
 	}
 
 	return input;
