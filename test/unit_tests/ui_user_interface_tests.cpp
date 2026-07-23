@@ -327,7 +327,7 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_EnterKey) {
 	const std::vector<Input> inputs = {
 		{ .keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } } },
 		{ .keyboard_keys = { { KEY_ENTER, ButtonState::Pressed } } },
-		{ },
+		{},
 	};
 	bool is_focused = false;
 	bool is_clicked = false;
