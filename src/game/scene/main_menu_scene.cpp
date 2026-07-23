@@ -100,7 +100,7 @@ void MainMenuScene::update(Game* game) {
 	menu_items[MenuItems::Quit] = "Quit";
 	m_ui.frame_begin();
 	{
-		m_ui.set_initially_focused_element(menu_items[2]);
+		m_ui.set_initially_focused_element(menu_items[0]);
 		m_ui.box_begin(ui::Direction::Vertical, menu_style);
 		{
 			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
