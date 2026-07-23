@@ -37,7 +37,7 @@ Game* Game_initialize(int argc, char** argv) {
 	if (start_fullscreen) {
 		game->window.toggle_fullscreen();
 	}
-	game->resources.load_default_font("resource/font/ModernDOS8x16.ttf");
+	game->resources.load_default_font("resource/font/8bitoperator_jve.ttf");
 
 	LOG_INFO("Game initialized");
 

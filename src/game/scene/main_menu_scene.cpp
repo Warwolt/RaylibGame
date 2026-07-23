@@ -13,7 +13,6 @@
 
 void MainMenuScene::initialize(Game* game) {
 	// clang-format off
-	m_images.mario64_skybox = game->resources.load_image("resource/image/mario64_skybox.jpg").value();
 	m_images.final_fantasy_menu_border = game->resources.load_image("resource/image/final_fantasy_menu_border_15_15.png").value();
 	m_images.focus_indicator = game->resources.load_image("resource/image/pointing_hand.png").value();
 	// clang-format on
@@ -41,7 +40,6 @@ void MainMenuScene::update(Game* game) {
 
 	const ui::Style menu_style = {
 		.alignment = ui::Alignment::Center,
-		.background = { .image = m_images.mario64_skybox },
 	};
 	const ui::Style title_container_style = {
 			.width = ui::Percentage(33),
@@ -72,7 +70,7 @@ void MainMenuScene::update(Game* game) {
 		.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
 		.fit_content = true,
 	};
-	const ui::Style menu_item_image_style = {
+	const ui::Style menu_item_text_style = {
 			.width = ui::Pixels(150),
 			.padding = {
 					.bottom = 2,
@@ -87,8 +85,8 @@ void MainMenuScene::update(Game* game) {
 	const ui::Style focus_indicator_style = {
 		.position =
 			ui::AbsolutePosition {
-				.x = ui::Pixels(-indicator_size - 10),
-				.y = ui::Pixels(-10),
+				.x = ui::Pixels(-indicator_size),
+				.y = ui::Pixels(-8),
 			},
 		.width = ui::Pixels(indicator_size),
 		.height = ui::Pixels(indicator_size),
@@ -146,7 +144,7 @@ void MainMenuScene::update(Game* game) {
 						}
 
 						/* Menu text */
-						m_ui.text(menu_items[i], menu_item_image_style);
+						m_ui.text(menu_items[i], menu_item_text_style);
 					}
 					m_ui.box_end();
 				}
