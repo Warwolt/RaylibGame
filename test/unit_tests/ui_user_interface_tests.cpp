@@ -277,12 +277,12 @@ TEST(UserInterfaceTests, BoxElement_IsActive) {
 	EXPECT_TRUE(is_active);
 }
 
-TEST(UserInterfaceTests, BoxElement_IsClicked) {
+TEST(UserInterfaceTests, BoxElement_IsClicked_MouseLeftButton) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = { 1000, 1000 };
 
-	const Input inputs[3] = {
+	const std::vector<Input> inputs = {
 		{
 			.mouse_position = { 150, 150 }, // middle of the box
 			.mouse_buttons = { { MOUSE_BUTTON_LEFT, ButtonState::Pressed }, },
@@ -297,8 +297,7 @@ TEST(UserInterfaceTests, BoxElement_IsClicked) {
 		},
 	};
 	bool is_clicked = false;
-	for (int i = 0; i < 3; i++) {
-		const Input input = inputs[i];
+	for (const Input& input : inputs) {
 		ui.frame_begin();
 		{
 			const ui::Style box_style = {
@@ -319,4 +318,47 @@ TEST(UserInterfaceTests, BoxElement_IsClicked) {
 
 	EXPECT_TRUE(is_clicked);
 }
+
+TEST(UserInterfaceTests, BoxElement_IsClicked_EnterKey) {
+	ui::UserInterface ui;
+	const ResourceManager resources;
+	const Vector2 window_size = { 1000, 1000 };
+
+	const std::vector<Input> inputs = {
+		{ .keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } } },
+		{ .keyboard_keys = { { KEY_ENTER, ButtonState::Pressed } } },
+		{},
+	};
+	bool is_focused = false;
+	bool is_clicked = false;
+	ui.set_initially_focused_element("child1");
+	for (const Input& input : inputs) {
+		ui.frame_begin();
+		{
+			ui.box_begin(ui::Direction::Vertical);
+			{
+				ui.box_begin(ui::Direction::Vertical, {}, "child1");
+				ui.box_end();
+
+				ui.box_begin(ui::Direction::Vertical, {}, "child2");
+				if (ui.element_is_focused()) {
+					is_focused = true;
+				}
+				if (ui.element_is_clicked()) {
+					is_clicked = true;
+				}
+				ui.box_end();
+
+				ui.box_begin(ui::Direction::Vertical, {}, "child3");
+				ui.box_end();
+			}
+			ui.box_end();
+		}
+		ui.frame_end(input, resources, window_size);
+	}
+
+	EXPECT_TRUE(is_focused);
+	EXPECT_TRUE(is_clicked);
+}
+
 #pragma endregion

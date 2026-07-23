@@ -7,6 +7,10 @@ public:
 	Tracked(T value)
 		: m_current(value) {
 	}
+	Tracked(T current, T previous)
+		: m_current(current)
+		, m_previous(previous) {
+	}
 
 	const T& value() const {
 		return m_current;
@@ -34,11 +38,11 @@ public:
 		return m_current;
 	}
 
-	const Tracked& operator*() const {
+	const T& operator*() const {
 		return m_current;
 	}
 
-	const Tracked* operator->() const {
+	const T* operator->() const {
 		return &m_current;
 	}
 
