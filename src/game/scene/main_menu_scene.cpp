@@ -155,7 +155,6 @@ void MainMenuScene::update(Game* game) {
 		}
 		m_ui.box_end();
 	}
-
 	m_ui.frame_end(game->input, game->resources, game->window.size());
 }
 

@@ -256,48 +256,48 @@ struct TestStep {
 	bool child3_is_focused;
 };
 
-std::vector<TestStep> change_focus_with_keyboard_steps(ui::Direction direction) {
-	KeyboardKey previous_key = direction == ui::Direction::Horizontal ? KEY_LEFT : KEY_UP;
-	KeyboardKey next_key = direction == ui::Direction::Horizontal ? KEY_RIGHT : KEY_DOWN;
+std::vector<TestStep> change_focus_with_input_actions(ui::Direction direction) {
+	InputAction previous_action = direction == ui::Direction::Horizontal ? ACTION_LEFT : ACTION_UP;
+	InputAction next_action = direction == ui::Direction::Horizontal ? ACTION_RIGHT : ACTION_DOWN;
 	return {
 		{
 			.message = "Moving focus to next element when on child1 should focus child2.",
-			.input = { .keyboard_keys = { { next_key, ButtonState::Pressed } } },
+			.input = { .input_actions = { { next_action, ButtonState::Pressed } } },
 			.child1_is_focused = false,
 			.child2_is_focused = true,
 			.child3_is_focused = false,
 		},
 		{
 			.message = "Moving focus to next element when on child2 should focus child3.",
-			.input = { .keyboard_keys = { { next_key, ButtonState::Pressed } } },
+			.input = { .input_actions = { { next_action, ButtonState::Pressed } } },
 			.child1_is_focused = false,
 			.child2_is_focused = false,
 			.child3_is_focused = true,
 		},
 		{
 			.message = "Moving focus to next element when on child3 should do nothing.",
-			.input = { .keyboard_keys = { { next_key, ButtonState::Pressed } } },
+			.input = { .input_actions = { { next_action, ButtonState::Pressed } } },
 			.child1_is_focused = false,
 			.child2_is_focused = false,
 			.child3_is_focused = true,
 		},
 		{
 			.message = "Moving focus to previous element when on child3 should focus child2.",
-			.input = { .keyboard_keys = { { previous_key, ButtonState::Pressed } } },
+			.input = { .input_actions = { { previous_action, ButtonState::Pressed } } },
 			.child1_is_focused = false,
 			.child2_is_focused = true,
 			.child3_is_focused = false,
 		},
 		{
 			.message = "Moving focus to previous element when on child2 should focus child1.",
-			.input = { .keyboard_keys = { { previous_key, ButtonState::Pressed } } },
+			.input = { .input_actions = { { previous_action, ButtonState::Pressed } } },
 			.child1_is_focused = true,
 			.child2_is_focused = false,
 			.child3_is_focused = false,
 		},
 		{
 			.message = "Moving focus to previous element when on child1 should do nothing.",
-			.input = { .keyboard_keys = { { previous_key, ButtonState::Pressed } } },
+			.input = { .input_actions = { { previous_action, ButtonState::Pressed } } },
 			.child1_is_focused = true,
 			.child2_is_focused = false,
 			.child3_is_focused = false,
@@ -305,7 +305,7 @@ std::vector<TestStep> change_focus_with_keyboard_steps(ui::Direction direction) 
 	};
 }
 
-TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Horizontal) {
+TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithInputAction_Horizontal) {
 	ResourceManager resources;
 	ui::Context context = {
 		.focused_element_id = "box_child_1",
@@ -315,7 +315,7 @@ TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Horizontal) {
 	const ui::Element& child2 = parent.box()->children[1];
 	const ui::Element& child3 = parent.box()->children[2];
 
-	std::vector<TestStep> test_steps = change_focus_with_keyboard_steps(ui::Direction::Horizontal);
+	std::vector<TestStep> test_steps = change_focus_with_input_actions(ui::Direction::Horizontal);
 
 	for (int i = 0; i < test_steps.size(); i++) {
 		const TestStep& test_step = test_steps[i];
@@ -330,7 +330,7 @@ TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Horizontal) {
 	}
 }
 
-TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Vertical) {
+TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithInputAction_Vertical) {
 	ResourceManager resources;
 	ui::Context context = {
 		.focused_element_id = "box_child_1",
@@ -340,7 +340,7 @@ TEST(ElementTests, BoxWithThreeChildren_ChangeFocusWithKeyboard_Vertical) {
 	const ui::Element& child2 = parent.box()->children[1];
 	const ui::Element& child3 = parent.box()->children[2];
 
-	std::vector<TestStep> test_steps = change_focus_with_keyboard_steps(ui::Direction::Vertical);
+	std::vector<TestStep> test_steps = change_focus_with_input_actions(ui::Direction::Vertical);
 
 	for (int i = 0; i < test_steps.size(); i++) {
 		const TestStep& test_step = test_steps[i];

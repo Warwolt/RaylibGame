@@ -319,14 +319,14 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_MouseLeftButton) {
 	EXPECT_TRUE(is_clicked);
 }
 
-TEST(UserInterfaceTests, BoxElement_IsClicked_EnterKey) {
+TEST(UserInterfaceTests, BoxElement_IsClicked_SelectAction) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = { 1000, 1000 };
 
 	const std::vector<Input> inputs = {
-		{ .keyboard_keys = { { KEY_DOWN, ButtonState::Pressed } } },
-		{ .keyboard_keys = { { KEY_ENTER, ButtonState::Pressed } } },
+		{ .input_actions = { { ACTION_DOWN, ButtonState::Pressed } } },
+		{ .input_actions = { { ACTION_SELECT, ButtonState::Pressed } } },
 		{},
 	};
 	bool is_focused = false;
