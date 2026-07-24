@@ -549,26 +549,30 @@ ui::Element button_box() {
 			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(10),
 				.color = DARKGREEN,
+				.hover = {
+					.color = GREEN,
+				},
+				.active = {
+					.color = GREEN,
+				}
 			},
 			.padding = ui::Edges::uniform(10),
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
 			.background = ui::BackgroundStyle {
 				.color = GREEN,
+				.hover = {
+					.color = LIGHTGREEN,
+				},
+				.active = {
+					.color = DARKGREEN,
+				},
 			},
 			.font = ui::FontStyle {
 				.color = DARKGREEN,
-			},
-
-			.hovered = {
-				.border_color = GREEN,
-				.background_color = LIGHTGREEN,
-			},
-
-			.active = {
-				.border_color = GREEN,
-				.background_color = DARKGREEN,
-				.font_color = GREEN,
+				.active = {
+					.color = GREEN,
+				}
 			},
 		},
 		.content = ui::Text { .text = "Press Me" },

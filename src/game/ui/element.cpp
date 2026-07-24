@@ -517,23 +517,11 @@ namespace ui {
 		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element, state);
 
 		/* Draw padding box */
-		Color background_color = element.style.background.color(state);
-		if (context.is_active(element)) {
-			background_color = element.style.active.background_color.value_or(background_color);
-		} else if (context.is_hovered(element)) {
-			background_color = element.style.hovered.background_color.value_or(background_color);
-		}
-		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
+		Raylib_DrawRectangleRec(element.layout.padding_box, element.style.background.color(state));
 
 		/* Draw border */
 		{
-			Color border_color = element.style.border.color(state);
-			if (context.is_active(element)) {
-				border_color = element.style.active.border_color.value_or(border_color);
-			} else if (context.is_hovered(element)) {
-				border_color = element.style.hovered.border_color.value_or(border_color);
-			}
-
+			const Color border_color = element.style.border.color(state);
 			const Rectangle border_top = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.border_box.y,
@@ -633,12 +621,7 @@ namespace ui {
 						.x = element.layout.content_box.x + left_padding,
 						.y = element.layout.content_box.y + line_num * element.style.font.size(state) + top_padding,
 					};
-					Color font_color = element.style.font.color(state);
-					if (context.is_active(element)) {
-						font_color = element.style.active.font_color.value_or(font_color);
-					} else if (context.is_hovered(element)) {
-						font_color = element.style.hovered.font_color.value_or(font_color);
-					}
+					const Color font_color = element.style.font.color(state);
 					const std::string line_str(line);
 					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font.size(state), font_spacing, font_color);
 					line_num++;

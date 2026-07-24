@@ -307,9 +307,6 @@ namespace ui {
 		Alignment cross_alignment;
 		OverridableBackgroundStyle background;
 		OverridableFontStyle font;
-
-		StyleOverride hovered;
-		StyleOverride active;
 		StyleDebug debug;
 
 		inline float horizontal_spacing() const {
