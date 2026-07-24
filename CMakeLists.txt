@@ -42,6 +42,7 @@ set(SRC
     src/game/scene/scene.cpp
     src/game/ui/context.cpp
     src/game/ui/element.cpp
+    src/game/ui/style.cpp
     src/game/ui/tree.cpp
     src/game/ui/user_interface.cpp
     src/platform/input.cpp

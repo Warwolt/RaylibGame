@@ -316,8 +316,8 @@ namespace ui {
 		/* Size padding, border, and margin boxes */
 		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
 		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
-		layout->border_box.width = layout->padding_box.width + style.border.edges.left + style.border.edges.right;
-		layout->border_box.height = layout->padding_box.height + style.border.edges.top + style.border.edges.bottom;
+		layout->border_box.width = layout->padding_box.width + style.border.edges().left + style.border.edges().right;
+		layout->border_box.height = layout->padding_box.height + style.border.edges().top + style.border.edges().bottom;
 		layout->margin_box.width = layout->border_box.width + style.margin.left + style.margin.right;
 		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
 	}
@@ -365,8 +365,8 @@ namespace ui {
 		}
 		layout->border_box.x = layout->margin_box.x + style.margin.left;
 		layout->border_box.y = layout->margin_box.y + style.margin.top;
-		layout->padding_box.x = layout->border_box.x + style.border.edges.left;
-		layout->padding_box.y = layout->border_box.y + style.border.edges.top;
+		layout->padding_box.x = layout->border_box.x + style.border.edges().left;
+		layout->padding_box.y = layout->border_box.y + style.border.edges().top;
 		layout->content_box.x = layout->padding_box.x + style.padding.left;
 		layout->content_box.y = layout->padding_box.y + style.padding.top;
 
@@ -512,6 +512,7 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Context& context, const Element& element) {
+		const StyleState state = get_style_state(context, element);
 		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element);
 
 		/* Draw padding box */
@@ -525,7 +526,7 @@ namespace ui {
 
 		/* Draw border */
 		{
-			Color border_color = element.style.border.color;
+			Color border_color = element.style.border.color(state);
 			if (context.is_active(element)) {
 				border_color = element.style.active.border_color.value_or(border_color);
 			} else if (context.is_hovered(element)) {
@@ -536,24 +537,24 @@ namespace ui {
 				.x = element.layout.border_box.x,
 				.y = element.layout.border_box.y,
 				.width = element.layout.border_box.width,
-				.height = element.style.border.edges.top,
+				.height = element.style.border.edges().top,
 			};
 			const Rectangle border_bottom = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.padding_box.y + element.layout.padding_box.height,
 				.width = element.layout.border_box.width,
-				.height = element.style.border.edges.bottom,
+				.height = element.style.border.edges().bottom,
 			};
 			const Rectangle border_left = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.padding_box.y,
-				.width = element.style.border.edges.left,
+				.width = element.style.border.edges().left,
 				.height = element.layout.padding_box.height,
 			};
 			const Rectangle border_right = {
-				.x = element.layout.border_box.x + element.layout.border_box.width - element.style.border.edges.right,
+				.x = element.layout.border_box.x + element.layout.border_box.width - element.style.border.edges().right,
 				.y = element.layout.padding_box.y,
-				.width = element.style.border.edges.right,
+				.width = element.style.border.edges().right,
 				.height = element.layout.padding_box.height,
 			};
 			Raylib_DrawRectangleRec(border_top, border_color);
@@ -563,14 +564,14 @@ namespace ui {
 		}
 
 		/* Draw border image */
-		if (element.style.border.image.value != 0) {
-			const Texture2D texture = resources.get_image(element.style.border.image);
-			const Edges& slice_spacing = element.style.border.image_slices;
+		if (element.style.border.image(state).value != 0) {
+			const Texture2D texture = resources.get_image(element.style.border.image(state));
+			const Edges& slice_spacing = element.style.border.image_slices(state);
 			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
 			const auto source_rects = edges_to_9_slices(slice_spacing, texture_rect);
-			const auto destination_rects = edges_to_9_slices(element.style.border.edges, element.layout.border_box);
+			const auto destination_rects = edges_to_9_slices(element.style.border.edges(), element.layout.border_box);
 			for (size_t i = 0; i < source_rects.size(); i++) {
-				if (i == 4 && !element.style.border.image_fill_center) {
+				if (i == 4 && !element.style.border.image_fill_center(state)) {
 					continue;
 				}
 				Raylib_DrawTexturePro(texture, source_rects[i], destination_rects[i], Vector2 { 0, 0 }, 0.0f, WHITE);

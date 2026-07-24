@@ -7,7 +7,31 @@
 #include <optional>
 #include <variant>
 
+#define RETURN_STYLE_FIELD(field, state)                             \
+	do {                                                             \
+		switch (state) {                                             \
+			case StyleState::Inactive:                               \
+				return m_style.field;                                \
+			case StyleState::Hovered:                                \
+				return m_style.hover.field.value_or(m_style.field);  \
+			case StyleState::Active:                                 \
+				return m_style.active.field.value_or(m_style.field); \
+		}                                                            \
+		return {};                                                   \
+	} while (0)
+
 namespace ui {
+
+	struct Context;
+	struct Element;
+
+	enum class StyleState {
+		Inactive,
+		Hovered,
+		Active,
+	};
+
+	StyleState get_style_state(const Context& context, const Element& element);
 
 	struct Pixels {
 		float value;
@@ -122,12 +146,54 @@ namespace ui {
 		Stretch,
 	};
 
+	/* Border */
+	struct BorderStyleOverride {
+		std::optional<Color> color;
+		std::optional<ImageID> image;
+		std::optional<Edges> image_slices;
+		std::optional<bool> image_fill_center;
+	};
+
 	struct BorderStyle {
 		Edges edges;
 		Color color;
 		ImageID image;
 		Edges image_slices; // for 9-slicing
 		bool image_fill_center;
+
+		BorderStyleOverride hover;
+		BorderStyleOverride active;
+	};
+
+	class InteractiveBorderStyle {
+	public:
+		InteractiveBorderStyle() = default;
+		InteractiveBorderStyle(BorderStyle style)
+			: m_style(style) {
+		}
+
+		inline Edges edges() const {
+			return m_style.edges;
+		}
+
+		inline Color color(StyleState state) const {
+			RETURN_STYLE_FIELD(color, state);
+		}
+
+		inline ImageID image(StyleState state) const {
+			RETURN_STYLE_FIELD(image, state);
+		}
+
+		inline Edges image_slices(StyleState state) const {
+			RETURN_STYLE_FIELD(image_slices, state);
+		}
+
+		inline bool image_fill_center(StyleState state) const {
+			RETURN_STYLE_FIELD(image_fill_center, state);
+		}
+
+	private:
+		BorderStyle m_style;
 	};
 
 	struct BackgroundStyle {
@@ -159,7 +225,7 @@ namespace ui {
 		std::optional<Measure> height;
 		bool fit_content = false; // width and height ignored if true
 		Edges margin;
-		BorderStyle border;
+		InteractiveBorderStyle border;
 		Edges padding;
 		Alignment alignment;
 		Alignment cross_alignment;
@@ -171,11 +237,11 @@ namespace ui {
 		StyleDebug debug;
 
 		inline float horizontal_spacing() const {
-			return margin.horizontal() + border.edges.horizontal() + padding.horizontal();
+			return margin.horizontal() + border.edges().horizontal() + padding.horizontal();
 		}
 
 		inline float vertical_spacing() const {
-			return margin.vertical() + border.edges.vertical() + padding.vertical();
+			return margin.vertical() + border.edges().vertical() + padding.vertical();
 		}
 
 		inline Vector2 spacing() const {

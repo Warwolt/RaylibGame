@@ -126,7 +126,7 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 					.width = ui::Pixels(100),
 					.height= ui::Pixels(100),
 					.margin = ui::Edges::uniform(2),
-					.border = {
+					.border = ui::BorderStyle {
 						.edges = ui::Edges::uniform(2),
 						.color = DARKBLUE,
 					},
@@ -209,7 +209,7 @@ TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
 ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 	return {
 		.style = {
-			.border = ui::Edges::uniform(2),
+			.border = ui::BorderStyle { ui::Edges::uniform(2) },
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
 		},
@@ -221,7 +221,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.width = ui::Pixels(100),
 						.height= ui::Pixels(100),
 						.margin = ui::Edges::uniform(2),
-						.border = {
+						.border = ui::BorderStyle {
 							.edges = ui::Edges::uniform(2),
 							.color = DARKBLUE,
 						},
@@ -237,7 +237,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.width = ui::Pixels(100),
 						.height = ui::Pixels(100),
 						.margin = ui::Edges::uniform(2),
-						.border = {
+						.border = ui::BorderStyle {
 							.edges = ui::Edges::uniform(2),
 							.color = GOLD,
 						},
@@ -252,7 +252,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.width = ui::Pixels(100),
 						.height= ui::Pixels(100),
 						.margin = ui::Edges::uniform(2),
-						.border = {
+						.border = ui::BorderStyle {
 							.edges = ui::Edges::uniform(2),
 							.color = DARKBLUE,
 						},
@@ -407,7 +407,7 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_CanOverflowParent_Pixels) {
 			},
 			.width = ui::Pixels(200),
 			.height = ui::Pixels(50),
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
@@ -424,7 +424,7 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_CanOverflowParent_Pixels) {
 							},
 							.width = ui::Pixels(100),
 							.height = ui::Pixels(100),
-							.border = {
+							.border = ui::BorderStyle {
 								.edges = ui::Edges::uniform(2),
 								.color = ORANGE,
 							},
@@ -445,7 +445,7 @@ ui::Element box_fit_content(ui::Direction direction, std::vector<ui::Element> ch
 	return {
 		.style = {
 			.fit_content = true,
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
@@ -546,7 +546,7 @@ ui::Element button_box() {
 		.style = {
 			.width = ui::Pixels(200),
 			.height = ui::Pixels(100),
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(10),
 				.color = DARKGREEN,
 			},
@@ -884,7 +884,7 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 	ui::Element element = {
 		.style = {
 			.width = ui::Percentage(50),
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
@@ -923,7 +923,7 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 	ui::Element element = {
 		.style = {
 			.height = ui::Percentage(50),
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
@@ -991,7 +991,7 @@ TEST_F(ElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 	ui::Context context = {};
 	ui::Element element = {
 		.style = {
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(64),
 				.image = m_nine_slice_image,
 				.image_slices = ui::Edges::uniform(16),
@@ -1011,7 +1011,7 @@ TEST_F(ElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
 	ui::Context context = {};
 	ui::Element element = {
 		.style = {
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(64),
 				.image = m_nine_slice_image,
 				.image_slices = ui::Edges::uniform(16),

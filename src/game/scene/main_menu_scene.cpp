@@ -43,7 +43,7 @@ void MainMenuScene::update(Game* game) {
 	};
 	const ui::Style title_container_style = {
 			.width = ui::Percentage(33),
-			.border = {
+			.border = ui::BorderStyle {
 				.edges = ui::Edges::uniform(16),
 				.image = m_images.final_fantasy_menu_border,
 				.image_slices = ui::Edges::uniform(5),
@@ -54,13 +54,14 @@ void MainMenuScene::update(Game* game) {
 
 		};
 	const ui::Style image_style {
-			.width = ui::Pixels(200),
-			.height = ui::Pixels(200),
-			.border = {
+		.width = ui::Pixels(200),
+		.height = ui::Pixels(200),
+		.border =
+			ui::BorderStyle {
 				.edges = ui::Edges::uniform(2),
 				.color = WHITE,
 			},
-		};
+	};
 	const ui::Style menu_container = {
 		.padding = ui::Edges::uniform(16),
 		.alignment = ui::Alignment::Center,
