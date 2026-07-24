@@ -50,7 +50,7 @@ void MainMenuScene::update(Game* game) {
 			},
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
-			.background = { .color = Color { 20, 37, 136, 255 }, }
+			.background = ui::BackgroundStyle { .color = Color { 20, 37, 136, 255 }, }
 
 		};
 	const ui::Style image_style {

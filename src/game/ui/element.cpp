@@ -516,7 +516,7 @@ namespace ui {
 		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element);
 
 		/* Draw padding box */
-		Color background_color = element.style.background.color;
+		Color background_color = element.style.background.color(state);
 		if (context.is_active(element)) {
 			background_color = element.style.active.background_color.value_or(background_color);
 		} else if (context.is_hovered(element)) {
@@ -590,9 +590,9 @@ namespace ui {
 		}
 
 		/* Draw background image */
-		if (element.style.background.image.value != 0) {
-			Texture2D texture = resources.get_image(element.style.background.image);
-			switch (element.style.background.fill) {
+		if (element.style.background.image(state).value != 0) {
+			Texture2D texture = resources.get_image(element.style.background.image(state));
+			switch (element.style.background.fill(state)) {
 				case Fill::Repeat: {
 					Rectangle source = {
 						.x = 0,

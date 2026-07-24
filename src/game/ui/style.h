@@ -146,7 +146,8 @@ namespace ui {
 		Stretch,
 	};
 
-	/* Border */
+#pragma region border
+
 	struct BorderStyleOverride {
 		std::optional<Color> color;
 		std::optional<ImageID> image;
@@ -165,10 +166,10 @@ namespace ui {
 		BorderStyleOverride active;
 	};
 
-	class InteractiveBorderStyle {
+	class OverridableBorderStyle {
 	public:
-		InteractiveBorderStyle() = default;
-		InteractiveBorderStyle(BorderStyle style)
+		OverridableBorderStyle() = default;
+		OverridableBorderStyle(BorderStyle style)
 			: m_style(style) {
 		}
 
@@ -196,17 +197,60 @@ namespace ui {
 		BorderStyle m_style;
 	};
 
+#pragma endregion
+
+#pragma region background
+
+	struct BackgroundStyleOverride {
+		std::optional<Color> color;
+		std::optional<ImageID> image;
+		std::optional<Fill> fill;
+	};
+
 	struct BackgroundStyle {
 		Color color;
 		ImageID image;
 		Fill fill = Fill::Stretch;
+		BackgroundStyleOverride hover;
+		BackgroundStyleOverride active;
 	};
+
+	class OverridableBackgroundStyle {
+	public:
+		OverridableBackgroundStyle() = default;
+		OverridableBackgroundStyle(BackgroundStyle style)
+			: m_style(style) {
+		}
+
+		Color color(StyleState state) const {
+			RETURN_STYLE_FIELD(color, state);
+		}
+
+		ImageID image(StyleState state) const {
+			RETURN_STYLE_FIELD(image, state);
+		}
+
+		Fill fill(StyleState state) const {
+			RETURN_STYLE_FIELD(fill, state);
+		}
+
+	private:
+		BackgroundStyle m_style;
+	};
+
+#pragma endregion
+
+#pragma region font
 
 	struct FontStyle {
 		FontID id = FontID::default_font();
 		int size = 16;
 		Color color = WHITE;
 	};
+
+#pragma endregion
+
+#pragma region style
 
 	struct StyleDebug {
 		bool show_margin_outline = false;
@@ -225,11 +269,11 @@ namespace ui {
 		std::optional<Measure> height;
 		bool fit_content = false; // width and height ignored if true
 		Edges margin;
-		InteractiveBorderStyle border;
+		OverridableBorderStyle border;
 		Edges padding;
 		Alignment alignment;
 		Alignment cross_alignment;
-		BackgroundStyle background;
+		OverridableBackgroundStyle background;
 		FontStyle font;
 
 		StyleOverride hovered;
@@ -248,5 +292,7 @@ namespace ui {
 			return { horizontal_spacing(), vertical_spacing() };
 		}
 	};
+
+#pragma endregion
 
 } // namespace ui

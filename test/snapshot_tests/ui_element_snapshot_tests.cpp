@@ -49,13 +49,13 @@ TEST_F(ElementSnapshotTests, Box_100_100_Gives_50_50) {
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background = { .color = RED },
+						.background = ui::BackgroundStyle { .color = RED },
 					},
 				},
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background = { .color = GREEN },
+						.background = ui::BackgroundStyle { .color = GREEN },
 					},
 				}
 			}
@@ -79,19 +79,19 @@ TEST_F(ElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background = { .color = RED },
+						.background = ui::BackgroundStyle { .color = RED },
 					},
 				},
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(25),
-						.background = { .color = GREEN },
+						.background = ui::BackgroundStyle { .color = GREEN },
 					},
 				},
 				ui::Element {
 					.style = {
 						.width = ui::Percentage(100),
-						.background = { .color = BLUE },
+						.background = ui::BackgroundStyle { .color = BLUE },
 					},
 				}
 			}
@@ -132,7 +132,7 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 					},
 					.alignment = ui::Alignment::Center,
 					.cross_alignment = ui::Alignment::Center,
-					.background = { .color = BLUE },
+					.background = ui::BackgroundStyle { .color = BLUE },
 					.font = { .color = WHITE },
 				},
 				.content = ui::Text {
@@ -227,7 +227,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
-						.background = { .color = BLUE },
+						.background = ui::BackgroundStyle { .color = BLUE },
 						.font = { .color = WHITE },
 					},
 				},
@@ -243,7 +243,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
-						.background = { .color = YELLOW },
+						.background = ui::BackgroundStyle { .color = YELLOW },
 						.font = { .color = WHITE },
 					},
 				},
@@ -258,7 +258,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						},
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
-						.background = { .color = BLUE },
+						.background = ui::BackgroundStyle { .color = BLUE },
 						.font = { .color = WHITE },
 					},
 				},
@@ -553,7 +553,7 @@ ui::Element button_box() {
 			.padding = ui::Edges::uniform(10),
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
-			.background = {
+			.background = ui::BackgroundStyle {
 				.color = GREEN,
 			},
 			.font = {
@@ -955,7 +955,7 @@ TEST_F(ElementSnapshotTests, BackgroundImage_FillByRepeat) {
 	ui::Context context = {};
 	ui::Element element = {
 		.style = {
-			.background = {
+			.background = ui::BackgroundStyle {
 				.image = m_small_test_image,
 				.fill = ui::Fill::Repeat,
 			},
@@ -973,7 +973,7 @@ TEST_F(ElementSnapshotTests, BackgroundImage_FillByStretch) {
 	ui::Context context = {};
 	ui::Element element = {
 		.style = {
-			.background = {
+			.background = ui::BackgroundStyle {
 				.image = m_small_test_image,
 				.fill = ui::Fill::Stretch,
 			},
