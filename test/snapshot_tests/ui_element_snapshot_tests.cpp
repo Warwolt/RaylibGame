@@ -62,7 +62,7 @@ TEST_F(ElementSnapshotTests, Box_100_100_Gives_50_50) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.box()->children[0].layout.margin_box.width, SCREEN_WIDTH / 2);
@@ -98,7 +98,7 @@ TEST_F(ElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.box()->children[0].layout.margin_box.width, SCREEN_WIDTH * 0.375);
@@ -133,7 +133,7 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 					.alignment = ui::Alignment::Center,
 					.cross_alignment = ui::Alignment::Center,
 					.background = ui::BackgroundStyle { .color = BLUE },
-					.font = { .color = WHITE },
+					.font = ui::FontStyle { .color = WHITE },
 				},
 				.content = ui::Text {
 					.text = std::format("{}", i + 1),
@@ -148,7 +148,7 @@ TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
 	ui::Context context = {};
 	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Horizontal);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.box()->children[0].layout.content_box.width, 100);
@@ -160,7 +160,7 @@ TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Vertical) {
 	ui::Context context = {};
 	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Vertical);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -170,7 +170,7 @@ TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Horizontal) {
 	ui::Context context = {};
 	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Horizontal);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -180,7 +180,7 @@ TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Vertical) {
 	ui::Context context = {};
 	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Vertical);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -190,7 +190,7 @@ TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Horizontal) {
 	ui::Context context = {};
 	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Horizontal);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -200,7 +200,7 @@ TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
 	ui::Context context = {};
 	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Vertical);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -228,7 +228,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
 						.background = ui::BackgroundStyle { .color = BLUE },
-						.font = { .color = WHITE },
+						.font = ui::FontStyle{ .color = WHITE },
 					},
 				},
 				ui::Element {
@@ -244,7 +244,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
 						.background = ui::BackgroundStyle { .color = YELLOW },
-						.font = { .color = WHITE },
+						.font = ui::FontStyle { .color = WHITE },
 					},
 				},
 				ui::Element {
@@ -259,7 +259,7 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 						.alignment = ui::Alignment::Center,
 						.cross_alignment = ui::Alignment::Center,
 						.background = ui::BackgroundStyle { .color = BLUE },
-						.font = { .color = WHITE },
+						.font = ui::FontStyle { .color = WHITE },
 					},
 				},
 			}
@@ -277,7 +277,7 @@ TEST_F(ElementSnapshotTests, Box_RelativePosition_Pixels_Horizontal) {
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.box()->children[0].layout.content_box.width, 100);
@@ -295,7 +295,7 @@ TEST_F(ElementSnapshotTests, Box_RelativePosition_Percentage_Horizontal) {
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -311,7 +311,7 @@ TEST_F(ElementSnapshotTests, Box_RelativePosition_Pixels_Vertical) {
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -327,7 +327,7 @@ TEST_F(ElementSnapshotTests, Box_RelativePosition_Percentage_Vertical) {
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -343,7 +343,7 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Horizontal
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -359,7 +359,7 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Horizo
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -375,7 +375,7 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Pixels_Vertical) 
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -391,7 +391,7 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_RelativeRoot_Percentage_Vertic
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -435,7 +435,7 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_CanOverflowParent_Pixels) {
 			},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -462,7 +462,7 @@ TEST_F(ElementSnapshotTests, Box_FitContent_NoChildren_Empty) {
 	ui::Context context = {};
 	ui::Element element = box_fit_content(ui::Direction::Horizontal, {});
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -482,7 +482,7 @@ TEST_F(ElementSnapshotTests, Box_FitContent_TextChild_FitsText) {
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -508,7 +508,7 @@ TEST_F(ElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Horizontal)
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -534,7 +534,7 @@ TEST_F(ElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Vertical) {
 		}
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -556,7 +556,7 @@ ui::Element button_box() {
 			.background = ui::BackgroundStyle {
 				.color = GREEN,
 			},
-			.font = {
+			.font = ui::FontStyle {
 				.color = DARKGREEN,
 			},
 
@@ -579,7 +579,7 @@ TEST_F(ElementSnapshotTests, Box_DefaultStyle) {
 	ui::Context context = {};
 	ui::Element element = button_box();
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.layout.content_box.width, 200);
@@ -593,7 +593,7 @@ TEST_F(ElementSnapshotTests, Box_HoveredStyle) {
 	ui::State* state = context.state(element);
 	state->is_hovered = true;
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -606,7 +606,7 @@ TEST_F(ElementSnapshotTests, Box_ActiveStyle) {
 	state->is_hovered = true;
 	state->is_active = true;
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -619,14 +619,14 @@ TEST_F(ElementSnapshotTests, Text_LeftAligned) {
 			.width = ui::Percentage(100),
 			.padding = ui::Edges::uniform(20),
 			.alignment = ui::Alignment::Start,
-			.font = { .size = 32 },
+			.font = ui::FontStyle { .size = 32 },
 		},
 		.content = ui::Text {
 			.text = "Left Aligned Text",
 		}
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -639,14 +639,14 @@ TEST_F(ElementSnapshotTests, Text_CenterAligned) {
 			.width = ui::Percentage(100),
 			.padding = ui::Edges::uniform(20),
 			.alignment = ui::Alignment::Center,
-			.font = { .size = 32 },
+			.font = ui::FontStyle { .size = 32 },
 		},
 		.content = ui::Text {
 			.text = "Center Aligned Text",
 		}
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -659,14 +659,14 @@ TEST_F(ElementSnapshotTests, Text_RightAligned) {
 			.width = ui::Percentage(100),
 			.padding = ui::Edges::uniform(20),
 			.alignment = ui::Alignment::End,
-			.font = { .size = 32 },
+			.font = ui::FontStyle { .size = 32 },
 		},
 		.content = ui::Text {
 			.text = "Right Aligned Text",
 		}
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -687,7 +687,7 @@ TEST_F(ElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 						.margin = {
 							.bottom = 16,
 						},
-						.font = { .size = 32 },
+						.font = ui::FontStyle { .size = 32 },
 					},
 					.content = ui::Text {
 						.text = "Super Metroid",
@@ -727,7 +727,7 @@ TEST_F(ElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -742,7 +742,7 @@ TEST_F(ElementSnapshotTests, Image_DefaultStyle_UsesIntrinsicSize) {
 			},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.layout.content_box.width, SCREEN_SIZE.x);
@@ -799,7 +799,7 @@ TEST_F(ElementSnapshotTests, Image_RelativeSize_FitHorizontally) {
 		m_big_test_image
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -816,7 +816,7 @@ TEST_F(ElementSnapshotTests, Image_RelativeSize_FitVertically) {
 		m_big_test_image
 	);
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -863,7 +863,7 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 			},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.box()->children[0].layout.content_box.width, 64);
@@ -906,7 +906,7 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_EQ(element.layout.content_box.width, SCREEN_SIZE.x / 2);
@@ -945,7 +945,7 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 		},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -963,7 +963,7 @@ TEST_F(ElementSnapshotTests, BackgroundImage_FillByRepeat) {
 		.content = ui::Box {},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -981,7 +981,7 @@ TEST_F(ElementSnapshotTests, BackgroundImage_FillByStretch) {
 		.content = ui::Box {},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -1001,7 +1001,7 @@ TEST_F(ElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 		.content = ui::Box {},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);
@@ -1021,7 +1021,7 @@ TEST_F(ElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
 		.content = ui::Box {},
 	};
 
-	ui::layout_element(m_resources, SCREEN_SIZE, &element);
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
 
 	EXPECT_SNAPSHOT_EQ(image);

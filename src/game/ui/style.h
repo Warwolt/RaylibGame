@@ -242,10 +242,42 @@ namespace ui {
 
 #pragma region font
 
+	struct FontStyleOverride {
+		std::optional<FontID> id;
+		std::optional<int> size;
+		std::optional<Color> color;
+	};
+
 	struct FontStyle {
 		FontID id = FontID::default_font();
 		int size = 16;
 		Color color = WHITE;
+
+		FontStyleOverride hover;
+		FontStyleOverride active;
+	};
+
+	class OverridableFontStyle {
+	public:
+		OverridableFontStyle() = default;
+		OverridableFontStyle(FontStyle style)
+			: m_style(style) {
+		}
+
+		FontID id(StyleState state) const {
+			RETURN_STYLE_FIELD(id, state);
+		}
+
+		int size(StyleState state) const {
+			RETURN_STYLE_FIELD(size, state);
+		}
+
+		Color color(StyleState state) const {
+			RETURN_STYLE_FIELD(color, state);
+		}
+
+	private:
+		FontStyle m_style;
 	};
 
 #pragma endregion
@@ -274,7 +306,7 @@ namespace ui {
 		Alignment alignment;
 		Alignment cross_alignment;
 		OverridableBackgroundStyle background;
-		FontStyle font;
+		OverridableFontStyle font;
 
 		StyleOverride hovered;
 		StyleOverride active;

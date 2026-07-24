@@ -76,11 +76,11 @@ namespace ui {
 	};
 
 	// The size of an element only considering its content.
-	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element) {
+	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element, StyleState state) {
 		if (const Text* text = element.text()) {
 			// Intrinsic size of text element is just one long line
-			const Font font = resources.get_font(element.style.font.id);
-			const int font_size = element.style.font.size;
+			const Font font = resources.get_font(element.style.font.id(state));
+			const int font_size = element.style.font.size(state);
 			const float width = measure_word_width(text->text, font, font_size, 0);
 			return {
 				Pixels(width),
@@ -129,17 +129,18 @@ namespace ui {
 	}
 
 	// compute desired size of margin box
-	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
+	static Vector2 compute_desired_element_size(const ResourceManager& resources, const Context& context, Vector2 parent_size, Element* element) {
 		Vector2 desired_size = { 0, 0 };
+		const StyleState state = get_style_state(context, *element);
 		const Style& style = element->style;
-		const Measure2 intrinsic_size = get_intrinsic_content_size(resources, *element);
+		const Measure2 intrinsic_size = get_intrinsic_content_size(resources, *element, state);
 		const float max_content_width = parent_size.x - style.horizontal_spacing();
 		const float max_content_height = parent_size.y - style.vertical_spacing();
 
 		if (Text* text = element->text()) {
-			const Font font = resources.get_font(style.font.id);
+			const Font font = resources.get_font(style.font.id(state));
 			const float font_spacing = 0.0f;
-			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
+			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size(state), font_spacing).x;
 
 			// The actual paragraph width, might be smaller than content area
 			float paragraph_width = 0;
@@ -155,7 +156,7 @@ namespace ui {
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
 			for (const std::string_view word : util::get_string_view_per_word(text->text)) {
-				const int word_width = measure_word_width(word, font, style.font.size, font_spacing);
+				const int word_width = measure_word_width(word, font, style.font.size(state), font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
 				// check if word fits on remainder of current line
 				if (cursor.x + needed_length <= paragraph_width) {
@@ -174,8 +175,8 @@ namespace ui {
 				} else {
 					// switch to new line
 					cursor.x = 0;
-					cursor.y = cursor.y + style.font.size;
-					if (cursor.y + style.font.size > max_content_height) {
+					cursor.y = cursor.y + style.font.size(state);
+					if (cursor.y + style.font.size(state) > max_content_height) {
 						break;
 					}
 					text->lines.push_back(word);
@@ -183,7 +184,7 @@ namespace ui {
 				}
 			}
 
-			const float paragraph_height = cursor.y + style.font.size;
+			const float paragraph_height = cursor.y + style.font.size(state);
 			const float content_height = style.height.has_value() && style.height->is_pixels() ? style.height->pixels()->value : paragraph_height;
 
 			desired_size = {
@@ -225,7 +226,7 @@ namespace ui {
 	}
 
 	// `max_size` is the constraint on the margin box size
-	static void compute_constrained_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
+	static void compute_constrained_element_sizes(const ResourceManager& resources, const Context& context, Vector2 max_size, Element* element) {
 		const Style& style = element->style;
 		Layout* layout = &element->layout;
 
@@ -257,10 +258,10 @@ namespace ui {
 				std::vector<IndexedVector2> desired_sizes;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
-					const Vector2 desired_size = compute_desired_element_size(resources, max_parent_size, &child);
+					const Vector2 desired_size = compute_desired_element_size(resources, context, max_parent_size, &child);
 					if (child.style.position.is_absolute_position()) {
 						// Absolutely positioned elements get their desired size directly
-						compute_constrained_element_sizes(resources, desired_size, &child);
+						compute_constrained_element_sizes(resources, context, desired_size, &child);
 					} else {
 						desired_sizes.push_back({ i, desired_size });
 					}
@@ -287,13 +288,13 @@ namespace ui {
 							.y = std::min<float>(desired_size.value.y, max_parent_size.y),
 						};
 						remaining_width -= child_size.x;
-						compute_constrained_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, context, child_size, &child);
 					} else {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, max_parent_size.x),
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
-						compute_constrained_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, context, child_size, &child);
 						remaining_height -= child.layout.margin_box.height;
 					}
 				}
@@ -418,16 +419,16 @@ namespace ui {
 		}
 	}
 
-	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
+	void layout_element(const ResourceManager& resources, const Context& context, Vector2 window_size, Element* element) {
 		PROFILING_SCOPE();
 		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
 		const Vector2 top_left = { 0, 0 };
-		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
+		const Vector2 desired_size = compute_desired_element_size(resources, context, window_size, element);
 		const Vector2 max_size = {
 			.x = std::min(desired_size.x, containing_box.width),
 			.y = std::min(desired_size.y, containing_box.height),
 		};
-		compute_constrained_element_sizes(resources, max_size, element);
+		compute_constrained_element_sizes(resources, context, max_size, element);
 		compute_element_positions(top_left, containing_box, element);
 	}
 
@@ -513,7 +514,7 @@ namespace ui {
 
 	void draw_element(const ResourceManager& resources, const Context& context, const Element& element) {
 		const StyleState state = get_style_state(context, element);
-		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element);
+		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element, state);
 
 		/* Draw padding box */
 		Color background_color = element.style.background.color(state);
@@ -617,29 +618,29 @@ namespace ui {
 
 		/* Draw content */
 		if (const ui::Text* text = element.text()) {
-			const Font font = resources.get_font(element.style.font.id);
+			const Font font = resources.get_font(element.style.font.id(state));
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
-				const int text_height = (int)text->lines.size() * element.style.font.size;
+				const int text_height = (int)text->lines.size() * element.style.font.size(state);
 				const int top_padding = alignment_padding(element.style.cross_alignment, content_box.height - text_height);
 				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
-					const int line_length = measure_word_width(line, font, element.style.font.size, font_spacing);
+					const int line_length = measure_word_width(line, font, element.style.font.size(state), font_spacing);
 					const int left_padding = alignment_padding(element.style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
-						.y = element.layout.content_box.y + line_num * element.style.font.size + top_padding,
+						.y = element.layout.content_box.y + line_num * element.style.font.size(state) + top_padding,
 					};
-					Color font_color = element.style.font.color;
+					Color font_color = element.style.font.color(state);
 					if (context.is_active(element)) {
 						font_color = element.style.active.font_color.value_or(font_color);
 					} else if (context.is_hovered(element)) {
 						font_color = element.style.hovered.font_color.value_or(font_color);
 					}
 					const std::string line_str(line);
-					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font.size, font_spacing, font_color);
+					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font.size(state), font_spacing, font_color);
 					line_num++;
 				}
 			}

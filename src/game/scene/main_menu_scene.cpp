@@ -77,7 +77,7 @@ void MainMenuScene::update(Game* game) {
 					.bottom = 2,
 				},
 			.alignment = ui::Alignment::Center,
-			.font = {
+			.font = ui::FontStyle {
 				.size = 32,
 				.color = WHITE,
 			},
@@ -108,7 +108,7 @@ void MainMenuScene::update(Game* game) {
 			{
 				m_ui.box_begin(ui::Direction::Vertical, title_container_style);
 				{
-					m_ui.text("Video Game", ui::Style { .alignment = ui::Alignment::Center, .font = { .size = 64 } });
+					m_ui.text("Video Game", ui::Style { .alignment = ui::Alignment::Center, .font = ui::FontStyle { .size = 64 } });
 				}
 				m_ui.box_end();
 			}

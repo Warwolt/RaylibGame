@@ -94,7 +94,7 @@ namespace ui {
 	};
 
 	/* API */
-	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element);
+	void layout_element(const ResourceManager& resources, const Context& context, Vector2 window_size, Element* element);
 	bool update_element(const Input& input, Context* context, Element* element);
 	void draw_element(const ResourceManager& resources, const Context& context, const Element& element);
 
