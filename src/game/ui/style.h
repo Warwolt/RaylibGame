@@ -155,6 +155,12 @@ namespace ui {
 		Color color = WHITE;
 	};
 
+	struct FontStyleOverride {
+		std::optional<FontID> id;
+		std::optional<int> size;
+		std::optional<Color> color;
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
@@ -163,7 +169,7 @@ namespace ui {
 	struct StyleOverride {
 		BorderStyleOverride border;
 		BackgroundStyleOverride background;
-		std::optional<Color> font_color;
+		FontStyleOverride font;
 	};
 
 	struct Style {

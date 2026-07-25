@@ -568,7 +568,7 @@ ui::Element button_box() {
 			.active = {
 				.border = { .color  = GREEN },
 				.background = { .color = DARKGREEN },
-				.font_color = GREEN,
+				.font = {. color = GREEN },
 			},
 		},
 		.content = ui::Text { .text = "Press Me" },

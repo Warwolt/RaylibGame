@@ -633,9 +633,9 @@ namespace ui {
 					};
 					Color font_color = element.style.font.color;
 					if (context.is_active(element)) {
-						font_color = element.style.active.font_color.value_or(font_color);
+						font_color = element.style.active.font.color.value_or(font_color);
 					} else if (context.is_hovered(element)) {
-						font_color = element.style.hovered.font_color.value_or(font_color);
+						font_color = element.style.hovered.font.color.value_or(font_color);
 					}
 					const std::string line_str(line);
 					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font.size, font_spacing, font_color);
