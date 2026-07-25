@@ -517,9 +517,9 @@ namespace ui {
 		/* Draw padding box */
 		Color background_color = element.style.background.color;
 		if (context.is_active(element)) {
-			background_color = element.style.active.background_color.value_or(background_color);
+			background_color = element.style.active.background.color.value_or(background_color);
 		} else if (context.is_hovered(element)) {
-			background_color = element.style.hovered.background_color.value_or(background_color);
+			background_color = element.style.hovered.background.color.value_or(background_color);
 		}
 		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
 

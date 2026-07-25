@@ -562,12 +562,12 @@ ui::Element button_box() {
 
 			.hovered = {
 				.border = { .color  = GREEN },
-				.background_color = LIGHTGREEN,
+				.background = { .color = LIGHTGREEN },
 			},
 
 			.active = {
 				.border = { .color  = GREEN },
-				.background_color = DARKGREEN,
+				.background = { .color = DARKGREEN },
 				.font_color = GREEN,
 			},
 		},

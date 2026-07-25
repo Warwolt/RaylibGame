@@ -143,6 +143,12 @@ namespace ui {
 		Fill fill = Fill::Stretch;
 	};
 
+	struct BackgroundStyleOverride {
+		std::optional<Color> color;
+		std::optional<ImageID> image;
+		std::optional<Fill> fill;
+	};
+
 	struct FontStyle {
 		FontID id = FontID::default_font();
 		int size = 16;
@@ -156,7 +162,7 @@ namespace ui {
 
 	struct StyleOverride {
 		BorderStyleOverride border;
-		std::optional<Color> background_color;
+		BackgroundStyleOverride background;
 		std::optional<Color> font_color;
 	};
 
