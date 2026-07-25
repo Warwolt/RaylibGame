@@ -63,7 +63,11 @@ namespace ui {
 				.image = SELECT_STYLE_OVERRIDE(style, background.image, state),
 				.fill = SELECT_STYLE_OVERRIDE(style, background.fill, state),
 			},
-			.font = style.font,
+			.font = {
+				.id = SELECT_STYLE_OVERRIDE(style, font.id, state),
+				.size = SELECT_STYLE_OVERRIDE(style, font.size, state),
+				.color = SELECT_STYLE_OVERRIDE(style, font.color, state),
+			},
 			.hover = style.hover,
 			.active = style.active,
 			.debug = style.debug,
