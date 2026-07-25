@@ -83,7 +83,7 @@ TEST(ElementTests, BoxElementWithChild_IsHovered) {
 	ui::State* child_state = context.state(child);
 
 	/* Element initially not hovered */
-	ui::layout_element(resources, SCREEN_SIZE, &element);
+	ui::layout_element(resources, context, SCREEN_SIZE, &element);
 	EXPECT_EQ(parent_state->is_hovered, false);
 	EXPECT_EQ(child_state->is_hovered, false);
 
@@ -129,7 +129,7 @@ TEST(ElementTests, BoxElementWithChild_IsActive) {
 	ui::State* child_state = context.state(child);
 
 	/* Element initially not active */
-	ui::layout_element(resources, SCREEN_SIZE, &element);
+	ui::layout_element(resources, context, SCREEN_SIZE, &element);
 	EXPECT_EQ(parent_state->is_active, false);
 	EXPECT_EQ(child_state->is_active, false);
 
@@ -179,7 +179,7 @@ TEST(ElementTests, BoxElementWithChild_IsClicked) {
 	ui::State* child_state = context.state(child);
 
 	/* Element initially not clicked */
-	ui::layout_element(resources, SCREEN_SIZE, &element);
+	ui::layout_element(resources, context, SCREEN_SIZE, &element);
 	EXPECT_EQ(parent_state->is_clicked, false);
 	EXPECT_EQ(child_state->is_clicked, false);
 
@@ -229,7 +229,7 @@ TEST(ElementTests, BoxElementWithChild_ClickOutside_ThenHover_NotActive) {
 	ui::State* child_state = context.state(child);
 
 	/* Click outside box */
-	ui::layout_element(resources, SCREEN_SIZE, &element);
+	ui::layout_element(resources, context, SCREEN_SIZE, &element);
 	EXPECT_EQ(parent_state->is_active, false);
 	EXPECT_EQ(child_state->is_active, false);
 

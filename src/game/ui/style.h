@@ -213,6 +213,6 @@ namespace ui {
 	};
 
 	StyleState get_style_state(const Context& context, const Element& element);
-	Style get_overriden_style(const Style& style, StyleState state);
+	Style compute_effective_style(const Style& style, StyleState state);
 
 } // namespace ui

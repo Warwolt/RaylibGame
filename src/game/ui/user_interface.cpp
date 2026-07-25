@@ -24,7 +24,7 @@ namespace ui {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		ASSERT(!m_tree.has_open_element(), "UserInterface::box_begin and box_end calls don't match. Missing call to UserInterface::box_end?");
 		m_is_within_frame = false;
-		layout_element(resources, window_size, &m_tree.root());
+		layout_element(resources, m_context, window_size, &m_tree.root());
 		update_element(input, &m_context, &m_tree.root());
 	}
 

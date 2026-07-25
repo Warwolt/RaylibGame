@@ -29,19 +29,7 @@ namespace ui {
 		return StyleState::Inactive;
 	}
 
-	Style get_overriden_style(const Style& style, StyleState state) {
-		const Color& normal = style.background.color;
-		const Color& hover = style.hover.background.color.value_or(normal);
-		const Color& active = style.active.background.color.value_or(normal);
-		Color result;
-		if (state == StyleState::Active) {
-			result = active;
-		}
-		if (state == StyleState::Hover) {
-			result = hover;
-		}
-		result = normal;
-
+	Style compute_effective_style(const Style& style, StyleState state) {
 		return Style {
 			.position = style.position,
 			.width = style.width,
