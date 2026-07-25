@@ -527,9 +527,9 @@ namespace ui {
 		{
 			Color border_color = element.style.border.color;
 			if (context.is_active(element)) {
-				border_color = element.style.active.border_color.value_or(border_color);
+				border_color = element.style.active.border.color.value_or(border_color);
 			} else if (context.is_hovered(element)) {
-				border_color = element.style.hovered.border_color.value_or(border_color);
+				border_color = element.style.hovered.border.color.value_or(border_color);
 			}
 
 			const Rectangle border_top = {

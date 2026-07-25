@@ -130,6 +130,13 @@ namespace ui {
 		bool image_fill_center;
 	};
 
+	struct BorderStyleOverride {
+		std::optional<Color> color;
+		std::optional<ImageID> image;
+		std::optional<Edges> image_slices; // for 9-slicing
+		std::optional<bool> image_fill_center;
+	};
+
 	struct BackgroundStyle {
 		Color color;
 		ImageID image;
@@ -148,7 +155,7 @@ namespace ui {
 	};
 
 	struct StyleOverride {
-		std::optional<Color> border_color;
+		BorderStyleOverride border;
 		std::optional<Color> background_color;
 		std::optional<Color> font_color;
 	};
