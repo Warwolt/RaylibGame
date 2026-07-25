@@ -1,0 +1,62 @@
+#include "game/ui/style.h"
+
+#include <gtest/gtest.h>
+#include <raylib.h>
+
+ui::Style style_with_overrides() {
+	return ui::Style {
+		.border = {
+			.color = RED,
+			.image = ImageID(1),
+			.image_slices = { 1, 1, 1, 1 },
+			.image_fill_center = false,
+		},
+		.background = {
+			.color = RED,
+			.image = ImageID(1),
+			.fill = ui::Fill::Stretch,
+		},
+		// TODO: font
+        .hover = {
+			.border = {
+				.color = GREEN,
+				.image = ImageID(2),
+				.image_slices = ui::Edges { 2, 2, 2, 2 },
+				.image_fill_center = true,
+			},
+			.background = {
+				.color = GREEN,
+				.image = ImageID(2),
+				.fill = ui::Fill::Repeat,
+            },
+		},
+	};
+}
+
+TEST(StyleTests, StyleOverride_Inactive_GivesNormalStyle) {
+	const ui::Style style = style_with_overrides();
+	const ui::Style overriden_style = ui::get_overriden_style(style, ui::StyleState::Inactive);
+
+	EXPECT_EQ(overriden_style.border.color, RED);
+	EXPECT_EQ(overriden_style.border.image, ImageID(1));
+	EXPECT_EQ(overriden_style.border.image_slices, ui::Edges(1, 1, 1, 1));
+	EXPECT_EQ(overriden_style.border.image_fill_center, false);
+
+	EXPECT_EQ(overriden_style.background.color, RED);
+	EXPECT_EQ(overriden_style.background.image, ImageID(1));
+	EXPECT_EQ(overriden_style.background.fill, ui::Fill::Stretch);
+}
+
+TEST(StyleTests, StyleOverride_Hovered_GivesHoverStyle) {
+	const ui::Style style = style_with_overrides();
+	const ui::Style overriden_style = ui::get_overriden_style(style, ui::StyleState::Hover);
+
+	EXPECT_EQ(overriden_style.border.color, GREEN);
+	EXPECT_EQ(overriden_style.border.image, ImageID(2));
+	EXPECT_EQ(overriden_style.border.image_slices, ui::Edges(2, 2, 2, 2));
+	EXPECT_EQ(overriden_style.border.image_fill_center, true);
+
+	EXPECT_EQ(overriden_style.background.color, GREEN);
+	EXPECT_EQ(overriden_style.background.image, ImageID(2));
+	EXPECT_EQ(overriden_style.background.fill, ui::Fill::Repeat);
+}

@@ -560,7 +560,7 @@ ui::Element button_box() {
 				.color = DARKGREEN,
 			},
 
-			.hovered = {
+			.hover = {
 				.border = { .color  = GREEN },
 				.background = { .color = LIGHTGREEN },
 			},

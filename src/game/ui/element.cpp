@@ -519,7 +519,7 @@ namespace ui {
 		if (context.is_active(element)) {
 			background_color = element.style.active.background.color.value_or(background_color);
 		} else if (context.is_hovered(element)) {
-			background_color = element.style.hovered.background.color.value_or(background_color);
+			background_color = element.style.hover.background.color.value_or(background_color);
 		}
 		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
 
@@ -529,7 +529,7 @@ namespace ui {
 			if (context.is_active(element)) {
 				border_color = element.style.active.border.color.value_or(border_color);
 			} else if (context.is_hovered(element)) {
-				border_color = element.style.hovered.border.color.value_or(border_color);
+				border_color = element.style.hover.border.color.value_or(border_color);
 			}
 
 			const Rectangle border_top = {
@@ -635,7 +635,7 @@ namespace ui {
 					if (context.is_active(element)) {
 						font_color = element.style.active.font.color.value_or(font_color);
 					} else if (context.is_hovered(element)) {
-						font_color = element.style.hovered.font.color.value_or(font_color);
+						font_color = element.style.hover.font.color.value_or(font_color);
 					}
 					const std::string line_str(line);
 					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font.size, font_spacing, font_color);
