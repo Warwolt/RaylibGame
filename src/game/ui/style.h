@@ -9,6 +9,9 @@
 
 namespace ui {
 
+	struct Context;
+	struct Element;
+
 	struct Pixels {
 		float value;
 	};
@@ -109,6 +112,8 @@ namespace ui {
 		static Edges uniform(float size) {
 			return { size, size, size, size };
 		}
+
+		bool operator==(const Edges& rhs) const = default;
 	};
 
 	enum class Alignment {
@@ -142,15 +147,34 @@ namespace ui {
 		Color color = WHITE;
 	};
 
+	struct BorderStyleOverride {
+		std::optional<Color> color;
+		std::optional<ImageID> image;
+		std::optional<Edges> image_slices; // for 9-slicing
+		std::optional<bool> image_fill_center;
+	};
+
+	struct BackgroundStyleOverride {
+		std::optional<Color> color;
+		std::optional<ImageID> image;
+		std::optional<Fill> fill;
+	};
+
+	struct FontStyleOverride {
+		std::optional<FontID> id;
+		std::optional<int> size;
+		std::optional<Color> color;
+	};
+
 	struct StyleDebug {
 		bool show_margin_outline = false;
 		bool show_content_outline = false;
 	};
 
 	struct StyleOverride {
-		std::optional<Color> border_color;
-		std::optional<Color> background_color;
-		std::optional<Color> font_color;
+		BorderStyleOverride border;
+		BackgroundStyleOverride background;
+		FontStyleOverride font;
 	};
 
 	struct Style {
@@ -165,8 +189,7 @@ namespace ui {
 		Alignment cross_alignment;
 		BackgroundStyle background;
 		FontStyle font;
-
-		StyleOverride hovered;
+		StyleOverride hover;
 		StyleOverride active;
 		StyleDebug debug;
 
@@ -182,5 +205,14 @@ namespace ui {
 			return { horizontal_spacing(), vertical_spacing() };
 		}
 	};
+
+	enum class StyleState {
+		Inactive,
+		Hover,
+		Active,
+	};
+
+	StyleState get_style_state(const Context& context, const Element& element);
+	Style resolve_style_for_state(const Style& style, StyleState state);
 
 } // namespace ui

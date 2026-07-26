@@ -76,11 +76,11 @@ namespace ui {
 	};
 
 	// The size of an element only considering its content.
-	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element) {
+	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element, const Style& resolved_style) {
 		if (const Text* text = element.text()) {
 			// Intrinsic size of text element is just one long line
-			const Font font = resources.get_font(element.style.font.id);
-			const int font_size = element.style.font.size;
+			const Font font = resources.get_font(resolved_style.font.id);
+			const int font_size = resolved_style.font.size;
 			const float width = measure_word_width(text->text, font, font_size, 0);
 			return {
 				Pixels(width),
@@ -129,21 +129,22 @@ namespace ui {
 	}
 
 	// compute desired size of margin box
-	static Vector2 compute_desired_element_size(const ResourceManager& resources, Vector2 parent_size, Element* element) {
+	static Vector2 compute_desired_element_size(const ResourceManager& resources, const Context& context, Vector2 parent_size, Element* element) {
 		Vector2 desired_size = { 0, 0 };
-		const Style& style = element->style;
-		const Measure2 intrinsic_size = get_intrinsic_content_size(resources, *element);
-		const float max_content_width = parent_size.x - style.horizontal_spacing();
-		const float max_content_height = parent_size.y - style.vertical_spacing();
+		const StyleState state = get_style_state(context, *element);
+		const Style resolved_style = resolve_style_for_state(element->style, state);
+		const Measure2 intrinsic_size = get_intrinsic_content_size(resources, *element, resolved_style);
+		const float max_content_width = parent_size.x - resolved_style.horizontal_spacing();
+		const float max_content_height = parent_size.y - resolved_style.vertical_spacing();
 
 		if (Text* text = element->text()) {
-			const Font font = resources.get_font(style.font.id);
+			const Font font = resources.get_font(resolved_style.font.id);
 			const float font_spacing = 0.0f;
-			const int space_width = Raylib_MeasureTextEx(font, " ", style.font.size, font_spacing).x;
+			const int space_width = Raylib_MeasureTextEx(font, " ", resolved_style.font.size, font_spacing).x;
 
 			// The actual paragraph width, might be smaller than content area
 			float paragraph_width = 0;
-			const Measure& content_width = style.width.value_or(intrinsic_size.x);
+			const Measure& content_width = resolved_style.width.value_or(intrinsic_size.x);
 			if (const Pixels* pixel_width = content_width.pixels()) {
 				paragraph_width = std::min<float>(pixel_width->value, max_content_width);
 			}
@@ -155,7 +156,7 @@ namespace ui {
 			Vector2 cursor = { 0, 0 };
 			text->lines.clear();
 			for (const std::string_view word : util::get_string_view_per_word(text->text)) {
-				const int word_width = measure_word_width(word, font, style.font.size, font_spacing);
+				const int word_width = measure_word_width(word, font, resolved_style.font.size, font_spacing);
 				const int needed_length = cursor.x > 0 ? space_width + word_width : word_width;
 				// check if word fits on remainder of current line
 				if (cursor.x + needed_length <= paragraph_width) {
@@ -174,8 +175,8 @@ namespace ui {
 				} else {
 					// switch to new line
 					cursor.x = 0;
-					cursor.y = cursor.y + style.font.size;
-					if (cursor.y + style.font.size > max_content_height) {
+					cursor.y = cursor.y + resolved_style.font.size;
+					if (cursor.y + resolved_style.font.size > max_content_height) {
 						break;
 					}
 					text->lines.push_back(word);
@@ -183,39 +184,42 @@ namespace ui {
 				}
 			}
 
-			const float paragraph_height = cursor.y + style.font.size;
-			const float content_height = style.height.has_value() && style.height->is_pixels() ? style.height->pixels()->value : paragraph_height;
+			const float paragraph_height = cursor.y + resolved_style.font.size;
+			const bool has_pixel_height = resolved_style.height.has_value() && resolved_style.height->is_pixels();
+			const float content_height = has_pixel_height ? resolved_style.height->pixels()->value : paragraph_height;
 
 			desired_size = {
-				.x = paragraph_width + style.horizontal_spacing(),
-				.y = content_height + style.vertical_spacing(),
+				.x = paragraph_width + resolved_style.horizontal_spacing(),
+				.y = content_height + resolved_style.vertical_spacing(),
 			};
 		} else if (element->is_image() || element->is_box()) {
 			/* Constrain style width */
-			const Measure& content_width = style.width.value_or(intrinsic_size.x);
+			const Measure& content_width = resolved_style.width.value_or(intrinsic_size.x);
 			if (const Pixels* pixel_width = content_width.pixels()) {
-				if (element->style.position.is_absolute_position()) {
+				if (resolved_style.position.is_absolute_position()) {
 					// Absolutely positioned elements sizes aren't constrained
-					desired_size.x = pixel_width->value + style.horizontal_spacing();
+					desired_size.x = pixel_width->value + resolved_style.horizontal_spacing();
 				} else {
-					desired_size.x = std::min<float>(pixel_width->value + style.horizontal_spacing(), parent_size.x);
+					const float margin_pixel_width = pixel_width->value + resolved_style.horizontal_spacing();
+					desired_size.x = std::min<float>(margin_pixel_width, parent_size.x);
 				}
 			}
 			if (const Percentage* percentage_width = content_width.percentage()) {
-				desired_size.x = percentage_width->fractional() * parent_size.x + style.horizontal_spacing();
+				desired_size.x = percentage_width->fractional() * parent_size.x + resolved_style.horizontal_spacing();
 			}
 			/* Constrain style height */
-			const Measure& content_height = style.height.value_or(intrinsic_size.x);
+			const Measure& content_height = resolved_style.height.value_or(intrinsic_size.x);
 			if (const Pixels* pixel_height = content_height.pixels()) {
-				if (element->style.position.is_absolute_position()) {
+				if (resolved_style.position.is_absolute_position()) {
 					// Absolutely positioned elements sizes aren't constrained
-					desired_size.y = pixel_height->value + style.vertical_spacing();
+					desired_size.y = pixel_height->value + resolved_style.vertical_spacing();
 				} else {
-					desired_size.y = std::min<float>(pixel_height->value + style.vertical_spacing(), parent_size.y);
+					const float margin_pixel_height = pixel_height->value + resolved_style.vertical_spacing();
+					desired_size.y = std::min<float>(margin_pixel_height, parent_size.y);
 				}
 			}
 			if (const Percentage* percentage_height = content_height.percentage()) {
-				desired_size.y = percentage_height->fractional() * parent_size.y + style.vertical_spacing();
+				desired_size.y = percentage_height->fractional() * parent_size.y + resolved_style.vertical_spacing();
 			}
 		} else {
 			ABORT("Unhandled ui::Content case!");
@@ -225,19 +229,20 @@ namespace ui {
 	}
 
 	// `max_size` is the constraint on the margin box size
-	static void compute_constrained_element_sizes(const ResourceManager& resources, Vector2 max_size, Element* element) {
-		const Style& style = element->style;
+	static void compute_constrained_element_sizes(const ResourceManager& resources, const Context& context, Vector2 max_size, Element* element) {
+		const StyleState state = get_style_state(context, *element);
+		const Style resolved_style = resolve_style_for_state(element->style, state);
 		Layout* layout = &element->layout;
 
 		/* Compute size of content box */
 		if (element->is_text() || element->is_image()) {
-			layout->content_box.width = max_size.x - style.horizontal_spacing();
-			layout->content_box.height = max_size.y - style.vertical_spacing();
+			layout->content_box.width = max_size.x - resolved_style.horizontal_spacing();
+			layout->content_box.height = max_size.y - resolved_style.vertical_spacing();
 		} else if (Box* box = element->box()) {
 			/* Compute max size of parent content box */
 			const Vector2 max_parent_size = {
-				max_size.x - style.horizontal_spacing(),
-				max_size.y - style.vertical_spacing(),
+				max_size.x - resolved_style.horizontal_spacing(),
+				max_size.y - resolved_style.vertical_spacing(),
 			};
 
 			//
@@ -257,10 +262,10 @@ namespace ui {
 				std::vector<IndexedVector2> desired_sizes;
 				for (size_t i = 0; i < box->children.size(); i++) {
 					Element& child = box->children[i];
-					const Vector2 desired_size = compute_desired_element_size(resources, max_parent_size, &child);
+					const Vector2 desired_size = compute_desired_element_size(resources, context, max_parent_size, &child);
 					if (child.style.position.is_absolute_position()) {
 						// Absolutely positioned elements get their desired size directly
-						compute_constrained_element_sizes(resources, desired_size, &child);
+						compute_constrained_element_sizes(resources, context, desired_size, &child);
 					} else {
 						desired_sizes.push_back({ i, desired_size });
 					}
@@ -287,13 +292,13 @@ namespace ui {
 							.y = std::min<float>(desired_size.value.y, max_parent_size.y),
 						};
 						remaining_width -= child_size.x;
-						compute_constrained_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, context, child_size, &child);
 					} else {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, max_parent_size.x),
 							.y = std::min<float>(desired_size.value.y, remaining_height / remaining_children),
 						};
-						compute_constrained_element_sizes(resources, child_size, &child);
+						compute_constrained_element_sizes(resources, context, child_size, &child);
 						remaining_height -= child.layout.margin_box.height;
 					}
 				}
@@ -301,7 +306,7 @@ namespace ui {
 
 			/* Size parent content */
 			Rectangle& content_box = layout->content_box;
-			if (element->style.fit_content) {
+			if (resolved_style.fit_content) {
 				const Vector2 child_content_size = compute_child_content_size(*box);
 				content_box.width = child_content_size.x;
 				content_box.height = child_content_size.y;
@@ -314,22 +319,25 @@ namespace ui {
 		}
 
 		/* Size padding, border, and margin boxes */
-		layout->padding_box.width = layout->content_box.width + style.padding.left + style.padding.right;
-		layout->padding_box.height = layout->content_box.height + style.padding.top + style.padding.bottom;
-		layout->border_box.width = layout->padding_box.width + style.border.edges.left + style.border.edges.right;
-		layout->border_box.height = layout->padding_box.height + style.border.edges.top + style.border.edges.bottom;
-		layout->margin_box.width = layout->border_box.width + style.margin.left + style.margin.right;
-		layout->margin_box.height = layout->border_box.height + style.margin.top + style.margin.bottom;
+		// clang-format off
+		layout->padding_box.width = layout->content_box.width + resolved_style.padding.left + resolved_style.padding.right;
+		layout->padding_box.height = layout->content_box.height + resolved_style.padding.top + resolved_style.padding.bottom;
+		layout->border_box.width = layout->padding_box.width + resolved_style.border.edges.left + resolved_style.border.edges.right;
+		layout->border_box.height = layout->padding_box.height + resolved_style.border.edges.top + resolved_style.border.edges.bottom;
+		layout->margin_box.width = layout->border_box.width + resolved_style.margin.left + resolved_style.margin.right;
+		layout->margin_box.height = layout->border_box.height + resolved_style.margin.top + resolved_style.margin.bottom;
+		// clang-format on
 	}
 
 	// `containing_box` is either root or the closest parent element with a non-static position
-	static void compute_element_positions(Vector2 position, Rectangle containing_box, Element* element) {
-		const Style style = element->style;
+	static void compute_element_positions(const Context& context, Vector2 position, Rectangle containing_box, Element* element) {
+		const StyleState state = get_style_state(context, *element);
+		const Style resolved_style = resolve_style_for_state(element->style, state);
 		Layout* layout = &element->layout;
 
 		/* Compute position offsets */
 		Vector2 offset = { 0, 0 };
-		if (const RelativePosition* relative_position = element->style.position.relative_position()) {
+		if (const RelativePosition* relative_position = resolved_style.position.relative_position()) {
 			if (const Pixels* x_pixels = relative_position->x.pixels()) {
 				offset.x = x_pixels->value;
 			}
@@ -346,7 +354,7 @@ namespace ui {
 		}
 
 		/* Position all boxes relative to each other */
-		if (const AbsolutePosition* absolute_position = element->style.position.absolute_position()) {
+		if (const AbsolutePosition* absolute_position = resolved_style.position.absolute_position()) {
 			if (const Pixels* x_pixels = absolute_position->x.pixels()) {
 				layout->margin_box.x = containing_box.x + x_pixels->value;
 			}
@@ -363,12 +371,12 @@ namespace ui {
 			layout->margin_box.x = position.x + offset.x;
 			layout->margin_box.y = position.y + offset.y;
 		}
-		layout->border_box.x = layout->margin_box.x + style.margin.left;
-		layout->border_box.y = layout->margin_box.y + style.margin.top;
-		layout->padding_box.x = layout->border_box.x + style.border.edges.left;
-		layout->padding_box.y = layout->border_box.y + style.border.edges.top;
-		layout->content_box.x = layout->padding_box.x + style.padding.left;
-		layout->content_box.y = layout->padding_box.y + style.padding.top;
+		layout->border_box.x = layout->margin_box.x + resolved_style.margin.left;
+		layout->border_box.y = layout->margin_box.y + resolved_style.margin.top;
+		layout->padding_box.x = layout->border_box.x + resolved_style.border.edges.left;
+		layout->padding_box.y = layout->border_box.y + resolved_style.border.edges.top;
+		layout->content_box.x = layout->padding_box.x + resolved_style.padding.left;
+		layout->content_box.y = layout->padding_box.y + resolved_style.padding.top;
 
 		/* Recurse into children */
 		if (Box* box = element->box()) {
@@ -380,13 +388,13 @@ namespace ui {
 			const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
 			switch (box->direction) {
 				case Direction::Horizontal: {
-					left_padding = alignment_padding(element->style.alignment, horizontal_remainder);
-					top_padding = alignment_padding(element->style.cross_alignment, vertical_remainder);
+					left_padding = alignment_padding(resolved_style.alignment, horizontal_remainder);
+					top_padding = alignment_padding(resolved_style.cross_alignment, vertical_remainder);
 				} break;
 
 				case Direction::Vertical: {
-					left_padding = alignment_padding(element->style.cross_alignment, horizontal_remainder);
-					top_padding = alignment_padding(element->style.alignment, vertical_remainder);
+					left_padding = alignment_padding(resolved_style.cross_alignment, horizontal_remainder);
+					top_padding = alignment_padding(resolved_style.alignment, vertical_remainder);
 				} break;
 			}
 
@@ -399,8 +407,8 @@ namespace ui {
 				/* Compute child position */
 				const Vector2 child_position = cursor;
 				const Rectangle child_containing_box =
-					element->style.position.is_static_position() ? containing_box : element->layout.margin_box;
-				compute_element_positions(child_position, child_containing_box, &child);
+					resolved_style.position.is_static_position() ? containing_box : element->layout.margin_box;
+				compute_element_positions(context, child_position, child_containing_box, &child);
 
 				/* Move cursor */
 				if (child.style.position.is_absolute_position()) {
@@ -418,17 +426,17 @@ namespace ui {
 		}
 	}
 
-	void layout_element(const ResourceManager& resources, Vector2 window_size, Element* element) {
+	void layout_element(const ResourceManager& resources, const Context& context, Vector2 window_size, Element* element) {
 		PROFILING_SCOPE();
 		const Rectangle containing_box = { 0, 0, window_size.x, window_size.y };
 		const Vector2 top_left = { 0, 0 };
-		const Vector2 desired_size = compute_desired_element_size(resources, window_size, element);
+		const Vector2 desired_size = compute_desired_element_size(resources, context, window_size, element);
 		const Vector2 max_size = {
 			.x = std::min(desired_size.x, containing_box.width),
 			.y = std::min(desired_size.y, containing_box.height),
 		};
-		compute_constrained_element_sizes(resources, max_size, element);
-		compute_element_positions(top_left, containing_box, element);
+		compute_constrained_element_sizes(resources, context, max_size, element);
+		compute_element_positions(context, top_left, containing_box, element);
 	}
 
 	bool update_element(const Input& input, Context* context, Element* element) {
@@ -512,65 +520,54 @@ namespace ui {
 	}
 
 	void draw_element(const ResourceManager& resources, const Context& context, const Element& element) {
-		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element);
+		const StyleState state = get_style_state(context, element);
+		const Style resolved_style = resolve_style_for_state(element.style, state);
+		const auto& [intrinsic_width, intrinsic_height] = get_intrinsic_content_size(resources, element, resolved_style);
 
 		/* Draw padding box */
-		Color background_color = element.style.background.color;
-		if (context.is_active(element)) {
-			background_color = element.style.active.background_color.value_or(background_color);
-		} else if (context.is_hovered(element)) {
-			background_color = element.style.hovered.background_color.value_or(background_color);
-		}
-		Raylib_DrawRectangleRec(element.layout.padding_box, background_color);
+		Raylib_DrawRectangleRec(element.layout.padding_box, resolved_style.background.color);
 
 		/* Draw border */
 		{
-			Color border_color = element.style.border.color;
-			if (context.is_active(element)) {
-				border_color = element.style.active.border_color.value_or(border_color);
-			} else if (context.is_hovered(element)) {
-				border_color = element.style.hovered.border_color.value_or(border_color);
-			}
-
 			const Rectangle border_top = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.border_box.y,
 				.width = element.layout.border_box.width,
-				.height = element.style.border.edges.top,
+				.height = resolved_style.border.edges.top,
 			};
 			const Rectangle border_bottom = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.padding_box.y + element.layout.padding_box.height,
 				.width = element.layout.border_box.width,
-				.height = element.style.border.edges.bottom,
+				.height = resolved_style.border.edges.bottom,
 			};
 			const Rectangle border_left = {
 				.x = element.layout.border_box.x,
 				.y = element.layout.padding_box.y,
-				.width = element.style.border.edges.left,
+				.width = resolved_style.border.edges.left,
 				.height = element.layout.padding_box.height,
 			};
 			const Rectangle border_right = {
-				.x = element.layout.border_box.x + element.layout.border_box.width - element.style.border.edges.right,
+				.x = element.layout.border_box.x + element.layout.border_box.width - resolved_style.border.edges.right,
 				.y = element.layout.padding_box.y,
-				.width = element.style.border.edges.right,
+				.width = resolved_style.border.edges.right,
 				.height = element.layout.padding_box.height,
 			};
-			Raylib_DrawRectangleRec(border_top, border_color);
-			Raylib_DrawRectangleRec(border_bottom, border_color);
-			Raylib_DrawRectangleRec(border_left, border_color);
-			Raylib_DrawRectangleRec(border_right, border_color);
+			Raylib_DrawRectangleRec(border_top, resolved_style.border.color);
+			Raylib_DrawRectangleRec(border_bottom, resolved_style.border.color);
+			Raylib_DrawRectangleRec(border_left, resolved_style.border.color);
+			Raylib_DrawRectangleRec(border_right, resolved_style.border.color);
 		}
 
 		/* Draw border image */
-		if (element.style.border.image.value != 0) {
-			const Texture2D texture = resources.get_image(element.style.border.image);
-			const Edges& slice_spacing = element.style.border.image_slices;
+		if (resolved_style.border.image.value != 0) {
+			const Texture2D texture = resources.get_image(resolved_style.border.image);
+			const Edges& slice_spacing = resolved_style.border.image_slices;
 			const Rectangle texture_rect = { 0, 0, texture.width, texture.height };
 			const auto source_rects = edges_to_9_slices(slice_spacing, texture_rect);
-			const auto destination_rects = edges_to_9_slices(element.style.border.edges, element.layout.border_box);
+			const auto destination_rects = edges_to_9_slices(resolved_style.border.edges, element.layout.border_box);
 			for (size_t i = 0; i < source_rects.size(); i++) {
-				if (i == 4 && !element.style.border.image_fill_center) {
+				if (i == 4 && !resolved_style.border.image_fill_center) {
 					continue;
 				}
 				Raylib_DrawTexturePro(texture, source_rects[i], destination_rects[i], Vector2 { 0, 0 }, 0.0f, WHITE);
@@ -579,19 +576,19 @@ namespace ui {
 
 		/* Debug draw box outlines */
 		{
-			if (element.style.debug.show_margin_outline) {
+			if (resolved_style.debug.show_margin_outline) {
 				Raylib_DrawRectangleLinesEx(element.layout.margin_box, 1, ORANGE);
 			}
 
-			if (element.style.debug.show_content_outline) {
+			if (resolved_style.debug.show_content_outline) {
 				Raylib_DrawRectangleLinesEx(element.layout.content_box, 1, GREEN);
 			}
 		}
 
 		/* Draw background image */
-		if (element.style.background.image.value != 0) {
-			Texture2D texture = resources.get_image(element.style.background.image);
-			switch (element.style.background.fill) {
+		if (resolved_style.background.image.value != 0) {
+			Texture2D texture = resources.get_image(resolved_style.background.image);
+			switch (resolved_style.background.fill) {
 				case Fill::Repeat: {
 					Rectangle source = {
 						.x = 0,
@@ -616,29 +613,29 @@ namespace ui {
 
 		/* Draw content */
 		if (const ui::Text* text = element.text()) {
-			const Font font = resources.get_font(element.style.font.id);
+			const Font font = resources.get_font(resolved_style.font.id);
 			const Rectangle content_box = element.layout.content_box;
 			Raylib_BeginScissorMode(content_box.x, content_box.y, content_box.width, content_box.height);
 			{
 				int line_num = 0;
-				const int text_height = (int)text->lines.size() * element.style.font.size;
-				const int top_padding = alignment_padding(element.style.cross_alignment, content_box.height - text_height);
+				const int text_height = (int)text->lines.size() * resolved_style.font.size;
+				const int top_padding = alignment_padding(resolved_style.cross_alignment, content_box.height - text_height);
 				for (const std::string_view line : text->lines) {
 					const float font_spacing = 0.0f;
-					const int line_length = measure_word_width(line, font, element.style.font.size, font_spacing);
-					const int left_padding = alignment_padding(element.style.alignment, content_box.width - line_length);
+					const int line_length = measure_word_width(line, font, resolved_style.font.size, font_spacing);
+					const int left_padding = alignment_padding(resolved_style.alignment, content_box.width - line_length);
 					Vector2 line_pos = {
 						.x = element.layout.content_box.x + left_padding,
-						.y = element.layout.content_box.y + line_num * element.style.font.size + top_padding,
+						.y = element.layout.content_box.y + line_num * resolved_style.font.size + top_padding,
 					};
-					Color font_color = element.style.font.color;
+					Color font_color = resolved_style.font.color;
 					if (context.is_active(element)) {
-						font_color = element.style.active.font_color.value_or(font_color);
+						font_color = resolved_style.active.font.color.value_or(font_color);
 					} else if (context.is_hovered(element)) {
-						font_color = element.style.hovered.font_color.value_or(font_color);
+						font_color = resolved_style.hover.font.color.value_or(font_color);
 					}
 					const std::string line_str(line);
-					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, element.style.font.size, font_spacing, font_color);
+					Raylib_DrawTextEx(font, line_str.c_str(), line_pos, resolved_style.font.size, font_spacing, font_color);
 					line_num++;
 				}
 			}
@@ -653,13 +650,13 @@ namespace ui {
 			// just a portion of it (in case of an overflow).
 			float source_width = (float)texture.width;
 			float source_height = (float)texture.height;
-			if (const Pixels* pixel_width = element.style.width.value_or(intrinsic_width).pixels()) {
+			if (const Pixels* pixel_width = resolved_style.width.value_or(intrinsic_width).pixels()) {
 				if (pixel_width->value > element.layout.content_box.width) {
 					const float scale = texture.width / pixel_width->value;
 					source_width = scale * element.layout.content_box.width;
 				}
 			}
-			if (const Pixels* pixel_height = element.style.height.value_or(intrinsic_height).pixels()) {
+			if (const Pixels* pixel_height = resolved_style.height.value_or(intrinsic_height).pixels()) {
 				if (pixel_height->value > element.layout.content_box.height) {
 					const float scale = texture.height / pixel_height->value;
 					source_height = scale * element.layout.content_box.height;

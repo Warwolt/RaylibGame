@@ -42,6 +42,7 @@ set(SRC
     src/game/scene/scene.cpp
     src/game/ui/context.cpp
     src/game/ui/element.cpp
+    src/game/ui/style.cpp
     src/game/ui/tree.cpp
     src/game/ui/user_interface.cpp
     src/platform/input.cpp
@@ -86,10 +87,11 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 # Tests
 add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
-    test/unit_tests/unit_test_main.cpp
     test/unit_tests/ui_element_tests.cpp
+    test/unit_tests/ui_style_tests.cpp
     test/unit_tests/ui_tree_tests.cpp
     test/unit_tests/ui_user_interface_tests.cpp
+    test/unit_tests/unit_test_main.cpp
 )
 target_include_directories(UnitTests PUBLIC src lib)
 target_link_libraries(UnitTests PUBLIC ${LIB} gtest gmock)
