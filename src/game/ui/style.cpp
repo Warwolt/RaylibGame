@@ -29,7 +29,7 @@ namespace ui {
 		return StyleState::Inactive;
 	}
 
-	Style compute_effective_style(const Style& style, StyleState state) {
+	Style resolve_style_for_state(const Style& style, StyleState state) {
 		return Style {
 			.position = style.position,
 			.width = style.width,
