@@ -185,9 +185,8 @@ namespace ui {
 			}
 
 			const float paragraph_height = cursor.y + resolved_style.font.size;
-			const float content_height = resolved_style.height.has_value() && resolved_style.height->is_pixels()
-				? resolved_style.height->pixels()->value
-				: paragraph_height;
+			const bool has_pixel_height = resolved_style.height.has_value() && resolved_style.height->is_pixels();
+			const float content_height = has_pixel_height ? resolved_style.height->pixels()->value : paragraph_height;
 
 			desired_size = {
 				.x = paragraph_width + resolved_style.horizontal_spacing(),
@@ -201,8 +200,8 @@ namespace ui {
 					// Absolutely positioned elements sizes aren't constrained
 					desired_size.x = pixel_width->value + resolved_style.horizontal_spacing();
 				} else {
-					desired_size.x =
-						std::min<float>(pixel_width->value + resolved_style.horizontal_spacing(), parent_size.x);
+					const float margin_pixel_width = pixel_width->value + resolved_style.horizontal_spacing();
+					desired_size.x = std::min<float>(margin_pixel_width, parent_size.x);
 				}
 			}
 			if (const Percentage* percentage_width = content_width.percentage()) {
@@ -215,8 +214,8 @@ namespace ui {
 					// Absolutely positioned elements sizes aren't constrained
 					desired_size.y = pixel_height->value + resolved_style.vertical_spacing();
 				} else {
-					desired_size.y =
-						std::min<float>(pixel_height->value + resolved_style.vertical_spacing(), parent_size.y);
+					const float margin_pixel_height = pixel_height->value + resolved_style.vertical_spacing();
+					desired_size.y = std::min<float>(margin_pixel_height, parent_size.y);
 				}
 			}
 			if (const Percentage* percentage_height = content_height.percentage()) {
@@ -320,14 +319,14 @@ namespace ui {
 		}
 
 		/* Size padding, border, and margin boxes */
+		// clang-format off
 		layout->padding_box.width = layout->content_box.width + resolved_style.padding.left + resolved_style.padding.right;
 		layout->padding_box.height = layout->content_box.height + resolved_style.padding.top + resolved_style.padding.bottom;
-		layout->border_box.width =
-			layout->padding_box.width + resolved_style.border.edges.left + resolved_style.border.edges.right;
-		layout->border_box.height =
-			layout->padding_box.height + resolved_style.border.edges.top + resolved_style.border.edges.bottom;
+		layout->border_box.width = layout->padding_box.width + resolved_style.border.edges.left + resolved_style.border.edges.right;
+		layout->border_box.height = layout->padding_box.height + resolved_style.border.edges.top + resolved_style.border.edges.bottom;
 		layout->margin_box.width = layout->border_box.width + resolved_style.margin.left + resolved_style.margin.right;
 		layout->margin_box.height = layout->border_box.height + resolved_style.margin.top + resolved_style.margin.bottom;
+		// clang-format on
 	}
 
 	// `containing_box` is either root or the closest parent element with a non-static position
