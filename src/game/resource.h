@@ -7,12 +7,6 @@
 #include <string>
 #include <unordered_map>
 
-// FIXME: make this easier to use in tests
-//
-// It would be nice to make this _just_ a map
-// So, we'd have `add_image` and `get_image`
-// To load an image from diks, we'd have a helper function
-// std::optional<ImageID> load_image(ResourceManager* resources, const std::string& path);
 class ResourceManager {
 public:
 	ResourceManager() = default;
