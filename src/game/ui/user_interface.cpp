@@ -47,6 +47,16 @@ namespace ui {
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
+
+		// assign automatic ID
+		if (id.empty()) {
+			const Element& parent = m_tree.current_parent();
+			if (!parent.id.empty()) {
+				size_t index = parent.box()->children.size();
+				id = std::format("{}_{}", parent.id, index);
+			}
+		}
+
 		m_tree.push_element(
 			Element {
 				.id = id,

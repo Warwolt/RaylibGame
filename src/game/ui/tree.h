@@ -36,6 +36,9 @@ namespace ui {
 		Element& current_element(); // most recent non-closed element
 		const Element& current_element() const;
 
+		Element& current_parent();
+		const Element& current_parent() const;
+
 		void reset();
 		void push_element(Element element);
 		void close_element(); // i.e. close current box element

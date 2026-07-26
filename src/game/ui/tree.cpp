@@ -56,6 +56,14 @@ namespace ui {
 		return children.empty() ? *parent : children.back();
 	}
 
+	Element& Tree::current_parent() {
+		return *m_parents.back();
+	}
+
+	const Element& Tree::current_parent() const {
+		return *m_parents.back();
+	}
+
 	void Tree::reset() {
 		m_root = { .id = "root", .content = ui::Box {} };
 		m_parents = { &m_root };

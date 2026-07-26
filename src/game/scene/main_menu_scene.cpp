@@ -80,6 +80,11 @@ void MainMenuScene::update(Game* game) {
 				.size = 32,
 				.color = WHITE,
 			},
+			.hover = {
+				.font = {
+					.color = YELLOW,
+				},
+			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
