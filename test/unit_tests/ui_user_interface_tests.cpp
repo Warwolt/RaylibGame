@@ -147,9 +147,6 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 
 TEST(UserInterfaceTests, Element_WithoutID_AssignedAutomaticID) {
 	ui::UserInterface ui;
-	const ResourceManager resources;
-	const Vector2 window_size = {};
-	const Input input = {};
 
 	ui.frame_begin();
 	{
@@ -158,7 +155,7 @@ TEST(UserInterfaceTests, Element_WithoutID_AssignedAutomaticID) {
 		ui.box_begin();
 		ui.box_end();
 	}
-	ui.frame_end(input, resources, window_size);
+	// skip frame_end, not doing any layouting
 
 	const ui::Element& root = ui.root_element();
 	ASSERT_EQ(root.box()->children.size(), 3);
