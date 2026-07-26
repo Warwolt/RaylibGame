@@ -3,7 +3,17 @@
 #include "core/debug/assert.h"
 #include "core/debug/profiling.h"
 
+#include <format>
+
 namespace ui {
+
+	static std::string try_generate_automatic_id(const Element& parent) {
+		if (parent.id.empty()) {
+			return "";
+		}
+		const size_t index = parent.box()->children.size();
+		return std::format("{}.children[{}]", parent.id, index);
+	}
 
 	void UserInterface::draw(const ResourceManager& resources) const {
 		draw_element(resources, m_context, m_tree.root());
@@ -32,7 +42,7 @@ namespace ui {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		m_tree.push_element(
 			Element {
-				.id = id,
+				.id = id.empty() ? try_generate_automatic_id(m_tree.current_parent()) : id,
 				.style = style.value_or(Style {}),
 				.content = Box { .direction = direction },
 			}
@@ -47,9 +57,10 @@ namespace ui {
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
+
 		m_tree.push_element(
 			Element {
-				.id = id,
+				.id = id.empty() ? try_generate_automatic_id(m_tree.current_parent()) : id,
 				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
 			}
@@ -60,7 +71,7 @@ namespace ui {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		m_tree.push_element(
 			Element {
-				.id = id,
+				.id = id.empty() ? try_generate_automatic_id(m_tree.current_parent()) : id,
 				.style = style.value_or(Style {}),
 				.content = Image { .id = image },
 			}
