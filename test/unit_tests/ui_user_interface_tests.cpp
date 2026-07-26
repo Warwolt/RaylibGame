@@ -145,68 +145,35 @@ TEST(UserInterfaceTests, BoxElement_TwoBoxesWithText) {
 
 #pragma region interaction
 
-TEST(UserInterfaceTests, BoxElement_IsHovered_WithoutId_GivesError) {
+TEST(UserInterfaceTests, Element_WithoutID_AssignedAutomaticID) {
 	ui::UserInterface ui;
 	const ResourceManager resources;
 	const Vector2 window_size = {};
 	const Input input = {};
-	EXPECT_DEATH(
-		{
-			ui.frame_begin();
-			{
-				ui.box_begin(); // id argument omitted
-				{
-					ui.element_is_hovered();
-				}
-				ui.box_end();
-			}
-			ui.frame_end(input, resources, window_size);
-		},
-		"element_is_hovered called when current element lacks id!"
-	);
+
+	ui.frame_begin();
+	{
+		ui.text("Hello world");
+		ui.image(ImageID(1));
+		ui.box_begin();
+		ui.box_end();
+	}
+	ui.frame_end(input, resources, window_size);
+
+	const ui::Element& root = ui.root_element();
+	ASSERT_EQ(root.box()->children.size(), 3);
+	ASSERT_TRUE(root.box()->children[0].is_text());
+	ASSERT_TRUE(root.box()->children[1].is_image());
+	ASSERT_TRUE(root.box()->children[2].is_box());
+
+	const ui::Element& text = root.box()->children[0];
+	const ui::Element& image = root.box()->children[1];
+	const ui::Element& box = root.box()->children[2];
+	EXPECT_EQ(text.id, "root.children[0]");
+	EXPECT_EQ(image.id, "root.children[1]");
+	EXPECT_EQ(box.id, "root.children[2]");
 }
 
-TEST(UserInterfaceTests, BoxElement_IsActive_WithoutId_GivesError) {
-	ui::UserInterface ui;
-	const ResourceManager resources;
-	const Vector2 window_size = {};
-	const Input input = {};
-	EXPECT_DEATH(
-		{
-			ui.frame_begin();
-			{
-				ui.box_begin(); // id argument omitted
-				{
-					ui.element_is_active();
-				}
-				ui.box_end();
-			}
-			ui.frame_end(input, resources, window_size);
-		},
-		"element_is_active called when current element lacks id!"
-	);
-}
-
-TEST(UserInterfaceTests, BoxElement_IsClicked_WithoutId_GivesError) {
-	ui::UserInterface ui;
-	const ResourceManager resources;
-	const Vector2 window_size = {};
-	const Input input = {};
-	EXPECT_DEATH(
-		{
-			ui.frame_begin();
-			{
-				ui.box_begin(); // id argument omitted
-				{
-					ui.element_is_clicked();
-				}
-				ui.box_end();
-			}
-			ui.frame_end(input, resources, window_size);
-		},
-		"element_is_clicked called when current element lacks id!"
-	);
-}
 TEST(UserInterfaceTests, BoxElement_IsHovered) {
 	ui::UserInterface ui;
 	const ResourceManager resources;

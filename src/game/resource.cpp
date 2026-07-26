@@ -30,6 +30,6 @@ Texture2D ResourceManager::get_image(ImageID image_id) const {
 		return it->second;
 	}
 
-	LOG_ERROR("Missing image for ID %d", image_id.value);
+	LOG_ERROR("Missing image for ImageID(%d)", image_id.value);
 	return {};
 }

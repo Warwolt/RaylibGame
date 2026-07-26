@@ -123,7 +123,7 @@ void MainMenuScene::update(Game* game) {
 				/* Menu */
 				for (int i = 0; i < MenuItems::Count; i++) {
 					/* Menu item */
-					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container, menu_items[i]);
+					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container);
 					{
 						/* On click */
 						if (m_ui.element_is_clicked()) {
