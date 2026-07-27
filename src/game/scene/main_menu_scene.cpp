@@ -85,6 +85,11 @@ void MainMenuScene::update(Game* game) {
 					.color = YELLOW,
 				},
 			},
+			.focus = {
+				.font = {
+					.color = YELLOW,
+				},
+			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {

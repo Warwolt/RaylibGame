@@ -190,6 +190,7 @@ namespace ui {
 		BackgroundStyle background;
 		FontStyle font;
 		StyleOverride hover;
+		StyleOverride focus;
 		StyleOverride active;
 		StyleDebug debug;
 
@@ -208,6 +209,7 @@ namespace ui {
 
 	enum class StyleState {
 		Inactive,
+		Focus,
 		Hover,
 		Active,
 	};
