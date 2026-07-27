@@ -29,6 +29,7 @@ enum class InputType {
 };
 
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings();
+std::unordered_map<InputAction, std::vector<GamepadButton>> default_gamepad_button_bindings();
 
 struct Input {
 	/* Mouse */
@@ -52,6 +53,7 @@ struct Input {
 
 	/* Gamepad */
 	std::unordered_map<GamepadButton, ButtonState> gamepad_buttons;
+	std::unordered_map<InputAction, std::vector<GamepadButton>> gamepad_button_bindings = default_gamepad_button_bindings();
 	ButtonState gamepad_button(GamepadButton button) const;
 	bool button_up(GamepadButton button) const;
 	bool button_released(GamepadButton button) const;

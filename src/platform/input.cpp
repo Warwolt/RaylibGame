@@ -61,6 +61,19 @@ std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindi
 	};
 }
 
+std::unordered_map<InputAction, std::vector<GamepadButton>> default_gamepad_button_bindings() {
+	return {
+		// clang-format off
+		{ ACTION_UP, { GAMEPAD_BUTTON_LEFT_FACE_UP }  },
+		{ ACTION_LEFT, { GAMEPAD_BUTTON_LEFT_FACE_LEFT } },
+		{ ACTION_DOWN, { GAMEPAD_BUTTON_LEFT_FACE_DOWN } },
+		{ ACTION_RIGHT, { GAMEPAD_BUTTON_LEFT_FACE_RIGHT } },
+		{ ACTION_SELECT, { GAMEPAD_BUTTON_RIGHT_FACE_DOWN } },
+		{ ACTION_BACK, { GAMEPAD_BUTTON_RIGHT_FACE_RIGHT } },
+		// clang-format on
+	};
+}
+
 ButtonState Input::left_mouse_button() const {
 	auto it = mouse_buttons.find(MOUSE_BUTTON_LEFT);
 	return it == mouse_buttons.end() ? ButtonState::Up : it->second;
@@ -216,6 +229,18 @@ void read_input(Input* input, const Window& window) {
 		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_up(key); })) {
 			input->input_actions[action] = ButtonState::Up;
 		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_released(key); })) {
+			input->input_actions[action] = ButtonState::Released;
+		}
+	}
+
+	for (auto& [action, buttons] : input->gamepad_button_bindings) {
+		if (util::any_of(buttons, [&](GamepadButton button) { return input->button_down(button); })) {
+			input->input_actions[action] = ButtonState::Down;
+		} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_pressed(button); })) {
+			input->input_actions[action] = ButtonState::Pressed;
+		} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_up(button); })) {
+			input->input_actions[action] = ButtonState::Up;
+		} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_released(button); })) {
 			input->input_actions[action] = ButtonState::Released;
 		}
 	}
