@@ -80,16 +80,6 @@ void MainMenuScene::update(Game* game) {
 				.size = 32,
 				.color = WHITE,
 			},
-			.hover = {
-				.font = {
-					.color = YELLOW,
-				},
-			},
-			.focus = {
-				.font = {
-					.color = YELLOW,
-				},
-			},
 		};
 	const int indicator_size = 48;
 	const ui::Style focus_indicator_style = {
@@ -130,6 +120,8 @@ void MainMenuScene::update(Game* game) {
 					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container, menu_items[i]);
 					{
 						m_ui.initially_focus_current_element();
+						const bool hovered_and_mouse = game->input.last_input_was_mouse() && m_ui.element_is_hovered();
+						const bool focused_and_keyboard = game->input.last_input_was_keyboard() && m_ui.element_is_focused();
 
 						/* On click */
 						if (m_ui.element_is_clicked()) {
@@ -145,19 +137,22 @@ void MainMenuScene::update(Game* game) {
 						}
 
 						/* On hover */
-						if (m_ui.element_is_hovered()) {
+						if (m_ui.element_is_hovered().has_changed_to(true)) {
 							m_ui.focus_current_element();
 						}
 
 						/* Focus indicator */
-						const bool hovered_and_mouse = game->input.last_input_was_mouse() && m_ui.element_is_hovered();
-						const bool focused_and_keyboard = game->input.last_input_was_keyboard() && m_ui.element_is_focused();
+
 						if (hovered_and_mouse || focused_and_keyboard) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 
 						/* Menu text */
-						m_ui.text(menu_items[i], menu_item_text_style);
+						ui::Style style = menu_item_text_style;
+						if (hovered_and_mouse || focused_and_keyboard) {
+							style.font.color = YELLOW;
+						}
+						m_ui.text(menu_items[i], style);
 					}
 					m_ui.box_end();
 				}
