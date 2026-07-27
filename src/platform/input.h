@@ -23,8 +23,8 @@ typedef enum {
 } InputAction;
 
 enum class InputType {
-	Mouse,
 	Keyboard,
+	Mouse,
 };
 
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings();

@@ -31,7 +31,7 @@ namespace ui {
 		Tracked<bool> element_is_active() const;
 		Tracked<bool> element_is_clicked() const;
 
-		void set_initially_focused_element(std::string id);
+		void initially_focus_current_element();
 		void focus_current_element();
 
 	private:
