@@ -33,6 +33,15 @@ namespace ui {
 	}
 
 	Tracked<bool> Context::is_focused(const Element& element) const {
+		/* Try inherit focused state from parent */
+		if (element.parent != nullptr) {
+			Tracked<bool> parent_is_focused = is_focused(*element.parent);
+			if (parent_is_focused) {
+				return parent_is_focused;
+			}
+		}
+
+		/* Check if given element is focused */
 		if (element.id.empty()) {
 			return false;
 		}

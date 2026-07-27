@@ -59,6 +59,7 @@ namespace ui {
 		Style style;
 		Content content;
 		Layout layout; // computed with layout_element()
+		Element* parent = nullptr;
 
 		inline bool is_box() const {
 			return std::holds_alternative<Box>(this->content);
