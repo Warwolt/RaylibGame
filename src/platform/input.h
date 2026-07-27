@@ -23,8 +23,8 @@ typedef enum {
 } InputAction;
 
 enum class InputType {
-	Keyboard,
 	Mouse,
+	Keyboard,
 	Gamepad,
 };
 
@@ -60,7 +60,7 @@ struct Input {
 
 	/* Logical */
 	std::unordered_map<InputAction, ButtonState> input_actions;
-	InputType last_input_type = {};
+	InputType last_input_type = InputType::Keyboard;
 
 	ButtonState input_action(InputAction action) const;
 	bool action_up(InputAction action) const;
