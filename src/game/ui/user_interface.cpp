@@ -102,9 +102,9 @@ namespace ui {
 		return m_context.is_clicked(element);
 	}
 
-	void UserInterface::set_initially_focused_element(std::string id) {
+	void UserInterface::initially_focus_current_element() {
 		if (m_context.focused_element_id->empty()) {
-			m_context.focused_element_id = id;
+			focus_current_element();
 		}
 	}
 

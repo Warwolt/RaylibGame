@@ -295,13 +295,13 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_SelectAction) {
 	};
 	bool is_focused = false;
 	bool is_clicked = false;
-	ui.set_initially_focused_element("child1");
 	for (const Input& input : inputs) {
 		ui.frame_begin();
 		{
 			ui.box_begin(ui::Direction::Vertical);
 			{
 				ui.box_begin(ui::Direction::Vertical, {}, "child1");
+				ui.initially_focus_current_element();
 				ui.box_end();
 
 				ui.box_begin(ui::Direction::Vertical, {}, "child2");
