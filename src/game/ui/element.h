@@ -8,7 +8,6 @@
 
 #include <raylib.h>
 
-#include <optional>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -20,6 +19,10 @@ namespace ui {
 
 	/* Content */
 	struct Element;
+
+	// Store elements in fixed capacity vectors to guarantee that pointers to
+	// elements won't get invalidated.
+	using ElementVector = core::fixed_capacity_vector<Element, 10>;
 
 	struct Text {
 		std::string text;
@@ -37,7 +40,7 @@ namespace ui {
 
 	struct Box {
 		Direction direction = Direction::Vertical;
-		core::fixed_capacity_vector<Element, 10> children;
+		ElementVector children;
 	};
 
 	using Content = std::variant<Box, Text, Image>;
