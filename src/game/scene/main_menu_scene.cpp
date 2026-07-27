@@ -143,7 +143,9 @@ void MainMenuScene::update(Game* game) {
 						}
 
 						/* Focus indicator */
-						if (m_ui.element_is_focused() && game->input.last_input_was_keyboard()) {
+						const bool hovered_and_mouse = game->input.last_input_was_mouse() && m_ui.element_is_hovered();
+						const bool focused_and_keyboard = game->input.last_input_was_keyboard() && m_ui.element_is_focused();
+						if (hovered_and_mouse || focused_and_keyboard) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 
