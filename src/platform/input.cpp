@@ -51,12 +51,12 @@ static ButtonState read_gamepad_button(int button) {
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings() {
 	return {
 		// clang-format off
-		{ ACTION_UP, { KEY_UP }  },
-		{ ACTION_LEFT, { KEY_LEFT } },
-		{ ACTION_DOWN, { KEY_DOWN } },
-		{ ACTION_RIGHT, { KEY_RIGHT } },
-		{ ACTION_SELECT, { KEY_ENTER, KEY_Z } },
-		{ ACTION_BACK, { KEY_ESCAPE, KEY_X } },
+		{ ACTION_UI_UP, { KEY_UP }  },
+		{ ACTION_UI_LEFT, { KEY_LEFT } },
+		{ ACTION_UI_DOWN, { KEY_DOWN } },
+		{ ACTION_UI_RIGHT, { KEY_RIGHT } },
+		{ ACTION_UI_SELECT, { KEY_ENTER, KEY_Z } },
+		{ ACTION_UI_BACK, { KEY_ESCAPE, KEY_X } },
 		// clang-format on
 	};
 }
@@ -64,12 +64,12 @@ std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindi
 std::unordered_map<InputAction, std::vector<GamepadButton>> default_gamepad_button_bindings() {
 	return {
 		// clang-format off
-		{ ACTION_UP, { GAMEPAD_BUTTON_LEFT_FACE_UP }  },
-		{ ACTION_LEFT, { GAMEPAD_BUTTON_LEFT_FACE_LEFT } },
-		{ ACTION_DOWN, { GAMEPAD_BUTTON_LEFT_FACE_DOWN } },
-		{ ACTION_RIGHT, { GAMEPAD_BUTTON_LEFT_FACE_RIGHT } },
-		{ ACTION_SELECT, { GAMEPAD_BUTTON_RIGHT_FACE_DOWN } },
-		{ ACTION_BACK, { GAMEPAD_BUTTON_RIGHT_FACE_RIGHT } },
+		{ ACTION_UI_UP, { GAMEPAD_BUTTON_LEFT_FACE_UP }  },
+		{ ACTION_UI_LEFT, { GAMEPAD_BUTTON_LEFT_FACE_LEFT } },
+		{ ACTION_UI_DOWN, { GAMEPAD_BUTTON_LEFT_FACE_DOWN } },
+		{ ACTION_UI_RIGHT, { GAMEPAD_BUTTON_LEFT_FACE_RIGHT } },
+		{ ACTION_UI_SELECT, { GAMEPAD_BUTTON_RIGHT_FACE_DOWN } },
+		{ ACTION_UI_BACK, { GAMEPAD_BUTTON_RIGHT_FACE_RIGHT } },
 		// clang-format on
 	};
 }

@@ -476,8 +476,8 @@ namespace ui {
 			// more than once per frame when we recurse through the children.
 			if (focused_child_index.has_value()) {
 				const bool box_is_horizontal = box->direction == Direction::Horizontal;
-				const bool should_focus_previous = box_is_horizontal ? input.action_pressed(ACTION_LEFT) : input.action_pressed(ACTION_UP);
-				const bool should_focus_next = box_is_horizontal ? input.action_pressed(ACTION_RIGHT) : input.action_pressed(ACTION_DOWN);
+				const bool should_focus_previous = box_is_horizontal ? input.action_pressed(ACTION_UI_LEFT) : input.action_pressed(ACTION_UI_UP);
+				const bool should_focus_next = box_is_horizontal ? input.action_pressed(ACTION_UI_RIGHT) : input.action_pressed(ACTION_UI_DOWN);
 
 				// search among  siblings, focus first one that has an id
 				if (should_focus_previous) {
@@ -509,7 +509,7 @@ namespace ui {
 				click_handled = true;
 			} else {
 				const bool element_is_mouse_clicked = state->is_hovered && input.left_mouse_button_released();
-				const bool element_is_keyboard_clicked = context->is_focused(*element) && input.action_pressed(ACTION_SELECT);
+				const bool element_is_keyboard_clicked = context->is_focused(*element) && input.action_pressed(ACTION_UI_SELECT);
 				const bool is_clicked = element_is_mouse_clicked || element_is_keyboard_clicked;
 				state->is_clicked = is_clicked;
 				click_handled = is_clicked;

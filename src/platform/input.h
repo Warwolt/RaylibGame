@@ -14,12 +14,12 @@ enum class ButtonState {
 };
 
 typedef enum {
-	ACTION_UP,
-	ACTION_LEFT,
-	ACTION_DOWN,
-	ACTION_RIGHT,
-	ACTION_SELECT,
-	ACTION_BACK,
+	ACTION_UI_UP,
+	ACTION_UI_LEFT,
+	ACTION_UI_DOWN,
+	ACTION_UI_RIGHT,
+	ACTION_UI_SELECT,
+	ACTION_UI_BACK,
 } InputAction;
 
 enum class InputType {
