@@ -22,6 +22,11 @@ typedef enum {
 	ACTION_BACK,
 } InputAction;
 
+enum class InputType {
+	Mouse,
+	Keyboard,
+};
+
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings();
 
 struct Input {
@@ -30,6 +35,7 @@ struct Input {
 	std::unordered_map<KeyboardKey, ButtonState> keyboard_keys;
 	std::unordered_map<InputAction, std::vector<KeyboardKey>> keyboard_bindings = default_keyboard_bindings();
 	std::unordered_map<InputAction, ButtonState> input_actions;
+	InputType last_input_type = {};
 
 	ButtonState left_mouse_button() const;
 	bool left_mouse_button_up() const;
@@ -48,6 +54,9 @@ struct Input {
 	bool action_released(InputAction action) const;
 	bool action_down(InputAction action) const;
 	bool action_pressed(InputAction action) const;
+
+	bool last_input_was_mouse() const;
+	bool last_input_was_keyboard() const;
 };
 
-Input read_input(const Window& window);
+void read_input(Input* input, const Window& window);
