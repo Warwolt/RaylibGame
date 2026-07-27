@@ -46,13 +46,13 @@ namespace ui {
 
 	Element& Tree::current_element() {
 		Element* parent = m_parents.back();
-		std::vector<Element>& children = m_parents.back()->box()->children;
+		core::fixed_capacity_vector<Element, 10>& children = m_parents.back()->box()->children;
 		return children.empty() ? *parent : children.back();
 	}
 
 	const Element& Tree::current_element() const {
 		const Element* parent = m_parents.back();
-		const std::vector<Element>& children = m_parents.back()->box()->children;
+		const core::fixed_capacity_vector<Element, 10>& children = m_parents.back()->box()->children;
 		return children.empty() ? *parent : children.back();
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/fixed_capacity_vector.h"
 #include "game/resource_id.h"
 #include "game/ui/context.h"
 #include "game/ui/style.h"
@@ -36,7 +37,7 @@ namespace ui {
 
 	struct Box {
 		Direction direction = Direction::Vertical;
-		std::vector<Element> children;
+		core::fixed_capacity_vector<Element, 10> children;
 	};
 
 	using Content = std::variant<Box, Text, Image>;
