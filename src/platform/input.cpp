@@ -33,6 +33,21 @@ static ButtonState read_keyboard_key(int key) {
 	return state;
 }
 
+static ButtonState read_gamepad_button(int button) {
+	const int gamepad = 0;
+	ButtonState state = ButtonState::Up;
+	if (Raylib_IsGamepadButtonPressed(gamepad, button)) {
+		state = ButtonState::Pressed;
+	} else if (Raylib_IsGamepadButtonDown(gamepad, button)) {
+		state = ButtonState::Down;
+	} else if (Raylib_IsGamepadButtonReleased(gamepad, button)) {
+		state = ButtonState::Released;
+	} else if (Raylib_IsGamepadButtonUp(gamepad, button)) {
+		state = ButtonState::Up;
+	}
+	return state;
+}
+
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings() {
 	return {
 		// clang-format off
@@ -86,6 +101,27 @@ bool Input::key_down(KeyboardKey key) const {
 
 bool Input::key_pressed(KeyboardKey key) const {
 	return keyboard_key(key) == ButtonState::Pressed;
+}
+
+ButtonState Input::gamepad_button(GamepadButton button) const {
+	auto it = gamepad_buttons.find(button);
+	return it == gamepad_buttons.end() ? ButtonState::Up : it->second;
+}
+
+bool Input::button_up(GamepadButton button) const {
+	return gamepad_button(button) == ButtonState::Up;
+}
+
+bool Input::button_released(GamepadButton button) const {
+	return gamepad_button(button) == ButtonState::Released;
+}
+
+bool Input::button_down(GamepadButton button) const {
+	return gamepad_button(button) == ButtonState::Down;
+}
+
+bool Input::button_pressed(GamepadButton button) const {
+	return gamepad_button(button) == ButtonState::Pressed;
 }
 
 ButtonState Input::input_action(InputAction action) const {
@@ -151,6 +187,19 @@ void read_input(Input* input, const Window& window) {
 		}
 		if (any_keyboard_key_pressed) {
 			input->last_input_type = InputType::Keyboard;
+		}
+	}
+
+	/* Gamepad */
+	{
+		bool any_gamepad_button_pressed = false;
+		for (int i = 0; i < (int)GAMEPAD_BUTTON_RIGHT_THUMB; i++) {
+			const ButtonState state = read_gamepad_button(i);
+			input->gamepad_buttons[(GamepadButton)i] = state;
+			any_gamepad_button_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
+		}
+		if (any_gamepad_button_pressed) {
+			input->last_input_type = InputType::Gamepad;
 		}
 	}
 

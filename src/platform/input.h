@@ -25,17 +25,15 @@ typedef enum {
 enum class InputType {
 	Keyboard,
 	Mouse,
+	Gamepad,
 };
 
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings();
 
 struct Input {
+	/* Mouse */
 	Vector2 mouse_position;
 	std::unordered_map<MouseButton, ButtonState> mouse_buttons;
-	std::unordered_map<KeyboardKey, ButtonState> keyboard_keys;
-	std::unordered_map<InputAction, std::vector<KeyboardKey>> keyboard_bindings = default_keyboard_bindings();
-	std::unordered_map<InputAction, ButtonState> input_actions;
-	InputType last_input_type = {};
 
 	ButtonState left_mouse_button() const;
 	bool left_mouse_button_up() const;
@@ -43,11 +41,26 @@ struct Input {
 	bool left_mouse_button_down() const;
 	bool left_mouse_button_pressed() const;
 
+	/* Keyboard */
+	std::unordered_map<KeyboardKey, ButtonState> keyboard_keys;
+	std::unordered_map<InputAction, std::vector<KeyboardKey>> keyboard_bindings = default_keyboard_bindings();
 	ButtonState keyboard_key(KeyboardKey key) const;
 	bool key_up(KeyboardKey key) const;
 	bool key_released(KeyboardKey key) const;
 	bool key_down(KeyboardKey key) const;
 	bool key_pressed(KeyboardKey key) const;
+
+	/* Gamepad */
+	std::unordered_map<GamepadButton, ButtonState> gamepad_buttons;
+	ButtonState gamepad_button(GamepadButton button) const;
+	bool button_up(GamepadButton button) const;
+	bool button_released(GamepadButton button) const;
+	bool button_down(GamepadButton button) const;
+	bool button_pressed(GamepadButton button) const;
+
+	/* Logical */
+	std::unordered_map<InputAction, ButtonState> input_actions;
+	InputType last_input_type = {};
 
 	ButtonState input_action(InputAction action) const;
 	bool action_up(InputAction action) const;
