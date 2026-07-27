@@ -85,6 +85,9 @@ void MainMenuScene::update(Game* game) {
 					.color = YELLOW,
 				},
 			},
+			// FIXME: this isn't used correctly because child elements don't
+			// inherit their parents' state. It'd be nice if a text element is
+			// focused if the parent box is focused!
 			.focus = {
 				.font = {
 					.color = YELLOW,
