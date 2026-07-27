@@ -70,6 +70,7 @@ struct Input {
 
 	bool last_input_was_mouse() const;
 	bool last_input_was_keyboard() const;
+	bool last_input_was_gamepad() const;
 };
 
 void read_input(Input* input, const Window& window);

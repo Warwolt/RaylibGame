@@ -153,6 +153,10 @@ bool Input::last_input_was_keyboard() const {
 	return this->last_input_type == InputType::Keyboard;
 }
 
+bool Input::last_input_was_gamepad() const {
+	return this->last_input_type == InputType::Gamepad;
+}
+
 void read_input(Input* input, const Window& window) {
 	/* Mouse */
 	{
