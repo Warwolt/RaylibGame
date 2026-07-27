@@ -5,16 +5,19 @@
 
 namespace ui {
 
-#define SELECT_STYLE_OVERRIDE(style, field, state)                                   \
-	select_style_override(style.field, style.hover.field, style.active.field, state)
+#define SELECT_STYLE_OVERRIDE(style, field, state)                                                      \
+	select_style_override(style.field, style.focus.field, style.hover.field, style.active.field, state)
 
 	template <typename T>
-	static T select_style_override(const T& normal, const std::optional<T>& hover, const std::optional<T>& active, StyleState state) {
+	static T select_style_override(const T& normal, const std::optional<T>& focus, const std::optional<T>& hover, const std::optional<T>& active, StyleState state) {
 		if (state == StyleState::Active) {
 			return active.value_or(normal);
 		}
 		if (state == StyleState::Hover) {
 			return hover.value_or(normal);
+		}
+		if (state == StyleState::Focus) {
+			return focus.value_or(normal);
 		}
 		return normal;
 	}
@@ -25,6 +28,9 @@ namespace ui {
 		}
 		if (context.is_hovered(element)) {
 			return StyleState::Hover;
+		}
+		if (context.is_focused(element)) {
+			return StyleState::Focus;
 		}
 		return StyleState::Inactive;
 	}

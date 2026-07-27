@@ -3,6 +3,8 @@
 #include "core/util.h"
 #include "platform/window.h"
 
+#include <raymath.h>
+
 static ButtonState read_mouse_button(int button) {
 	ButtonState state = ButtonState::Up;
 	if (Raylib_IsMouseButtonPressed(button)) {
@@ -107,38 +109,61 @@ bool Input::action_pressed(InputAction action) const {
 	return input_action(action) == ButtonState::Pressed;
 }
 
-Input read_input(const Window& window) {
-	Input input;
+bool Input::last_input_was_mouse() const {
+	return this->last_input_type == InputType::Mouse;
+}
 
+bool Input::last_input_was_keyboard() const {
+	return this->last_input_type == InputType::Keyboard;
+}
+
+void read_input(Input* input, const Window& window) {
 	/* Mouse */
-	const Vector2 global_mouse_position = Raylib_GetMousePosition();
-	const Rectangle letterbox = window.letterbox();
-	const int scale = window.letterbox_scale();
-	input.mouse_position = {
-		.x = (global_mouse_position.x - letterbox.x) / scale,
-		.y = (global_mouse_position.y - letterbox.y) / scale,
-	};
-	for (int i = 0; i < 6; i++) {
-		input.mouse_buttons[(MouseButton)i] = read_mouse_button(i);
-	}
+	{
+		const Vector2 global_mouse_position = Raylib_GetMousePosition();
+		const Rectangle letterbox = window.letterbox();
+		const int scale = window.letterbox_scale();
+		input->mouse_position = {
+			.x = (global_mouse_position.x - letterbox.x) / scale,
+			.y = (global_mouse_position.y - letterbox.y) / scale,
+		};
 
-	/* Keyboard */
-	for (int i = 0; i < 336; i++) {
-		input.keyboard_keys[(KeyboardKey)i] = read_keyboard_key(i);
-	}
+		bool any_mouse_button_pressed = false;
+		for (int i = 0; i < 6; i++) {
+			const ButtonState state = read_mouse_button(i);
+			input->mouse_buttons[(MouseButton)i] = state;
+			any_mouse_button_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
+		}
 
-	/* Actions */
-	for (auto& [action, keys] : input.keyboard_bindings) {
-		if (util::any_of(keys, [&](KeyboardKey key) { return input.key_down(key); })) {
-			input.input_actions[action] = ButtonState::Down;
-		} else if (util::any_of(keys, [&](KeyboardKey key) { return input.key_pressed(key); })) {
-			input.input_actions[action] = ButtonState::Pressed;
-		} else if (util::any_of(keys, [&](KeyboardKey key) { return input.key_up(key); })) {
-			input.input_actions[action] = ButtonState::Up;
-		} else if (util::any_of(keys, [&](KeyboardKey key) { return input.key_released(key); })) {
-			input.input_actions[action] = ButtonState::Released;
+		const bool mouse_has_moved = Raylib_GetMouseDelta() != Vector2 { 0, 0 };
+		if (any_mouse_button_pressed || mouse_has_moved) {
+			input->last_input_type = InputType::Mouse;
 		}
 	}
 
-	return input;
+	/* Keyboard */
+	{
+		bool any_keyboard_key_pressed = false;
+		for (int i = 0; i < 336; i++) {
+			const ButtonState state = read_keyboard_key(i);
+			input->keyboard_keys[(KeyboardKey)i] = state;
+			any_keyboard_key_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
+		}
+		if (any_keyboard_key_pressed) {
+			input->last_input_type = InputType::Keyboard;
+		}
+	}
+
+	/* Actions */
+	for (auto& [action, keys] : input->keyboard_bindings) {
+		if (util::any_of(keys, [&](KeyboardKey key) { return input->key_down(key); })) {
+			input->input_actions[action] = ButtonState::Down;
+		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_pressed(key); })) {
+			input->input_actions[action] = ButtonState::Pressed;
+		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_up(key); })) {
+			input->input_actions[action] = ButtonState::Up;
+		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_released(key); })) {
+			input->input_actions[action] = ButtonState::Released;
+		}
+	}
 }
