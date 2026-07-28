@@ -1,5 +1,6 @@
 #include "platform/input.h"
 
+#include "core/debug/logging.h"
 #include "core/util.h"
 #include "platform/window.h"
 
@@ -46,6 +47,15 @@ static ButtonState read_gamepad_button(int button) {
 		state = ButtonState::Up;
 	}
 	return state;
+}
+
+static float read_gamepad_stick(int axis) {
+	const float deadzone = 0.1f;
+	const float stick_value = Raylib_GetGamepadAxisMovement(0, axis);
+	if (-deadzone < stick_value && stick_value < deadzone) {
+		return 0.0f; // if within deadzone, pretend like stick is at rest
+	}
+	return stick_value;
 }
 
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings() {
@@ -208,48 +218,69 @@ void read_input(Input* input, const Window& window) {
 	}
 
 	/* Gamepad */
-	input->gamepad_left_stick = {
-		.x = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X),
-		.y = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y),
-	};
-	input->gamepad_right_stick = {
-		.x = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_X),
-		.y = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_Y),
-	};
 	{
-		bool any_gamepad_button_pressed = false;
-		for (int i = 0; i < (int)GAMEPAD_BUTTON_RIGHT_THUMB; i++) {
-			const ButtonState state = read_gamepad_button(i);
-			input->gamepad_buttons[(GamepadButton)i] = state;
-			any_gamepad_button_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
-		}
-		if (any_gamepad_button_pressed) {
-			input->last_input_type = InputType::Gamepad;
+		input->gamepad_left_stick_x = read_gamepad_stick(GAMEPAD_AXIS_LEFT_X);
+		input->gamepad_left_stick_y = read_gamepad_stick(GAMEPAD_AXIS_LEFT_Y);
+		input->gamepad_right_stick_x = read_gamepad_stick(GAMEPAD_AXIS_RIGHT_X);
+		input->gamepad_right_stick_y = read_gamepad_stick(GAMEPAD_AXIS_RIGHT_Y);
+		{
+			bool any_gamepad_button_pressed = false;
+			for (int i = 0; i < (int)GAMEPAD_BUTTON_RIGHT_THUMB; i++) {
+				const ButtonState state = read_gamepad_button(i);
+				input->gamepad_buttons[(GamepadButton)i] = state;
+				any_gamepad_button_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
+			}
+			if (any_gamepad_button_pressed) {
+				input->last_input_type = InputType::Gamepad;
+			}
 		}
 	}
 
 	/* Actions */
-	for (auto& [action, keys] : input->keyboard_bindings) {
-		if (util::any_of(keys, [&](KeyboardKey key) { return input->key_down(key); })) {
-			input->input_actions[action] = ButtonState::Down;
-		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_pressed(key); })) {
-			input->input_actions[action] = ButtonState::Pressed;
-		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_up(key); })) {
-			input->input_actions[action] = ButtonState::Up;
-		} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_released(key); })) {
-			input->input_actions[action] = ButtonState::Released;
+	{
+		/* Keyboard */
+		for (auto& [action, keys] : input->keyboard_bindings) {
+			if (util::any_of(keys, [&](KeyboardKey key) { return input->key_down(key); })) {
+				input->input_actions[action] = ButtonState::Down;
+			} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_pressed(key); })) {
+				input->input_actions[action] = ButtonState::Pressed;
+			} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_up(key); })) {
+				input->input_actions[action] = ButtonState::Up;
+			} else if (util::any_of(keys, [&](KeyboardKey key) { return input->key_released(key); })) {
+				input->input_actions[action] = ButtonState::Released;
+			}
 		}
-	}
 
-	for (auto& [action, buttons] : input->gamepad_button_bindings) {
-		if (util::any_of(buttons, [&](GamepadButton button) { return input->button_down(button); })) {
-			input->input_actions[action] = ButtonState::Down;
-		} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_pressed(button); })) {
-			input->input_actions[action] = ButtonState::Pressed;
-		} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_up(button); })) {
-			input->input_actions[action] = ButtonState::Up;
-		} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_released(button); })) {
-			input->input_actions[action] = ButtonState::Released;
+		/* Gamepad buttons */
+		for (auto& [action, buttons] : input->gamepad_button_bindings) {
+			if (util::any_of(buttons, [&](GamepadButton button) { return input->button_down(button); })) {
+				input->input_actions[action] = ButtonState::Down;
+			} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_pressed(button); })) {
+				input->input_actions[action] = ButtonState::Pressed;
+			} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_up(button); })) {
+				input->input_actions[action] = ButtonState::Up;
+			} else if (util::any_of(buttons, [&](GamepadButton button) { return input->button_released(button); })) {
+				input->input_actions[action] = ButtonState::Released;
+			}
+		}
+
+		/* Gamepad sticks */
+		// flicking thumb stick navigates in UI
+		if (input->gamepad_left_stick_x.previous() == 0 && input->gamepad_left_stick_y == 0) {
+			if (input->gamepad_left_stick_x < 0) {
+				input->input_actions[ACTION_UI_LEFT] = ButtonState::Pressed;
+			}
+			if (input->gamepad_left_stick_x > 0) {
+				input->input_actions[ACTION_UI_RIGHT] = ButtonState::Pressed;
+			}
+		}
+		if (input->gamepad_left_stick_y.previous() == 0 && input->gamepad_left_stick_x == 0) {
+			if (input->gamepad_left_stick_y < 0) {
+				input->input_actions[ACTION_UI_UP] = ButtonState::Pressed;
+			}
+			if (input->gamepad_left_stick_y > 0) {
+				input->input_actions[ACTION_UI_DOWN] = ButtonState::Pressed;
+			}
 		}
 	}
 }
