@@ -35,15 +35,15 @@ static ButtonState read_keyboard_key(int key) {
 }
 
 static ButtonState read_gamepad_button(int button) {
-	const int gamepad = 0;
+	const int gamepad_id = 0;
 	ButtonState state = ButtonState::Up;
-	if (Raylib_IsGamepadButtonPressed(gamepad, button)) {
+	if (Raylib_IsGamepadButtonPressed(gamepad_id, button)) {
 		state = ButtonState::Pressed;
-	} else if (Raylib_IsGamepadButtonDown(gamepad, button)) {
+	} else if (Raylib_IsGamepadButtonDown(gamepad_id, button)) {
 		state = ButtonState::Down;
-	} else if (Raylib_IsGamepadButtonReleased(gamepad, button)) {
+	} else if (Raylib_IsGamepadButtonReleased(gamepad_id, button)) {
 		state = ButtonState::Released;
-	} else if (Raylib_IsGamepadButtonUp(gamepad, button)) {
+	} else if (Raylib_IsGamepadButtonUp(gamepad_id, button)) {
 		state = ButtonState::Up;
 	}
 	return state;
