@@ -223,16 +223,15 @@ void read_input(Input* input, const Window& window) {
 		input->gamepad_left_stick_y = read_gamepad_stick(GAMEPAD_AXIS_LEFT_Y);
 		input->gamepad_right_stick_x = read_gamepad_stick(GAMEPAD_AXIS_RIGHT_X);
 		input->gamepad_right_stick_y = read_gamepad_stick(GAMEPAD_AXIS_RIGHT_Y);
-		{
-			bool any_gamepad_button_pressed = false;
-			for (int i = 0; i < (int)GAMEPAD_BUTTON_RIGHT_THUMB; i++) {
-				const ButtonState state = read_gamepad_button(i);
-				input->gamepad_buttons[(GamepadButton)i] = state;
-				any_gamepad_button_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
-			}
-			if (any_gamepad_button_pressed) {
-				input->last_input_type = InputType::Gamepad;
-			}
+
+		bool any_gamepad_button_pressed = false;
+		for (int i = 0; i < (int)GAMEPAD_BUTTON_RIGHT_THUMB; i++) {
+			const ButtonState state = read_gamepad_button(i);
+			input->gamepad_buttons[(GamepadButton)i] = state;
+			any_gamepad_button_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
+		}
+		if (any_gamepad_button_pressed) {
+			input->last_input_type = InputType::Gamepad;
 		}
 	}
 
