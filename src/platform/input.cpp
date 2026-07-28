@@ -208,6 +208,14 @@ void read_input(Input* input, const Window& window) {
 	}
 
 	/* Gamepad */
+	input->gamepad_left_stick = {
+		.x = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X),
+		.y = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y),
+	};
+	input->gamepad_right_stick = {
+		.x = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_X),
+		.y = Raylib_GetGamepadAxisMovement(0, GAMEPAD_AXIS_RIGHT_Y),
+	};
 	{
 		bool any_gamepad_button_pressed = false;
 		for (int i = 0; i < (int)GAMEPAD_BUTTON_RIGHT_THUMB; i++) {

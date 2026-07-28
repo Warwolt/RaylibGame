@@ -52,8 +52,14 @@ struct Input {
 	bool key_pressed(KeyboardKey key) const;
 
 	/* Gamepad */
+	// FIXME: implement left and right stick input
+	// moving left stick a certain amount should count as ACTION_UI_UP, ACTION_UI_LEFT etc.
+	Vector2 gamepad_left_stick;
+	Vector2 gamepad_right_stick;
 	std::unordered_map<GamepadButton, ButtonState> gamepad_buttons;
 	std::unordered_map<InputAction, std::vector<GamepadButton>> gamepad_button_bindings = default_gamepad_button_bindings();
+	// FIXME: somehow bind gamepad stick movements to input actions?
+	// e.g. flicking left stick up should count as ACTION_UI_UP?
 	ButtonState gamepad_button(GamepadButton button) const;
 	bool button_up(GamepadButton button) const;
 	bool button_released(GamepadButton button) const;
