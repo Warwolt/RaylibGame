@@ -3,15 +3,14 @@
 #include <chrono>
 
 struct Time {
-	std::chrono::milliseconds value = std::chrono::milliseconds(0);
-
+	std::chrono::nanoseconds value;
 	static Time now(); // since epoch
 	Time() = default;
 	Time(std::chrono::nanoseconds ns);
 	Time(std::chrono::milliseconds ms);
 	Time(std::chrono::seconds sec);
 
-	float in_seconds() const;
+	double in_seconds() const;
 
 	auto operator<=>(const Time&) const = default;
 	Time& operator+=(const Time& rhs);

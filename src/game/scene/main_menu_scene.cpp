@@ -11,6 +11,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
+#include <cmath>
+#include <numbers>
+
 void MainMenuScene::initialize(Game* game) {
 	// clang-format off
 	m_images.final_fantasy_menu_border = game->resources.load_image("resource/image/final_fantasy_menu_border_15_15.png").value();
@@ -71,7 +74,7 @@ void MainMenuScene::update(Game* game) {
 		.fit_content = true,
 	};
 	const ui::Style menu_item_text_style = {
-			.width = ui::Pixels(150),
+			.width = ui::Pixels(130),
 			.padding = {
 					.bottom = 2,
 				},
@@ -82,10 +85,16 @@ void MainMenuScene::update(Game* game) {
 			},
 		};
 	const int indicator_size = 48;
+	const Vector2 focus_indicator_pos = { -indicator_size, -8 };
+	const double time_now = game->input.time_now.in_seconds();
+	const double period = 1.8; // seconds
+	const double freq = 1.0 / period;
+	const double two_pi = 2.0 * std::numbers::pi;
+	const float offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
 	const ui::Style focus_indicator_style = {
 		.position =
 			ui::AbsolutePosition {
-				.x = ui::Pixels(-indicator_size),
+				.x = ui::Pixels(-indicator_size + offset),
 				.y = ui::Pixels(-8),
 			},
 		.width = ui::Pixels(indicator_size),
@@ -143,7 +152,6 @@ void MainMenuScene::update(Game* game) {
 						}
 
 						/* Focus indicator */
-
 						if (hovered_and_mouse || focused_and_keyboard_or_gamepad) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
