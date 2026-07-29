@@ -224,9 +224,59 @@ TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_EndEnd_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+TEST_F(ElementSnapshotTests, Box_Alignment_DifferentSizes_StartStart_Horizontal) {
+	ui::Context context = {};
+	ui::Element element = aligned_boxes_with_different_sizes(ui::Alignment::Start, ui::Direction::Horizontal);
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(ElementSnapshotTests, Box_Alignment_DifferentSizes_StartStart_Vertical) {
+	ui::Context context = {};
+	ui::Element element = aligned_boxes_with_different_sizes(ui::Alignment::Start, ui::Direction::Vertical);
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
 TEST_F(ElementSnapshotTests, Box_Alignment_DifferentSizes_CenterCenter_Horizontal) {
 	ui::Context context = {};
 	ui::Element element = aligned_boxes_with_different_sizes(ui::Alignment::Center, ui::Direction::Horizontal);
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(ElementSnapshotTests, Box_Alignment_DifferentSizes_CenterCenter_Vertical) {
+	ui::Context context = {};
+	ui::Element element = aligned_boxes_with_different_sizes(ui::Alignment::Center, ui::Direction::Vertical);
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(ElementSnapshotTests, Box_Alignment_DifferentSizes_EndEnd_Horizontal) {
+	ui::Context context = {};
+	ui::Element element = aligned_boxes_with_different_sizes(ui::Alignment::End, ui::Direction::Horizontal);
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(ElementSnapshotTests, Box_Alignment_DifferentSizes_EndEnd_Vertical) {
+	ui::Context context = {};
+	ui::Element element = aligned_boxes_with_different_sizes(ui::Alignment::End, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
