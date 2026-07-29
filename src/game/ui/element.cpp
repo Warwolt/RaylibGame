@@ -70,11 +70,6 @@ namespace ui {
 		};
 	}
 
-	struct Measure2 {
-		Measure x;
-		Measure y;
-	};
-
 	// The size of an element only considering its content.
 	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element, const Style& resolved_style) {
 		if (const Text* text = element.text()) {
@@ -380,22 +375,22 @@ namespace ui {
 
 		/* Recurse into children */
 		if (Box* box = element->box()) {
-			/* Compute padding for alignment */
+			/* Compute padding for alignment on main axis */
 			float left_padding = 0;
 			float top_padding = 0;
-			const Vector2 child_content_size = compute_child_content_size(*box);
-			const int horizontal_remainder = element->layout.content_box.width - child_content_size.x;
-			const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
-			switch (box->direction) {
-				case Direction::Horizontal: {
-					left_padding = alignment_padding(resolved_style.alignment, horizontal_remainder);
-					top_padding = alignment_padding(resolved_style.cross_alignment, vertical_remainder);
-				} break;
+			{
+				const Vector2 child_content_size = compute_child_content_size(*box);
+				const int horizontal_remainder = element->layout.content_box.width - child_content_size.x;
+				const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
+				switch (box->direction) {
+					case Direction::Horizontal: {
+						left_padding = alignment_padding(resolved_style.alignment, horizontal_remainder);
+					} break;
 
-				case Direction::Vertical: {
-					left_padding = alignment_padding(resolved_style.cross_alignment, horizontal_remainder);
-					top_padding = alignment_padding(resolved_style.alignment, vertical_remainder);
-				} break;
+					case Direction::Vertical: {
+						top_padding = alignment_padding(resolved_style.alignment, vertical_remainder);
+					} break;
+				}
 			}
 
 			/* Iterate over children */
@@ -404,8 +399,27 @@ namespace ui {
 				.y = layout->content_box.y + top_padding,
 			};
 			for (Element& child : box->children) {
+				/* Compute per-child cross-axis padding */
+				float child_left_padding = 0;
+				float child_top_padding = 0;
+				if (!child.style.position.is_absolute_position()) {
+					switch (box->direction) {
+						case Direction::Horizontal: {
+							const float remainder = element->layout.content_box.height - child.layout.margin_box.height;
+							child_top_padding = alignment_padding(resolved_style.cross_alignment, remainder);
+						} break;
+						case Direction::Vertical: {
+							const float remainder = element->layout.content_box.width - child.layout.margin_box.width;
+							child_left_padding = alignment_padding(resolved_style.cross_alignment, remainder);
+						} break;
+					}
+				}
+
 				/* Compute child position */
-				const Vector2 child_position = cursor;
+				const Vector2 child_position = {
+					.x = cursor.x + child_left_padding,
+					.y = cursor.y + child_top_padding,
+				};
 				const Rectangle child_containing_box =
 					resolved_style.position.is_static_position() ? containing_box : element->layout.margin_box;
 				compute_element_positions(context, child_position, child_containing_box, &child);

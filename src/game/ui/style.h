@@ -49,6 +49,11 @@ namespace ui {
 		}
 	};
 
+	struct Measure2 {
+		Measure x;
+		Measure y;
+	};
+
 	struct StaticPosition {};
 	struct RelativePosition {
 		Measure x;
