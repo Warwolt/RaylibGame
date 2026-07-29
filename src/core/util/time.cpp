@@ -10,11 +10,10 @@ Time Time::now() {
 	LARGE_INTEGER counter;
 	QueryPerformanceCounter(&counter);
 
-	// Split into whole seconds and remainder to avoid int64 overflow
-	auto whole_seconds = counter.QuadPart / frequency.QuadPart;
-	auto remainder = counter.QuadPart % frequency.QuadPart;
-	auto ns = std::chrono::nanoseconds(whole_seconds * 1000000000LL + (remainder * 1000000000LL) / frequency.QuadPart);
-	return Time { ns };
+	// Split into whole seconds and remainder to avoid overflow
+	LONGLONG whole_seconds = counter.QuadPart / frequency.QuadPart;
+	LONGLONG remainder = counter.QuadPart % frequency.QuadPart;
+	return Time { std::chrono::nanoseconds(whole_seconds * 1000000000LL + (remainder * 1000000000LL) / frequency.QuadPart) };
 }
 
 Time::Time(std::chrono::nanoseconds ns)
