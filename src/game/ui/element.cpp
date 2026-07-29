@@ -70,11 +70,6 @@ namespace ui {
 		};
 	}
 
-	struct Measure2 {
-		Measure x;
-		Measure y;
-	};
-
 	// The size of an element only considering its content.
 	static Measure2 get_intrinsic_content_size(const ResourceManager& resources, const Element& element, const Style& resolved_style) {
 		if (const Text* text = element.text()) {

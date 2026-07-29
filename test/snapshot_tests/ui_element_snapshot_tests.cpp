@@ -113,7 +113,7 @@ TEST_F(ElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 
 #pragma region Alignment
 
-ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
+ui::Element aligned_boxes(ui::Alignment alignment, ui::Direction direction, std::vector<ui::Measure2> sizes) {
 	ui::Context context = {};
 	ui::Element element = {
 		.style = {
@@ -125,12 +125,13 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 			.children = {},
 		},
 	};
-	for (int i = 0; i < 3; i++) {
+	int i = 0;
+	for (auto& [width, height] : sizes) {
 		element.box()->children.push_back(
 			ui::Element {
 				.style = {
-					.width = ui::Pixels(100),
-					.height= ui::Pixels(100),
+					.width = width,
+					.height= height,
 					.margin = ui::Edges::uniform(2),
 					.border = {
 						.edges = ui::Edges::uniform(2),
@@ -146,13 +147,19 @@ ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 				},
 			}
 		);
+		i++;
 	}
 	return element;
 }
 
-TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
+ui::Element aligned_boxes_with_same_size(ui::Alignment alignment, ui::Direction direction) {
+	const std::vector<ui::Measure2> sizes = { { ui::Pixels(100), ui::Pixels(100) }, { ui::Pixels(100), ui::Pixels(100) }, { ui::Pixels(100), ui::Pixels(100) } };
+	return aligned_boxes(alignment, direction, sizes);
+}
+
+TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_StartStart_Horizontal) {
 	ui::Context context = {};
-	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Horizontal);
+	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::Start, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
@@ -162,9 +169,9 @@ TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Vertical) {
+TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_StartStart_Vertical) {
 	ui::Context context = {};
-	ui::Element element = box_alignment(ui::Alignment::Start, ui::Direction::Vertical);
+	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::Start, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
@@ -172,9 +179,9 @@ TEST_F(ElementSnapshotTests, Box_Alignment_StartStart_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_CenterCenter_Horizontal) {
 	ui::Context context = {};
-	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Horizontal);
+	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::Center, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
@@ -182,9 +189,9 @@ TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Vertical) {
+TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_CenterCenter_Vertical) {
 	ui::Context context = {};
-	ui::Element element = box_alignment(ui::Alignment::Center, ui::Direction::Vertical);
+	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::Center, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
@@ -192,9 +199,9 @@ TEST_F(ElementSnapshotTests, Box_Alignment_CenterCenter_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Horizontal) {
+TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_EndEnd_Horizontal) {
 	ui::Context context = {};
-	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Horizontal);
+	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::End, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
@@ -202,9 +209,9 @@ TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Horizontal) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
+TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_EndEnd_Vertical) {
 	ui::Context context = {};
-	ui::Element element = box_alignment(ui::Alignment::End, ui::Direction::Vertical);
+	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::End, ui::Direction::Vertical);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
