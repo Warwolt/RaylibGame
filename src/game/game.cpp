@@ -55,6 +55,13 @@ void Game_update(Game* game) {
 		game->window.toggle_fullscreen();
 	}
 
+	/* Handle cursor visiblity */
+	if (game->input.last_input_was_gamepad() || game->input.last_input_was_keyboard()) {
+		Raylib_HideCursor();
+	} else {
+		Raylib_ShowCursor();
+	}
+
 	/* Update systems */
 	game->window.update();
 

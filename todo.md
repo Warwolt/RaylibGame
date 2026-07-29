@@ -1,5 +1,4 @@
 # TODO
-- Hide mouse if fullscreen and last input method was gamepad
 - MainMenu scene with mouse+keyboard buttons
 - Gameplay scene with basic camera + character movement
 - Collision detection test screen
@@ -7,6 +6,7 @@
 - Bug: Fix clang format not formatting nested designated initializers
 
 # Done
+- Hide mouse if fullscreen and last input method was gamepad
 - Animate focus indicator
 - QoL: Render something while hot reload build is on going. Give visual feedback if hot reload went ok.
 - The --clean-snapshots option should clean images _after_ tests have ran
