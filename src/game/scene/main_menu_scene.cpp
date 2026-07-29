@@ -121,7 +121,8 @@ void MainMenuScene::update(Game* game) {
 					{
 						m_ui.initially_focus_current_element();
 						const bool hovered_and_mouse = game->input.last_input_was_mouse() && m_ui.element_is_hovered();
-						const bool focused_and_keyboard = game->input.last_input_was_keyboard() && m_ui.element_is_focused();
+						const bool keyboard_or_gamepad = game->input.last_input_was_keyboard() || game->input.last_input_was_gamepad();
+						const bool focused_and_keyboard_or_gamepad = keyboard_or_gamepad && m_ui.element_is_focused();
 
 						/* On click */
 						if (m_ui.element_is_clicked()) {
@@ -143,13 +144,13 @@ void MainMenuScene::update(Game* game) {
 
 						/* Focus indicator */
 
-						if (hovered_and_mouse || focused_and_keyboard) {
+						if (hovered_and_mouse || focused_and_keyboard_or_gamepad) {
 							m_ui.image(m_images.focus_indicator, focus_indicator_style);
 						}
 
 						/* Menu text */
 						ui::Style style = menu_item_text_style;
-						if (hovered_and_mouse || focused_and_keyboard) {
+						if (hovered_and_mouse || focused_and_keyboard_or_gamepad) {
 							style.font.color = YELLOW;
 						}
 						m_ui.text(menu_items[i], style);
