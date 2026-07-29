@@ -1,6 +1,5 @@
 #include "platform/input.h"
 
-#include "core/debug/logging.h"
 #include "core/util.h"
 #include "platform/window.h"
 
