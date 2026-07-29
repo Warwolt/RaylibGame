@@ -1,11 +1,12 @@
 # TODO
-- MainMenu scene with mouse+keyboard buttons
+- Make box direction a style property instead of a content property
 - Gameplay scene with basic camera + character movement
 - Collision detection test screen
 - Collision resolution test screen
 - Bug: Fix clang format not formatting nested designated initializers
 
 # Done
+- Main menu with mouse+keyboard+gamepad navigation
 - Hide mouse if fullscreen and last input method was gamepad
 - Animate focus indicator
 - QoL: Render something while hot reload build is on going. Give visual feedback if hot reload went ok.

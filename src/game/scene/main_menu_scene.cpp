@@ -13,6 +13,8 @@
 
 #include <cmath>
 #include <numbers>
+#include <unordered_map>
+#include <vector>
 
 void MainMenuScene::initialize(Game* game) {
 	// clang-format off
@@ -24,16 +26,23 @@ void MainMenuScene::initialize(Game* game) {
 void MainMenuScene::deinitialize(Game* /*game*/) {
 }
 
-namespace MenuItems {
-	enum {
-		Continue,
-		LoadGame,
-		NewGame,
-		Settings,
-		Quit,
-		Count,
-	};
-}
+enum MenuItem {
+	MenuItem_Start,
+	MenuItem_Settings,
+	MenuItem_Quit,
+};
+
+const std::vector<MenuItem> menu_items = {
+	MenuItem_Start,
+	MenuItem_Settings,
+	MenuItem_Quit,
+};
+
+const std::unordered_map<MenuItem, const char*> item_labels = {
+	{ MenuItem_Start, "Start" },
+	{ MenuItem_Settings, "Settings" },
+	{ MenuItem_Quit, "Quit" },
+};
 
 void MainMenuScene::update(Game* game) {
 	PROFILING_SCOPE();
@@ -41,92 +50,75 @@ void MainMenuScene::update(Game* game) {
 		game->scenes.pop_scene(game);
 	}
 
-	const ui::Style menu_style = {
-		.alignment = ui::Alignment::Center,
-	};
-	const ui::Style title_container_style = {
-			.width = ui::Percentage(33),
-			.border = {
-				.edges = ui::Edges::uniform(16),
-				.image = m_images.final_fantasy_menu_border,
-				.image_slices = ui::Edges::uniform(5),
-			},
-			.alignment = ui::Alignment::Center,
-			.cross_alignment = ui::Alignment::Center,
-			.background = { .color = Color { 20, 37, 136, 255 }, }
-
-		};
-	const ui::Style image_style {
-			.width = ui::Pixels(200),
-			.height = ui::Pixels(200),
-			.border = {
-				.edges = ui::Edges::uniform(2),
-				.color = WHITE,
-			},
-		};
-	const ui::Style menu_container = {
-		.padding = ui::Edges::uniform(16),
-		.alignment = ui::Alignment::Center,
-		.cross_alignment = ui::Alignment::Center,
-	};
-	const ui::Style menu_item_container = {
-		.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
-		.fit_content = true,
-	};
-	const ui::Style menu_item_text_style = {
-			.width = ui::Pixels(130),
-			.padding = {
-					.bottom = 2,
-				},
-			.alignment = ui::Alignment::Center,
-			.font = {
-				.size = 32,
-				.color = WHITE,
-			},
-		};
-	const int indicator_size = 48;
-	const Vector2 focus_indicator_pos = { -indicator_size, -8 };
 	const double time_now = game->input.time_now.in_seconds();
 	const double period = 1.8; // seconds
 	const double freq = 1.0 / period;
 	const double two_pi = 2.0 * std::numbers::pi;
-	const float offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
-	const ui::Style focus_indicator_style = {
-		.position =
-			ui::AbsolutePosition {
-				.x = ui::Pixels(-indicator_size + offset),
-				.y = ui::Pixels(-8),
+	const float focus_indicator_offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
+	const int focus_indicator_size = 48;
+	struct Styles {
+		ui::Style menu_container;
+		ui::Style menu_title;
+		ui::Style item_list;
+		ui::Style menu_item;
+		ui::Style focus_indicator;
+		ui::Style item_label;
+	};
+	const Styles styles = {
+		.menu_container = {
+			.alignment = ui::Alignment::Center,
+			.cross_alignment = ui::Alignment::Center,
+		},
+		.menu_title = {
+			.margin = {
+				.bottom = 48,
 			},
-		.width = ui::Pixels(indicator_size),
-		.height = ui::Pixels(indicator_size),
+			.font = {
+				.size = 64,
+			},
+		},
+		.item_list = {
+			.fit_content = true,
+			.cross_alignment = ui::Alignment::Center,
+		},
+		.menu_item = {
+			.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
+			.fit_content = true,
+		},
+		.focus_indicator = {
+			.position =
+				ui::AbsolutePosition {
+					.x = ui::Pixels(-focus_indicator_size + focus_indicator_offset),
+					.y = ui::Pixels(-8),
+				},
+			.width = ui::Pixels(focus_indicator_size),
+			.height = ui::Pixels(focus_indicator_size),
+		},
+		.item_label = {
+			.width = ui::Pixels(130),
+			.padding = {
+				.bottom = 2,
+			},
+			.alignment = ui::Alignment::Center,
+			.font = {
+				.size = 32,
+			},
+		},
 	};
 
-	const char* menu_items[MenuItems::Count] = {};
-	menu_items[MenuItems::Continue] = "Continue";
-	menu_items[MenuItems::LoadGame] = "Load Game";
-	menu_items[MenuItems::NewGame] = "New Game";
-	menu_items[MenuItems::Settings] = "Settings";
-	menu_items[MenuItems::Quit] = "Quit";
 	m_ui.frame_begin();
 	{
-		m_ui.box_begin(ui::Direction::Vertical, menu_style);
+		m_ui.box_begin(ui::Direction::Vertical, styles.menu_container);
 		{
-			m_ui.box_begin(ui::Direction::Horizontal, ui::Style { .alignment = ui::Alignment::Center });
-			{
-				m_ui.box_begin(ui::Direction::Vertical, title_container_style);
-				{
-					m_ui.text("Video Game", ui::Style { .alignment = ui::Alignment::Center, .font = { .size = 64 } });
-				}
-				m_ui.box_end();
-			}
-			m_ui.box_end();
+			/* Title */
+			m_ui.text("Video Game", styles.menu_title);
 
-			m_ui.box_begin(ui::Direction::Vertical, menu_container);
+			/* Menu */
+			m_ui.box_begin(ui::Direction::Vertical, styles.item_list);
 			{
-				/* Menu */
-				for (int i = 0; i < MenuItems::Count; i++) {
-					/* Menu item */
-					m_ui.box_begin(ui::Direction::Horizontal, menu_item_container, menu_items[i]);
+				/* Items */
+				for (MenuItem item : menu_items) {
+					m_ui.box_begin(ui::Direction::Horizontal, styles.menu_item);
 					{
 						m_ui.initially_focus_current_element();
 						const bool hovered_and_mouse = game->input.last_input_was_mouse() && m_ui.element_is_hovered();
@@ -135,12 +127,16 @@ void MainMenuScene::update(Game* game) {
 
 						/* On click */
 						if (m_ui.element_is_clicked()) {
-							switch (i) {
-								case MenuItems::Continue: {
+							switch (item) {
+								case MenuItem_Start: {
 									game->scenes.push_scene(game, SceneID::Gameplay);
 								} break;
 
-								case MenuItems::Quit: {
+								case MenuItem_Settings: {
+									/* Nothing yet */
+								} break;
+
+								case MenuItem_Quit: {
 									game->scenes.pop_scene(game);
 								} break;
 							}
@@ -153,15 +149,17 @@ void MainMenuScene::update(Game* game) {
 
 						/* Focus indicator */
 						if (hovered_and_mouse || focused_and_keyboard_or_gamepad) {
-							m_ui.image(m_images.focus_indicator, focus_indicator_style);
+							m_ui.image(m_images.focus_indicator, styles.focus_indicator);
 						}
 
 						/* Menu text */
-						ui::Style style = menu_item_text_style;
+						ui::Style item_label_style = styles.item_label;
 						if (hovered_and_mouse || focused_and_keyboard_or_gamepad) {
-							style.font.color = YELLOW;
+							item_label_style.font.color = YELLOW;
+						} else {
+							item_label_style.font.color = WHITE;
 						}
-						m_ui.text(menu_items[i], style);
+						m_ui.text(item_labels.at(item), item_label_style);
 					}
 					m_ui.box_end();
 				}

@@ -10,7 +10,7 @@
 // low resolution 16:9
 constexpr int SCREEN_WIDTH = 768;
 constexpr int SCREEN_HEIGHT = 432;
-constexpr char SCREEN_TITLE[] = "Program";
+constexpr char SCREEN_TITLE[] = "Video Game";
 
 Game* Game_initialize(int argc, char** argv) {
 	/* Parse command line */
