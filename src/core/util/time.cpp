@@ -1,6 +1,6 @@
 #include "core/util/time.h"
 
-#include <Windows.h>
+#include <windows.h>
 
 Time Time::now() {
 	static LARGE_INTEGER frequency = {};
