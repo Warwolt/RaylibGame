@@ -1,11 +1,24 @@
 #include "core/util/time.h"
 
+#include <Windows.h>
+
 Time Time::now() {
-	return Time { std::chrono::high_resolution_clock::now().time_since_epoch() };
+	static LARGE_INTEGER frequency = {};
+	if (frequency.QuadPart == 0) {
+		QueryPerformanceFrequency(&frequency);
+	}
+	LARGE_INTEGER counter;
+	QueryPerformanceCounter(&counter);
+
+	// Split into whole seconds and remainder to avoid int64 overflow
+	auto whole_seconds = counter.QuadPart / frequency.QuadPart;
+	auto remainder = counter.QuadPart % frequency.QuadPart;
+	auto ns = std::chrono::nanoseconds(whole_seconds * 1000000000LL + (remainder * 1000000000LL) / frequency.QuadPart);
+	return Time { ns };
 }
 
 Time::Time(std::chrono::nanoseconds ns)
-	: value(std::chrono::duration_cast<std::chrono::milliseconds>(ns)) {
+	: value(ns) {
 }
 
 Time::Time(std::chrono::milliseconds ms)
@@ -13,11 +26,11 @@ Time::Time(std::chrono::milliseconds ms)
 }
 
 Time::Time(std::chrono::seconds sec)
-	: value(std::chrono::duration_cast<std::chrono::milliseconds>(sec)) {
+	: value(sec) {
 }
 
-float Time::in_seconds() const {
-	return std::chrono::duration<float>(value).count();
+double Time::in_seconds() const {
+	return std::chrono::duration<double>(value).count();
 }
 
 Time& Time::operator+=(const Time& rhs) {
