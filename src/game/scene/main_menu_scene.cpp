@@ -86,10 +86,15 @@ void MainMenuScene::update(Game* game) {
 		};
 	const int indicator_size = 48;
 	const Vector2 focus_indicator_pos = { -indicator_size, -8 };
-	ui::Style focus_indicator_style = {
+	const double time_now = game->input.time_now.in_seconds();
+	const double period = 1.8; // seconds
+	const double freq = 1.0 / period;
+	const double two_pi = 2.0 * std::numbers::pi;
+	const float offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
+	const ui::Style focus_indicator_style = {
 		.position =
 			ui::AbsolutePosition {
-				.x = ui::Pixels(-indicator_size),
+				.x = ui::Pixels(-indicator_size + offset),
 				.y = ui::Pixels(-8),
 			},
 		.width = ui::Pixels(indicator_size),
@@ -118,17 +123,6 @@ void MainMenuScene::update(Game* game) {
 
 			m_ui.box_begin(ui::Direction::Vertical, menu_container);
 			{
-				/* Focus indicator animation */
-				const double time_now = game->input.time_now.in_seconds();
-				const double period = 1.8; // seconds
-				const double freq = 1.0 / period;
-				const double two_pi = 2.0 * std::numbers::pi;
-				const float offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
-				focus_indicator_style.position = ui::AbsolutePosition {
-					.x = ui::Pixels(focus_indicator_pos.x + offset),
-					.y = ui::Pixels(focus_indicator_pos.y),
-				};
-
 				/* Menu */
 				for (int i = 0; i < MenuItems::Count; i++) {
 					/* Menu item */
