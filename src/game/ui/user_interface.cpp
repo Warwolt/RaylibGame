@@ -24,6 +24,7 @@ namespace ui {
 	}
 
 	void UserInterface::frame_begin() {
+		PROFILING_SCOPE();
 		ASSERT(!m_is_within_frame, "Missing call to UserInterface::frame_end?");
 		m_is_within_frame = true;
 		m_tree.reset();

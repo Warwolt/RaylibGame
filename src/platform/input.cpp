@@ -1,9 +1,8 @@
 #include "platform/input.h"
 
+#include "core/debug/profiling.h"
 #include "core/util.h"
 #include "platform/window.h"
-
-#include "core/debug/logging.h"
 
 #include <raymath.h>
 
@@ -182,6 +181,8 @@ bool Input::last_input_was_gamepad() const {
 }
 
 void read_input(Input* input, const Window& window) {
+	PROFILING_SCOPE();
+
 	/* Mouse */
 	{
 		const Vector2 global_mouse_position = Raylib_GetMousePosition();
