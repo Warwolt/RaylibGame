@@ -378,17 +378,19 @@ namespace ui {
 			/* Compute padding for alignment on main axis */
 			float left_padding = 0;
 			float top_padding = 0;
-			const Vector2 child_content_size = compute_child_content_size(*box);
-			const int horizontal_remainder = element->layout.content_box.width - child_content_size.x;
-			const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
-			switch (box->direction) {
-				case Direction::Horizontal: {
-					left_padding = alignment_padding(resolved_style.alignment, horizontal_remainder);
-				} break;
+			{
+				const Vector2 child_content_size = compute_child_content_size(*box);
+				const int horizontal_remainder = element->layout.content_box.width - child_content_size.x;
+				const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
+				switch (box->direction) {
+					case Direction::Horizontal: {
+						left_padding = alignment_padding(resolved_style.alignment, horizontal_remainder);
+					} break;
 
-				case Direction::Vertical: {
-					top_padding = alignment_padding(resolved_style.alignment, vertical_remainder);
-				} break;
+					case Direction::Vertical: {
+						top_padding = alignment_padding(resolved_style.alignment, vertical_remainder);
+					} break;
+				}
 			}
 
 			/* Iterate over children */
@@ -403,12 +405,12 @@ namespace ui {
 				if (!child.style.position.is_absolute_position()) {
 					switch (box->direction) {
 						case Direction::Horizontal: {
-							const float child_vertical_remainder = element->layout.content_box.height - child.layout.margin_box.height;
-							child_top_padding = alignment_padding(resolved_style.cross_alignment, child_vertical_remainder);
+							const float remainder = element->layout.content_box.height - child.layout.margin_box.height;
+							child_top_padding = alignment_padding(resolved_style.cross_alignment, remainder);
 						} break;
 						case Direction::Vertical: {
-							const float child_horizontal_remainder = element->layout.content_box.width - child.layout.margin_box.width;
-							child_left_padding = alignment_padding(resolved_style.cross_alignment, child_horizontal_remainder);
+							const float remainder = element->layout.content_box.width - child.layout.margin_box.width;
+							child_left_padding = alignment_padding(resolved_style.cross_alignment, remainder);
 						} break;
 					}
 				}
