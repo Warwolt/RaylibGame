@@ -375,7 +375,7 @@ namespace ui {
 
 		/* Recurse into children */
 		if (Box* box = element->box()) {
-			/* Compute padding for alignment */
+			/* Compute padding for alignment on main axis */
 			float left_padding = 0;
 			float top_padding = 0;
 			const Vector2 child_content_size = compute_child_content_size(*box);
@@ -384,11 +384,9 @@ namespace ui {
 			switch (box->direction) {
 				case Direction::Horizontal: {
 					left_padding = alignment_padding(resolved_style.alignment, horizontal_remainder);
-					top_padding = alignment_padding(resolved_style.cross_alignment, vertical_remainder);
 				} break;
 
 				case Direction::Vertical: {
-					left_padding = alignment_padding(resolved_style.cross_alignment, horizontal_remainder);
 					top_padding = alignment_padding(resolved_style.alignment, vertical_remainder);
 				} break;
 			}
@@ -399,8 +397,27 @@ namespace ui {
 				.y = layout->content_box.y + top_padding,
 			};
 			for (Element& child : box->children) {
+				/* Compute per-child cross-axis padding */
+				float child_left_padding = 0;
+				float child_top_padding = 0;
+				if (!child.style.position.is_absolute_position()) {
+					switch (box->direction) {
+						case Direction::Horizontal: {
+							const float child_vertical_remainder = element->layout.content_box.height - child.layout.margin_box.height;
+							child_top_padding = alignment_padding(resolved_style.cross_alignment, child_vertical_remainder);
+						} break;
+						case Direction::Vertical: {
+							const float child_horizontal_remainder = element->layout.content_box.width - child.layout.margin_box.width;
+							child_left_padding = alignment_padding(resolved_style.cross_alignment, child_horizontal_remainder);
+						} break;
+					}
+				}
+
 				/* Compute child position */
-				const Vector2 child_position = cursor;
+				const Vector2 child_position = {
+					.x = cursor.x + child_left_padding,
+					.y = cursor.y + child_top_padding,
+				};
 				const Rectangle child_containing_box =
 					resolved_style.position.is_static_position() ? containing_box : element->layout.margin_box;
 				compute_element_positions(context, child_position, child_containing_box, &child);
