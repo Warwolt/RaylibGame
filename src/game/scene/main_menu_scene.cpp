@@ -74,7 +74,7 @@ void MainMenuScene::update(Game* game) {
 		.fit_content = true,
 	};
 	const ui::Style menu_item_text_style = {
-			.width = ui::Pixels(150),
+			.width = ui::Pixels(130),
 			.padding = {
 					.bottom = 2,
 				},
@@ -119,8 +119,11 @@ void MainMenuScene::update(Game* game) {
 			m_ui.box_begin(ui::Direction::Vertical, menu_container);
 			{
 				/* Focus indicator animation */
-				const double freq = 2.0;
-				const float offset = 10.0f * std::abs(std::cos(game->input.time_now.in_seconds() * 2.0f * (float)std::numbers::pi));
+				const double time_now = game->input.time_now.in_seconds();
+				const double period = 1.8; // seconds
+				const double freq = 1.0 / period;
+				const double two_pi = 2.0 * std::numbers::pi;
+				const float offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
 				focus_indicator_style.position = ui::AbsolutePosition {
 					.x = ui::Pixels(focus_indicator_pos.x + offset),
 					.y = ui::Pixels(focus_indicator_pos.y),
