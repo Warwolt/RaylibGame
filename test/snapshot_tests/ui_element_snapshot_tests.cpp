@@ -157,6 +157,11 @@ ui::Element aligned_boxes_with_same_size(ui::Alignment alignment, ui::Direction 
 	return aligned_boxes(alignment, direction, sizes);
 }
 
+ui::Element aligned_boxes_with_different_sizes(ui::Alignment alignment, ui::Direction direction) {
+	const std::vector<ui::Measure2> sizes = { { ui::Pixels(50), ui::Pixels(50) }, { ui::Pixels(100), ui::Pixels(100) }, { ui::Pixels(200), ui::Pixels(200) } };
+	return aligned_boxes(alignment, direction, sizes);
+}
+
 TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_StartStart_Horizontal) {
 	ui::Context context = {};
 	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::Start, ui::Direction::Horizontal);
@@ -212,6 +217,16 @@ TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_EndEnd_Horizontal) {
 TEST_F(ElementSnapshotTests, Box_Alignment_SameSize_EndEnd_Vertical) {
 	ui::Context context = {};
 	ui::Element element = aligned_boxes_with_same_size(ui::Alignment::End, ui::Direction::Vertical);
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(ElementSnapshotTests, Box_Alignment_DifferentSizes_CenterCenter_Horizontal) {
+	ui::Context context = {};
+	ui::Element element = aligned_boxes_with_different_sizes(ui::Alignment::Center, ui::Direction::Horizontal);
 
 	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
 	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
