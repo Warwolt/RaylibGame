@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/util/time.h"
 #include "core/util/tracked.h"
 
 #include <raylib.h>
@@ -80,6 +81,9 @@ struct Input {
 	bool last_input_was_mouse() const;
 	bool last_input_was_keyboard() const;
 	bool last_input_was_gamepad() const;
+
+	/* Time */
+	Time time_now = {};
 };
 
 void read_input(Input* input, const Window& window);

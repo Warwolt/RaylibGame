@@ -286,5 +286,8 @@ void read_input(Input* input, const Window& window) {
 				}
 			}
 		}
+
+		/* Time */
+		input->time_now = Time::now();
 	}
 }
