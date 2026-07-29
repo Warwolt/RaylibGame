@@ -40,6 +40,8 @@ ImageID ElementSnapshotTests::m_big_test_image;
 ImageID ElementSnapshotTests::m_small_test_image;
 ImageID ElementSnapshotTests::m_nine_slice_image;
 
+#pragma region Sizing
+
 TEST_F(ElementSnapshotTests, Box_100_100_Gives_50_50) {
 	ui::Context context = {};
 	ui::Element element = {
@@ -106,6 +108,10 @@ TEST_F(ElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 	EXPECT_EQ(element.box()->children[2].layout.margin_box.width, SCREEN_WIDTH * 0.375);
 	EXPECT_SNAPSHOT_EQ(image);
 }
+
+#pragma endregion
+
+#pragma region Alignment
 
 ui::Element box_alignment(ui::Alignment alignment, ui::Direction direction) {
 	ui::Context context = {};
@@ -205,6 +211,70 @@ TEST_F(ElementSnapshotTests, Box_Alignment_EndEnd_Vertical) {
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
+
+TEST_F(ElementSnapshotTests, Text_LeftAligned) {
+	ui::Context context = {};
+	ui::Element element = {
+		.style = {
+			.width = ui::Percentage(100),
+			.padding = ui::Edges::uniform(20),
+			.alignment = ui::Alignment::Start,
+			.font = { .size = 32 },
+		},
+		.content = ui::Text {
+			.text = "Left Aligned Text",
+		}
+	};
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(ElementSnapshotTests, Text_CenterAligned) {
+	ui::Context context = {};
+	ui::Element element = {
+		.style = {
+			.width = ui::Percentage(100),
+			.padding = ui::Edges::uniform(20),
+			.alignment = ui::Alignment::Center,
+			.font = { .size = 32 },
+		},
+		.content = ui::Text {
+			.text = "Center Aligned Text",
+		}
+	};
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(ElementSnapshotTests, Text_RightAligned) {
+	ui::Context context = {};
+	ui::Element element = {
+		.style = {
+			.width = ui::Percentage(100),
+			.padding = ui::Edges::uniform(20),
+			.alignment = ui::Alignment::End,
+			.font = { .size = 32 },
+		},
+		.content = ui::Text {
+			.text = "Right Aligned Text",
+		}
+	};
+
+	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
+	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
+
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+#pragma endregion
+
+#pragma region Position
 
 ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 	return {
@@ -540,6 +610,10 @@ TEST_F(ElementSnapshotTests, Box_FitContent_TextImageChild_FitsImage_Vertical) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+#pragma endregion
+
+#pragma region State
+
 ui::Element button_box() {
 	return {
 		.id = "button_box",
@@ -612,65 +686,9 @@ TEST_F(ElementSnapshotTests, Box_ActiveStyle) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(ElementSnapshotTests, Text_LeftAligned) {
-	ui::Context context = {};
-	ui::Element element = {
-		.style = {
-			.width = ui::Percentage(100),
-			.padding = ui::Edges::uniform(20),
-			.alignment = ui::Alignment::Start,
-			.font = { .size = 32 },
-		},
-		.content = ui::Text {
-			.text = "Left Aligned Text",
-		}
-	};
+#pragma endregion
 
-	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
-
-TEST_F(ElementSnapshotTests, Text_CenterAligned) {
-	ui::Context context = {};
-	ui::Element element = {
-		.style = {
-			.width = ui::Percentage(100),
-			.padding = ui::Edges::uniform(20),
-			.alignment = ui::Alignment::Center,
-			.font = { .size = 32 },
-		},
-		.content = ui::Text {
-			.text = "Center Aligned Text",
-		}
-	};
-
-	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
-
-TEST_F(ElementSnapshotTests, Text_RightAligned) {
-	ui::Context context = {};
-	ui::Element element = {
-		.style = {
-			.width = ui::Percentage(100),
-			.padding = ui::Edges::uniform(20),
-			.alignment = ui::Alignment::End,
-			.font = { .size = 32 },
-		},
-		.content = ui::Text {
-			.text = "Right Aligned Text",
-		}
-	};
-
-	ui::layout_element(m_resources, context, SCREEN_SIZE, &element);
-	Image image = snapshots::render_image(SCREEN_SIZE, [&]() { ui::draw_element(m_resources, context, element); });
-
-	EXPECT_SNAPSHOT_EQ(image);
-}
+#pragma region Text
 
 TEST_F(ElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 	ui::Context context = {};
@@ -732,6 +750,10 @@ TEST_F(ElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
+
+#pragma endregion
+
+#pragma region Image
 
 TEST_F(ElementSnapshotTests, Image_DefaultStyle_UsesIntrinsicSize) {
 	ui::Context context = {};
@@ -951,6 +973,10 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
+#pragma endregion
+
+#pragma region Background
+
 TEST_F(ElementSnapshotTests, BackgroundImage_FillByRepeat) {
 	ui::Context context = {};
 	ui::Element element = {
@@ -986,6 +1012,10 @@ TEST_F(ElementSnapshotTests, BackgroundImage_FillByStretch) {
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
+
+#pragma endregion
+
+#pragma region Border
 
 TEST_F(ElementSnapshotTests, BorderImage_NineSlice_FillCenter) {
 	ui::Context context = {};
@@ -1026,3 +1056,5 @@ TEST_F(ElementSnapshotTests, BorderImage_NineSlice_WithoutCenter) {
 
 	EXPECT_SNAPSHOT_EQ(image);
 }
+
+#pragma endregion
