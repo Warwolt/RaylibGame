@@ -16,11 +16,15 @@
 #include <unordered_map>
 #include <vector>
 
+Sound g_menu_sound;
+
 void MainMenuScene::initialize(Game* game) {
 	// clang-format off
 	m_images.final_fantasy_menu_border = game->resources.load_image("resource/image/final_fantasy_menu_border_15_15.png").value();
 	m_images.focus_indicator = game->resources.load_image("resource/image/pointing_hand.png").value();
 	// clang-format on
+
+	g_menu_sound = Raylib_LoadSound("resource/sound/menu_navigate.wav");
 }
 
 void MainMenuScene::deinitialize(Game* /*game*/) {
@@ -145,6 +149,11 @@ void MainMenuScene::update(Game* game) {
 						/* On hover */
 						if (m_ui.element_is_hovered().has_changed_to(true)) {
 							m_ui.focus_current_element();
+						}
+
+						/* On focus */
+						if (m_ui.element_is_focused().has_changed_to(true)) {
+							Raylib_PlaySound(g_menu_sound);
 						}
 
 						/* Focus indicator */
