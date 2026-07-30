@@ -37,6 +37,7 @@ namespace ui {
 		m_is_within_frame = false;
 		layout_element(resources, m_context, window_size, &m_tree.root());
 		update_element(input, &m_context, &m_tree.root());
+		m_context.update();
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string id) {
