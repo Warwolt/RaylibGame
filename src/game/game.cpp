@@ -28,6 +28,7 @@ Game* Game_initialize(int argc, char** argv) {
 	Raylib_InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE);
 	Raylib_SetExitKey(KEY_NULL);
 	Raylib_SetTargetFPS(144);
+	Raylib_InitAudioDevice();
 
 	/* Initialize game */
 	Game* game = new Game {
@@ -83,11 +84,14 @@ void Game_render(const Game& game) {
 	/* Draw viewport onto application window */
 	Raylib_BeginDrawing();
 	{
+		const RenderTexture viewport = game.window.viewport();
+		const Rectangle viewport_rect = {
+			.width = (float)viewport.texture.width,
+			.height = (float)-viewport.texture.height,
+		};
+		const Rectangle letterbox = game.window.letterbox();
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
-		RenderTexture viewport = game.window.viewport();
-		Rectangle viewport_rect = { .width = (float)viewport.texture.width, .height = (float)-viewport.texture.height };
-		Rectangle letterbox = game.window.letterbox();
-		DrawTexturePro(viewport.texture, viewport_rect, letterbox, Vector2Zero(), 0, WHITE);
+		Raylib_DrawTexturePro(viewport.texture, viewport_rect, letterbox, Vector2Zero(), 0, WHITE);
 	}
 	Raylib_EndDrawing();
 
@@ -96,6 +100,7 @@ void Game_render(const Game& game) {
 
 void Game_shutdown(Game* game) {
 	game->window.deinitialize();
+	Raylib_CloseAudioDevice();
 	Raylib_CloseWindow();
 
 	LOG_INFO("Game shutdown");

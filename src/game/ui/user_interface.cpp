@@ -37,6 +37,7 @@ namespace ui {
 		m_is_within_frame = false;
 		layout_element(resources, m_context, window_size, &m_tree.root());
 		update_element(input, &m_context, &m_tree.root());
+		m_context.update();
 	}
 
 	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string id) {
@@ -105,13 +106,17 @@ namespace ui {
 
 	void UserInterface::initially_focus_current_element() {
 		if (m_context.focused_element_id->empty()) {
-			focus_current_element();
+			// Set both current and previous value so that initially focused
+			// element doesn't trigger any focus changed events.
+			const Element& element = m_tree.current_element();
+			ASSERT(!element.id.empty(), "focus_current_element called when current element lacks id!");
+			m_context.focused_element_id = { element.id, element.id };
 		}
 	}
 
 	void UserInterface::focus_current_element() {
 		const Element& element = m_tree.current_element();
 		ASSERT(!element.id.empty(), "focus_current_element called when current element lacks id!");
-		m_context.focus_element(element);
+		m_context.focused_element_id = element.id;
 	}
 }

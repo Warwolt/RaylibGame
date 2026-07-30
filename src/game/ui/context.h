@@ -21,6 +21,8 @@ namespace ui {
 		std::unordered_map<ElementID, State> element_states; // computed with update_element()
 		Tracked<ElementID> focused_element_id;
 
+		void update();
+
 		State* state(const Element& element);
 		const State* state(const Element& element) const;
 

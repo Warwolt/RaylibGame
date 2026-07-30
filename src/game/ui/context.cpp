@@ -5,6 +5,10 @@
 
 namespace ui {
 
+	void Context::update() {
+		this->focused_element_id.update();
+	}
+
 	State* Context::state(const Element& element) {
 		if (element.id.empty()) {
 			return nullptr;
