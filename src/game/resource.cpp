@@ -33,3 +33,22 @@ Texture2D ResourceManager::get_image(ImageID image_id) const {
 	LOG_ERROR("Missing image for ImageID(%d)", image_id.value);
 	return {};
 }
+
+std::optional<SoundID> ResourceManager::load_sound(const std::string& path) {
+	Sound sound = Raylib_LoadSound(path.c_str());
+	if (!Raylib_IsSoundValid(sound)) {
+		return {};
+	}
+	SoundID id = SoundID { m_next_sound_id++ };
+	m_sounds.insert({ id.value, sound });
+	return id;
+}
+
+Sound ResourceManager::get_sound(SoundID sound_id) const {
+	if (auto it = m_sounds.find(sound_id.value); it != m_sounds.end()) {
+		return it->second;
+	}
+
+	LOG_ERROR("Missing image for SoundID(%d)", sound_id.value);
+	return {};
+}

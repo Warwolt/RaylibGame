@@ -19,6 +19,9 @@ private:
 		ImageID final_fantasy_menu_border;
 		ImageID focus_indicator;
 	} m_images;
+	struct Sounds {
+		SoundID menu_navigate;
+	} m_sounds;
 	ui::UserInterface m_ui;
 	int m_menu_index = 0;
 };

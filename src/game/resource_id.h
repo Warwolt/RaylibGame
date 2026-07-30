@@ -15,3 +15,9 @@ struct ImageID {
 
 	bool operator==(const ImageID& rhs) const = default;
 };
+
+struct SoundID {
+	int value = 0;
+
+	bool operator==(const SoundID& rhs) const = default;
+};
