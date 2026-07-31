@@ -32,12 +32,16 @@ namespace ui {
 		Tracked<bool> element_is_clicked() const;
 
 		void initially_focus_current_element();
+		void initially_focus_next_element();
 		void focus_current_element();
 
 	private:
+		void _push_element(Element element);
+
 		bool m_is_within_frame = false;
 		Context m_context;
 		Tree m_tree;
+		bool m_should_initially_focus_next_element = false;
 	};
 
 } // namespace ui

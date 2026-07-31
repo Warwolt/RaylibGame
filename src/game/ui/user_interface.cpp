@@ -42,9 +42,9 @@ namespace ui {
 
 	void UserInterface::box_begin(std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-		m_tree.push_element(
+		_push_element(
 			Element {
-				.id = id.empty() ? try_generate_automatic_id(m_tree.current_parent()) : id,
+				.id = id,
 				.style = style.value_or(Style {}),
 				.content = Box {},
 			}
@@ -59,10 +59,9 @@ namespace ui {
 
 	void UserInterface::text(std::string_view text, std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-
-		m_tree.push_element(
+		_push_element(
 			Element {
-				.id = id.empty() ? try_generate_automatic_id(m_tree.current_parent()) : id,
+				.id = id,
 				.style = style.value_or(Style {}),
 				.content = Text { .text = std::string(text) },
 			}
@@ -71,9 +70,9 @@ namespace ui {
 
 	void UserInterface::image(ImageID image, std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
-		m_tree.push_element(
+		_push_element(
 			Element {
-				.id = id.empty() ? try_generate_automatic_id(m_tree.current_parent()) : id,
+				.id = id,
 				.style = style.value_or(Style {}),
 				.content = Image { .id = image },
 			}
@@ -109,14 +108,28 @@ namespace ui {
 			// Set both current and previous value so that initially focused
 			// element doesn't trigger any focus changed events.
 			const Element& element = m_tree.current_element();
-			ASSERT(!element.id.empty(), "focus_current_element called when current element lacks id!");
 			m_context.focused_element_id = { element.id, element.id };
 		}
+	}
+
+	void UserInterface::initially_focus_next_element() {
+		m_should_initially_focus_next_element = true;
 	}
 
 	void UserInterface::focus_current_element() {
 		const Element& element = m_tree.current_element();
 		ASSERT(!element.id.empty(), "focus_current_element called when current element lacks id!");
 		m_context.focused_element_id = element.id;
+	}
+
+	void UserInterface::_push_element(Element element) {
+		if (element.id.empty()) {
+			element.id = try_generate_automatic_id(m_tree.current_parent());
+		}
+		m_tree.push_element(element);
+		if (m_should_initially_focus_next_element) {
+			m_should_initially_focus_next_element = false;
+			initially_focus_current_element();
+		}
 	}
 }

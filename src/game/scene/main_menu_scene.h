@@ -5,6 +5,25 @@ struct Game;
 #include "game/resource_id.h"
 #include "game/ui/user_interface.h"
 
+#include <string_view>
+
+class MenuUserInterface : public ui::UserInterface {
+public:
+	void initialize(Game* game);
+	void menu_begin();
+	bool menu_item(const Input& input, const ResourceManager& resources, std::string_view label);
+	void menu_end();
+
+private:
+	struct Images {
+		ImageID focus_indicator;
+	} m_images;
+
+	struct Sounds {
+		SoundID menu_navigate;
+	} m_sounds;
+};
+
 class MainMenuScene {
 public:
 	void initialize(Game* game);
@@ -14,14 +33,5 @@ public:
 	void render(const Game& game) const;
 
 private:
-	struct Images {
-		ImageID mario64_skybox;
-		ImageID final_fantasy_menu_border;
-		ImageID focus_indicator;
-	} m_images;
-	struct Sounds {
-		SoundID menu_navigate;
-	} m_sounds;
-	ui::UserInterface m_ui;
-	int m_menu_index = 0;
+	MenuUserInterface m_ui;
 };
