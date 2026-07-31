@@ -20,14 +20,8 @@ void GameplayScene::update(Game* game) {
 		m_game_paused = !m_game_paused;
 	}
 
-	/* Gameplay */
-	if (!m_game_paused) {
-		// TODO run gameplay here
-	}
-
 	/* Pause menu */
 	if (m_game_paused) {
-		m_ui.frame_begin();
 		const ui::Style menu_container_style = {
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
@@ -44,12 +38,14 @@ void GameplayScene::update(Game* game) {
 				.color = BLACK,
 			},
 		};
+		m_ui.frame_begin();
 		m_ui.box_begin(menu_container_style);
 		m_ui.menu_begin(menu_style);
 		{
 			if (m_ui.menu_item(game->input, game->resources, "Continue")) {
 				m_game_paused = false;
 			}
+
 			if (m_ui.menu_item(game->input, game->resources, "Quit")) {
 				game->scenes.pop_scene(game);
 				return;
@@ -58,6 +54,11 @@ void GameplayScene::update(Game* game) {
 		m_ui.menu_end();
 		m_ui.box_end();
 		m_ui.frame_end(game->input, game->resources, game->window.size());
+	}
+
+	/* Gameplay */
+	if (!m_game_paused) {
+		// TODO run gameplay here
 	}
 }
 
