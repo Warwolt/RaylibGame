@@ -31,7 +31,7 @@ namespace ui {
 		void image(ImageID image, std::optional<Style> style = {}, std::string id = "");
 
 		/* Menu elements */
-		void menu_begin();
+		void menu_begin(std::optional<Style> style = {});
 		bool menu_item(const Input& input, const ResourceManager& resources, std::string_view label);
 		void menu_end();
 

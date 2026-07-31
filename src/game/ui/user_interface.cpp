@@ -79,12 +79,13 @@ namespace ui {
 		);
 	}
 
-	void UserInterface::menu_begin() {
-		const Style menu_begin_style = {
+	void UserInterface::menu_begin(std::optional<Style> style) {
+		const Style default_style = {
 			.fit_content = true,
 			.cross_alignment = Alignment::Center,
 		};
-		UserInterface::box_begin(menu_begin_style);
+		box_begin(style.value_or(default_style));
+		initially_focus_next_element();
 	}
 
 	bool UserInterface::menu_item(const Input& input, const ResourceManager& resources, std::string_view label) {
