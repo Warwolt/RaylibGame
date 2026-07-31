@@ -103,13 +103,13 @@ namespace ui {
 	}
 
 	// computes space that the box children will use, given the layout direction
-	static Vector2 compute_child_content_size(const Box& box) {
+	static Vector2 compute_child_content_size(const Box& box, const Style& style) {
 		Vector2 content_size = {};
 		for (const Element& child : box.children) {
 			if (child.style.position.is_absolute_position()) {
 				continue; // remove absolutely positioned element from flow
 			}
-			switch (box.direction) {
+			switch (style.direction) {
 				case Direction::Horizontal: {
 					content_size.x += child.layout.margin_box.width;
 					content_size.y = std::max(content_size.y, child.layout.margin_box.height);
@@ -267,7 +267,7 @@ namespace ui {
 				}
 				// 2. sort desired sizes from smallest to biggest
 				auto ordering = [&](const IndexedVector2& lhs, const IndexedVector2& rhs) {
-					if (box->direction == Direction::Horizontal) {
+					if (element->style.direction == Direction::Horizontal) {
 						return lhs.value.x < rhs.value.x;
 					} else {
 						return lhs.value.y < rhs.value.y;
@@ -281,7 +281,7 @@ namespace ui {
 					const size_t remaining_children = desired_sizes.size() - i;
 					const IndexedVector2& desired_size = desired_sizes[i];
 					Element& child = box->children[desired_size.index];
-					if (box->direction == Direction::Horizontal) {
+					if (element->style.direction == Direction::Horizontal) {
 						const Vector2 child_size = {
 							.x = std::min<float>(desired_size.value.x, remaining_width / remaining_children),
 							.y = std::min<float>(desired_size.value.y, max_parent_size.y),
@@ -302,7 +302,7 @@ namespace ui {
 			/* Size parent content */
 			Rectangle& content_box = layout->content_box;
 			if (resolved_style.fit_content) {
-				const Vector2 child_content_size = compute_child_content_size(*box);
+				const Vector2 child_content_size = compute_child_content_size(*box, element->style);
 				content_box.width = child_content_size.x;
 				content_box.height = child_content_size.y;
 			} else {
@@ -379,10 +379,10 @@ namespace ui {
 			float left_padding = 0;
 			float top_padding = 0;
 			{
-				const Vector2 child_content_size = compute_child_content_size(*box);
+				const Vector2 child_content_size = compute_child_content_size(*box, element->style);
 				const int horizontal_remainder = element->layout.content_box.width - child_content_size.x;
 				const int vertical_remainder = element->layout.content_box.height - child_content_size.y;
-				switch (box->direction) {
+				switch (element->style.direction) {
 					case Direction::Horizontal: {
 						left_padding = alignment_padding(resolved_style.alignment, horizontal_remainder);
 					} break;
@@ -403,7 +403,7 @@ namespace ui {
 				float child_left_padding = 0;
 				float child_top_padding = 0;
 				if (!child.style.position.is_absolute_position()) {
-					switch (box->direction) {
+					switch (element->style.direction) {
 						case Direction::Horizontal: {
 							const float remainder = element->layout.content_box.height - child.layout.margin_box.height;
 							child_top_padding = alignment_padding(resolved_style.cross_alignment, remainder);
@@ -428,7 +428,7 @@ namespace ui {
 				if (child.style.position.is_absolute_position()) {
 					continue; // don't move cursor for absolutely positioned elements
 				}
-				switch (box->direction) {
+				switch (element->style.direction) {
 					case Direction::Horizontal:
 						cursor.x += child.layout.margin_box.width;
 						break;
@@ -489,7 +489,7 @@ namespace ui {
 			// Note: We do this outside the above loop so we don't update focus
 			// more than once per frame when we recurse through the children.
 			if (focused_child_index.has_value()) {
-				const bool box_is_horizontal = box->direction == Direction::Horizontal;
+				const bool box_is_horizontal = element->style.direction == Direction::Horizontal;
 				const bool should_focus_previous = box_is_horizontal ? input.action_pressed(ACTION_UI_LEFT) : input.action_pressed(ACTION_UI_UP);
 				const bool should_focus_next = box_is_horizontal ? input.action_pressed(ACTION_UI_RIGHT) : input.action_pressed(ACTION_UI_DOWN);
 

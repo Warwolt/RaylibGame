@@ -51,9 +51,9 @@ ui::Element box_element_with_three_children(ui::Direction direction) {
 		.style = {
 			.width = ui::Pixels(size.x),
 			.height = ui::Pixels(size.y),
+			.direction = direction,
 		},
 		.content = ui::Box {
-			.direction = direction,
 			.children = {
 				ui::Element {
 				.id = "box_child_1",

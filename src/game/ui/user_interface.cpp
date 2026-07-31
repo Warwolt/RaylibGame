@@ -40,13 +40,13 @@ namespace ui {
 		m_context.update();
 	}
 
-	void UserInterface::box_begin(Direction direction, std::optional<Style> style, std::string id) {
+	void UserInterface::box_begin(std::optional<Style> style, std::string id) {
 		ASSERT(m_is_within_frame, "Missing call to UserInterface::frame_begin?");
 		m_tree.push_element(
 			Element {
 				.id = id.empty() ? try_generate_automatic_id(m_tree.current_parent()) : id,
 				.style = style.value_or(Style {}),
-				.content = Box { .direction = direction },
+				.content = Box {},
 			}
 		);
 	}

@@ -45,8 +45,10 @@ ImageID ElementSnapshotTests::m_nine_slice_image;
 TEST_F(ElementSnapshotTests, Box_100_100_Gives_50_50) {
 	ui::Context context = {};
 	ui::Element element = {
-		.content = ui::Box {
+		.style = {
 			.direction = ui::Direction::Horizontal,
+		},
+		.content = ui::Box {
 			.children = {
 				ui::Element {
 					.style = {
@@ -75,8 +77,10 @@ TEST_F(ElementSnapshotTests, Box_100_100_Gives_50_50) {
 TEST_F(ElementSnapshotTests, Box_100_25_100_Gives_37_25_37) {
 	ui::Context context = {};
 	ui::Element element = {
-		.content = ui::Box {
+		.style = {
 			.direction = ui::Direction::Horizontal,
+		},
+		.content = ui::Box {
 			.children = {
 				ui::Element {
 					.style = {
@@ -117,11 +121,11 @@ ui::Element aligned_boxes(ui::Alignment alignment, ui::Direction direction, std:
 	ui::Context context = {};
 	ui::Element element = {
 		.style = {
+			.direction = direction,
 			.alignment = alignment,
 			.cross_alignment = alignment,
 		},
 		.content = ui::Box {
-			.direction = direction,
 			.children = {},
 		},
 	};
@@ -352,11 +356,11 @@ ui::Element box_with_position(ui::Direction direction, ui::Position position) {
 	return {
 		.style = {
 			.border = ui::Edges::uniform(2),
+			.direction = direction,
 			.alignment = ui::Alignment::Center,
 			.cross_alignment = ui::Alignment::Center,
 		},
 		.content = ui::Box {
-			.direction = direction,
 			.children = {
 				ui::Element {
 					.style = {
@@ -553,10 +557,10 @@ TEST_F(ElementSnapshotTests, Box_AbsolutePosition_CanOverflowParent_Pixels) {
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
+			.direction = ui::Direction::Horizontal,
 		},
 		.content =
 			ui::Box {
-				.direction = ui::Direction::Horizontal,
 				.children = {
 					ui::Element {
 						.style = {
@@ -591,10 +595,10 @@ ui::Element box_fit_content(ui::Direction direction, std::vector<ui::Element> ch
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
+			.direction = direction,
 		},
 		.content =
 			ui::Box {
-				.direction = direction,
 				.children = children,
 			}
 	};
@@ -768,9 +772,9 @@ TEST_F(ElementSnapshotTests, Text_MultipleParagraphs_WithTitle) {
 		.style = {
 			.width = ui::Percentage(100),
 			.padding = ui::Edges::uniform(20),
+			.direction = ui::Direction::Vertical,
 		},
 		.content = ui::Box {
-			.direction = ui::Direction::Vertical,
 			.children = {
 				ui::Element {
 					.style = {
@@ -845,10 +849,10 @@ TEST_F(ElementSnapshotTests, Image_DefaultStyle_UsesIntrinsicSize) {
 }
 
 ui::Element image_relative_size(ui::Style parent_style, ui::Direction direction, ImageID image) {
+	parent_style.direction = direction;
 	return {
 		.style = parent_style,
 		.content = ui::Box {
-			.direction = direction,
 			.children = {
 				ui::Element {
 					.style = {
@@ -919,9 +923,11 @@ TEST_F(ElementSnapshotTests, Image_RelativeSize_FitVertically) {
 TEST_F(ElementSnapshotTests, Image_PixelSize_FitsInContainer) {
 	ui::Context context = {};
 	ui::Element element = {
+		.style = {
+			.direction = ui::Direction::Vertical,
+		},
 		.content =
 			ui::Box {
-				.direction = ui::Direction::Vertical,
 				.children = {
 						ui::Element {
 						.style = ui::Style {
@@ -982,9 +988,9 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_HorizontalOverflow_GetsClipped) {
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
+			.direction = ui::Direction::Horizontal,
 		},
 		.content = ui::Box {
-			.direction = ui::Direction::Horizontal,
 			.children = {
 				ui::Element {
 					.style = {
@@ -1021,9 +1027,9 @@ TEST_F(ElementSnapshotTests, Image_PixelSize_VerticalOverflow_GetsClipped) {
 				.edges = ui::Edges::uniform(2),
 				.color = GREEN,
 			},
+			.direction = ui::Direction::Vertical,
 		},
 		.content = ui::Box {
-			.direction = ui::Direction::Vertical,
 			.children = {
 				ui::Element {
 					.style = {

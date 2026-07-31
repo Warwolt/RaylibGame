@@ -86,6 +86,7 @@ void MainMenuScene::update(Game* game) {
 		.menu_item = {
 			.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
 			.fit_content = true,
+			.direction = ui::Direction::Horizontal,
 		},
 		.focus_indicator = {
 			.position =
@@ -110,17 +111,17 @@ void MainMenuScene::update(Game* game) {
 
 	m_ui.frame_begin();
 	{
-		m_ui.box_begin(ui::Direction::Vertical, styles.menu_container);
+		m_ui.box_begin(styles.menu_container);
 		{
 			/* Title */
 			m_ui.text("Video Game", styles.menu_title);
 
 			/* Menu */
-			m_ui.box_begin(ui::Direction::Vertical, styles.item_list);
+			m_ui.box_begin(styles.item_list);
 			{
 				/* Items */
 				for (MenuItem item : menu_items) {
-					m_ui.box_begin(ui::Direction::Horizontal, styles.menu_item);
+					m_ui.box_begin(styles.menu_item);
 					{
 						m_ui.initially_focus_current_element();
 						const bool hovered_and_mouse = game->input.last_input_was_mouse() && m_ui.element_is_hovered();
