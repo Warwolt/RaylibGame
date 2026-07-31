@@ -80,18 +80,18 @@ namespace ui {
 	}
 
 	void UserInterface::menu_begin() {
-		const ui::Style menu_begin_style = {
+		const Style menu_begin_style = {
 			.fit_content = true,
-			.cross_alignment = ui::Alignment::Center,
+			.cross_alignment = Alignment::Center,
 		};
 		UserInterface::box_begin(menu_begin_style);
 	}
 
 	bool UserInterface::menu_item(const Input& input, const ResourceManager& resources, std::string_view label) {
-		const ui::Style menu_item_style = {
-			.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
+		const Style menu_item_style = {
+			.position = RelativePosition { .x = Pixels(0), .y = Pixels(0) },
 			.fit_content = true,
-			.direction = ui::Direction::Horizontal,
+			.direction = Direction::Horizontal,
 		};
 		bool item_is_clicked = false;
 		box_begin(menu_item_style);
@@ -122,26 +122,26 @@ namespace ui {
 			const double two_pi = 2.0 * std::numbers::pi;
 			const float focus_indicator_offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
 			const int focus_indicator_size = 48;
-			const ui::Style focus_indicator_style = {
+			const Style focus_indicator_style = {
 				.position =
-					ui::AbsolutePosition {
-						.x = ui::Pixels(-focus_indicator_size + focus_indicator_offset),
-						.y = ui::Pixels(-8),
+					AbsolutePosition {
+						.x = Pixels(-focus_indicator_size + focus_indicator_offset),
+						.y = Pixels(-8),
 					},
-				.width = ui::Pixels(focus_indicator_size),
-				.height = ui::Pixels(focus_indicator_size),
+				.width = Pixels(focus_indicator_size),
+				.height = Pixels(focus_indicator_size),
 			};
 			if (hovered_and_mouse || focused_and_keyboard_or_gamepad) {
 				image(m_images.focus_indicator, focus_indicator_style);
 			}
 
 			/* Menu text */
-			const ui::Style item_label_style = {
-			.width = ui::Pixels(130),
+			const Style item_label_style = {
+			.width = Pixels(130),
 			.padding = {
 				.bottom = 2,
 			},
-			.alignment = ui::Alignment::Center,
+			.alignment = Alignment::Center,
 			.font = {
 				.size = 32,
 				.color = (hovered_and_mouse || focused_and_keyboard_or_gamepad) ? YELLOW : WHITE,
@@ -200,19 +200,18 @@ namespace ui {
 		m_context.focused_element_id = element.id;
 	}
 
-	static std::string try_generate_automatic_id(const Element& parent) {
-		if (parent.id.empty()) {
-			return "";
-		}
-		const size_t index = parent.box()->children.size();
-		return std::format("{}.children[{}]", parent.id, index);
-	}
-
 	void UserInterface::_push_element(Element element) {
-		if (element.id.empty()) {
-			element.id = try_generate_automatic_id(m_tree.current_parent());
+		/* Try generate ID if missing */
+		const Element& parent = m_tree.current_parent();
+		if (element.id.empty() && !parent.id.empty()) {
+			const size_t index = parent.box()->children.size();
+			element.id = std::format("{}.children[{}]", parent.id, index);
 		}
+
+		/* Push element */
 		m_tree.push_element(element);
+
+		/* Handle focus */
 		if (m_should_initially_focus_next_element) {
 			m_should_initially_focus_next_element = false;
 			initially_focus_current_element();
