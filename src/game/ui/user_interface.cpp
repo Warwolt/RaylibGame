@@ -2,17 +2,17 @@
 
 #include "core/debug/assert.h"
 #include "core/debug/profiling.h"
+#include "game/game.h"
 
+#include <cmath>
 #include <format>
+#include <numbers>
 
 namespace ui {
 
-	static std::string try_generate_automatic_id(const Element& parent) {
-		if (parent.id.empty()) {
-			return "";
-		}
-		const size_t index = parent.box()->children.size();
-		return std::format("{}.children[{}]", parent.id, index);
+	void UserInterface::initialize(Game* game) {
+		m_images.focus_indicator = game->resources.load_image("resource/image/pointing_hand.png").value();
+		m_sounds.menu_navigate = game->resources.load_sound("resource/sound/menu_navigate.wav").value();
 	}
 
 	void UserInterface::draw(const ResourceManager& resources) const {
@@ -79,6 +79,84 @@ namespace ui {
 		);
 	}
 
+	void UserInterface::menu_begin() {
+		const ui::Style menu_begin_style = {
+			.fit_content = true,
+			.cross_alignment = ui::Alignment::Center,
+		};
+		UserInterface::box_begin(menu_begin_style);
+	}
+
+	bool UserInterface::menu_item(const Input& input, const ResourceManager& resources, std::string_view label) {
+		const ui::Style menu_item_style = {
+			.position = ui::RelativePosition { .x = ui::Pixels(0), .y = ui::Pixels(0) },
+			.fit_content = true,
+			.direction = ui::Direction::Horizontal,
+		};
+		bool item_is_clicked = false;
+		box_begin(menu_item_style);
+		{
+			const bool hovered_and_mouse = input.last_input_was_mouse() && element_is_hovered();
+			const bool keyboard_or_gamepad = input.last_input_was_keyboard() || input.last_input_was_gamepad();
+			const bool focused_and_keyboard_or_gamepad = keyboard_or_gamepad && element_is_focused();
+
+			/* On click */
+			item_is_clicked = element_is_clicked();
+
+			/* On hover */
+			if (element_is_hovered().has_changed_to(true)) {
+				focus_current_element();
+			}
+
+			/* On focus */
+			if (element_is_focused().has_changed_to(true)) {
+				Sound sound = resources.get_sound(m_sounds.menu_navigate);
+				Raylib_SetSoundVolume(sound, 0.5f);
+				Raylib_PlaySound(sound);
+			}
+
+			/* Focus indicator */
+			const double time_now = input.time_now.in_seconds();
+			const double period = 1.8; // seconds
+			const double freq = 1.0 / period;
+			const double two_pi = 2.0 * std::numbers::pi;
+			const float focus_indicator_offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
+			const int focus_indicator_size = 48;
+			const ui::Style focus_indicator_style = {
+				.position =
+					ui::AbsolutePosition {
+						.x = ui::Pixels(-focus_indicator_size + focus_indicator_offset),
+						.y = ui::Pixels(-8),
+					},
+				.width = ui::Pixels(focus_indicator_size),
+				.height = ui::Pixels(focus_indicator_size),
+			};
+			if (hovered_and_mouse || focused_and_keyboard_or_gamepad) {
+				image(m_images.focus_indicator, focus_indicator_style);
+			}
+
+			/* Menu text */
+			const ui::Style item_label_style = {
+			.width = ui::Pixels(130),
+			.padding = {
+				.bottom = 2,
+			},
+			.alignment = ui::Alignment::Center,
+			.font = {
+				.size = 32,
+				.color = (hovered_and_mouse || focused_and_keyboard_or_gamepad) ? YELLOW : WHITE,
+			},
+		};
+			text(label, item_label_style);
+		}
+		box_end();
+		return item_is_clicked;
+	}
+
+	void UserInterface::menu_end() {
+		box_end();
+	}
+
 	Tracked<bool> UserInterface::element_is_hovered() const {
 		const Element& element = m_tree.current_element();
 		ASSERT(!element.id.empty(), "element_is_hovered called when current element lacks id!");
@@ -120,6 +198,14 @@ namespace ui {
 		const Element& element = m_tree.current_element();
 		ASSERT(!element.id.empty(), "focus_current_element called when current element lacks id!");
 		m_context.focused_element_id = element.id;
+	}
+
+	static std::string try_generate_automatic_id(const Element& parent) {
+		if (parent.id.empty()) {
+			return "";
+		}
+		const size_t index = parent.box()->children.size();
+		return std::format("{}.children[{}]", parent.id, index);
 	}
 
 	void UserInterface::_push_element(Element element) {
