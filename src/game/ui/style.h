@@ -13,8 +13,8 @@ namespace ui {
 	struct Element;
 
 	enum class Direction {
-		Horizontal,
 		Vertical,
+		Horizontal,
 	};
 
 	struct Pixels {
