@@ -14,11 +14,18 @@ void GameplayScene::deinitialize(Game* /*game*/) {
 
 void GameplayScene::update(Game* game) {
 	PROFILING_SCOPE();
-	if (game->input.key_pressed(KEY_ESCAPE)) {
-		m_game_paused = true;
+
+	/* Toggle pause menu */
+	if (game->input.action_pressed(ACTION_PAUSE_GAME)) {
+		m_game_paused = !m_game_paused;
 	}
 
-	/* Pause menu*/
+	/* Gameplay */
+	if (!m_game_paused) {
+		// TODO run gameplay here
+	}
+
+	/* Pause menu */
 	if (m_game_paused) {
 		m_ui.frame_begin();
 		const ui::Style menu_container_style = {
@@ -27,10 +34,6 @@ void GameplayScene::update(Game* game) {
 		};
 		const ui::Style menu_style = {
 			.fit_content = true,
-			.border = {
-				.edges = ui::Edges::uniform(4),
-				.color = Color { 50, 60, 57, 255},
-			},
 			.padding = ui::Edges {
 				.top = 25,
 				.bottom = 25,

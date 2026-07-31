@@ -67,6 +67,7 @@ std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindi
 		{ ACTION_UI_RIGHT, { KEY_RIGHT } },
 		{ ACTION_UI_SELECT, { KEY_ENTER, KEY_Z } },
 		{ ACTION_UI_BACK, { KEY_ESCAPE, KEY_X } },
+		{ ACTION_PAUSE_GAME, { KEY_ESCAPE } },
 		// clang-format on
 	};
 }
@@ -80,6 +81,7 @@ std::unordered_map<InputAction, std::vector<GamepadButton>> default_gamepad_butt
 		{ ACTION_UI_RIGHT, { GAMEPAD_BUTTON_LEFT_FACE_RIGHT } },
 		{ ACTION_UI_SELECT, { GAMEPAD_BUTTON_RIGHT_FACE_DOWN } },
 		{ ACTION_UI_BACK, { GAMEPAD_BUTTON_RIGHT_FACE_RIGHT } },
+		{ ACTION_PAUSE_GAME, { GAMEPAD_BUTTON_MIDDLE_RIGHT } },
 		// clang-format on
 	};
 }
