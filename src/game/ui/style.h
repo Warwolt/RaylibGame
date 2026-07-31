@@ -12,6 +12,11 @@ namespace ui {
 	struct Context;
 	struct Element;
 
+	enum class Direction {
+		Vertical,
+		Horizontal,
+	};
+
 	struct Pixels {
 		float value;
 	};
@@ -190,6 +195,7 @@ namespace ui {
 		Edges margin;
 		BorderStyle border;
 		Edges padding;
+		Direction direction; // direction of main-axis for children
 		Alignment alignment;
 		Alignment cross_alignment;
 		BackgroundStyle background;

@@ -29,13 +29,7 @@ namespace ui {
 		ImageID id;
 	};
 
-	enum class Direction {
-		Horizontal,
-		Vertical,
-	};
-
 	struct Box {
-		Direction direction = Direction::Vertical;
 		std::vector<Element> children;
 	};
 

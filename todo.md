@@ -1,11 +1,11 @@
 # TODO
-- Make box direction a style property instead of a content property
 - Gameplay scene with basic camera + character movement
 - Collision detection test screen
 - Collision resolution test screen
 - Bug: Fix clang format not formatting nested designated initializers
 
 # Done
+- Make box direction a style property instead of a content property
 - Main menu with mouse+keyboard+gamepad navigation
 - Hide mouse if fullscreen and last input method was gamepad
 - Animate focus indicator

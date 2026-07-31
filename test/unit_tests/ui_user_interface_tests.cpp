@@ -187,8 +187,9 @@ TEST(UserInterfaceTests, BoxElement_IsHovered) {
 				.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
 				.width = ui::Pixels(100),
 				.height = ui::Pixels(100),
+				.direction = ui::Direction::Horizontal,
 			};
-			ui.box_begin(ui::Direction::Horizontal, box_style, "box");
+			ui.box_begin(box_style, "box");
 			{
 				if (ui.element_is_hovered()) {
 					is_hovered = true;
@@ -226,8 +227,9 @@ TEST(UserInterfaceTests, BoxElement_IsActive) {
 				.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
 				.width = ui::Pixels(100),
 				.height = ui::Pixels(100),
+				.direction = ui::Direction::Horizontal,
 			};
-			ui.box_begin(ui::Direction::Horizontal, box_style, "box");
+			ui.box_begin(box_style, "box");
 			{
 				if (ui.element_is_active()) {
 					is_active = true;
@@ -268,8 +270,9 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_MouseLeftButton) {
 				.position = ui::AbsolutePosition(ui::Pixels(100), ui::Pixels(100)),
 				.width = ui::Pixels(100),
 				.height = ui::Pixels(100),
+				.direction = ui::Direction::Horizontal,
 			};
-			ui.box_begin(ui::Direction::Horizontal, box_style, "box");
+			ui.box_begin(box_style, "box");
 			{
 				if (ui.element_is_clicked()) {
 					is_clicked = true;
@@ -298,13 +301,13 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_SelectAction) {
 	for (const Input& input : inputs) {
 		ui.frame_begin();
 		{
-			ui.box_begin(ui::Direction::Vertical);
+			ui.box_begin();
 			{
-				ui.box_begin(ui::Direction::Vertical, {}, "child1");
+				ui.box_begin();
 				ui.initially_focus_current_element();
 				ui.box_end();
 
-				ui.box_begin(ui::Direction::Vertical, {}, "child2");
+				ui.box_begin();
 				if (ui.element_is_focused()) {
 					is_focused = true;
 				}
@@ -313,7 +316,7 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_SelectAction) {
 				}
 				ui.box_end();
 
-				ui.box_begin(ui::Direction::Vertical, {}, "child3");
+				ui.box_begin();
 				ui.box_end();
 			}
 			ui.box_end();
