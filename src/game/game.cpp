@@ -34,7 +34,8 @@ Game* Game_initialize(int argc, char** argv) {
 	Game* game = new Game {
 		.window = Window::initialize(SCREEN_WIDTH, SCREEN_HEIGHT),
 	};
-	game->scenes.push_scene(game, SceneID::MainMenu);
+	game->scenes.queue_push_scene(SceneID::MainMenu);
+	game->scenes.run_queued_actions(game);
 	if (start_fullscreen) {
 		game->window.toggle_fullscreen();
 	}
@@ -68,6 +69,7 @@ void Game_update(Game* game) {
 
 	/* Update scene */
 	game->scenes.update_current_scene(game);
+	game->scenes.run_queued_actions(game);
 }
 
 void Game_render(const Game& game) {

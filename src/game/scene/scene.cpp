@@ -57,18 +57,24 @@ SceneManager::SceneManager() = default;
 
 SceneManager::~SceneManager() = default;
 
-void SceneManager::push_scene(Game* game, SceneID scene_id) {
-	m_scenes.push_back(std::make_unique<Scene>(scene_id));
-	m_scenes.back()->initialize(game);
+void SceneManager::queue_push_scene(SceneID scene_id) {
+	m_actions.push_back(PushScene { scene_id });
 }
 
-void SceneManager::pop_scene(Game* game) {
-	m_scenes.back()->deinitialize(game);
-	if (m_scenes.size() == 1) {
-		game->should_quit = true;
-	} else {
-		m_scenes.pop_back();
+void SceneManager::queue_pop_scene() {
+	m_actions.push_back(PopScene {});
+}
+
+void SceneManager::run_queued_actions(Game* game) {
+	for (SceneAction action : m_actions) {
+		if (PushScene* push_scene = std::get_if<PushScene>(&action)) {
+			_push_scene(game, push_scene->scene_id);
+		}
+		if (PopScene* pop_scene = std::get_if<PopScene>(&action)) {
+			_pop_scene(game);
+		}
 	}
+	m_actions.clear();
 }
 
 void SceneManager::update_current_scene(Game* game) {
@@ -80,5 +86,19 @@ void SceneManager::update_current_scene(Game* game) {
 void SceneManager::render_current_scene(const Game& game) const {
 	if (!m_scenes.empty()) {
 		m_scenes.back()->render(game);
+	}
+}
+
+void SceneManager::_push_scene(Game* game, SceneID scene_id) {
+	m_scenes.push_back(std::make_unique<Scene>(scene_id));
+	m_scenes.back()->initialize(game);
+}
+
+void SceneManager::_pop_scene(Game* game) {
+	m_scenes.back()->deinitialize(game);
+	if (m_scenes.size() == 1) {
+		game->should_quit = true;
+	} else {
+		m_scenes.pop_back();
 	}
 }

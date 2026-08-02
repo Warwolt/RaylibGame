@@ -47,8 +47,7 @@ void GameplayScene::update(Game* game) {
 			}
 
 			if (m_ui.menu_item(game->input, game->resources, "Quit")) {
-				game->scenes.pop_scene(game);
-				return;
+				game->scenes.queue_pop_scene();
 			}
 		}
 		m_ui.menu_end();
