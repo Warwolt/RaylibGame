@@ -42,7 +42,7 @@ const std::unordered_map<MenuItem, const char*> item_labels = {
 void MainMenuScene::update(Game* game) {
 	PROFILING_SCOPE();
 	if (game->input.key_pressed(KEY_ESCAPE)) {
-		game->scenes.pop_scene(game);
+		game->scenes.queue_pop_scene();
 	}
 
 	m_ui.frame_begin();
@@ -68,7 +68,7 @@ void MainMenuScene::update(Game* game) {
 			m_ui.menu_begin();
 			{
 				if (m_ui.menu_item(game->input, game->resources, "Start")) {
-					game->scenes.push_scene(game, SceneID::Gameplay);
+					game->scenes.queue_push_scene(SceneID::Gameplay);
 				}
 
 				if (m_ui.menu_item(game->input, game->resources, "Settings")) {
@@ -76,7 +76,7 @@ void MainMenuScene::update(Game* game) {
 				}
 
 				if (m_ui.menu_item(game->input, game->resources, "Quit")) {
-					game->scenes.pop_scene(game);
+					game->scenes.queue_pop_scene();
 				}
 			}
 			m_ui.menu_end();
