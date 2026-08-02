@@ -292,7 +292,7 @@ TEST(UserInterfaceTests, BoxElement_IsClicked_SelectAction) {
 	const Vector2 window_size = { 1000, 1000 };
 
 	const std::vector<Input> inputs = {
-		{ .input_actions = { { ACTION_UI_DOWN, ButtonState::Pressed } } },
+		{ .input_actions = { { ACTION_DOWN, ButtonState::Pressed } } },
 		{ .input_actions = { { ACTION_UI_SELECT, ButtonState::Pressed } } },
 		{},
 	};
