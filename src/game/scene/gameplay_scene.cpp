@@ -72,8 +72,8 @@ void GameplayScene::_update_pause_menu(Game* game) {
 void GameplayScene::_update_gameplay(Game* game) {
 	PROFILING_SCOPE();
 
-	const Vector2 position_delta = (float)(game->input.time_delta.in_seconds() * PLAYER_SPEED) * game->input.directional_input();
-	m_player_position += position_delta;
+	const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
+	m_player_position += delta_speed * game->input.directional_input();
 }
 
 void GameplayScene::render(const Game& game) const {
