@@ -5,14 +5,17 @@
 
 #include <raymath.h>
 
+constexpr float HUD_HEIGHT = 56; // pixels
 constexpr Vector2 PLAYER_SIZE = { 24, 30 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 
-	// put player in center of window
-	m_player_position = game->window.size() / 2;
+	m_level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+
+	// put player in center of level
+	m_player_position = (game->window.size() - Vector2 { 0, HUD_HEIGHT }) / 2 + Vector2 { 0, HUD_HEIGHT };
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -83,9 +86,17 @@ void GameplayScene::render(const Game& game) const {
 	PROFILING_SCOPE();
 
 	/* Render gameplay */
-	const Vector2 player_screen_position = m_player_position - PLAYER_SIZE / 2.0f;
+	const Vector2 player_rect_pos = m_player_position - PLAYER_SIZE / 2.0f;
+	const Rectangle hud_rect = { 0, 0, 384, HUD_HEIGHT };
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
-	Raylib_DrawRectangle(player_screen_position.x, player_screen_position.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+	Raylib_DrawTexture(game.resources.get_image(m_level_background), 0, HUD_HEIGHT, WHITE);
+	Raylib_DrawRectangle(player_rect_pos.x, player_rect_pos.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+	Raylib_DrawPixel(m_player_position.x, m_player_position.y, DARKGREEN);
+
+	/* HUD */
+	Raylib_DrawRectangleRec(hud_rect, BROWN);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Health: 8", { 8, 4 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 8, 4 + 16 }, 16, 0, WHITE);
 
 	/* Render pause menu */
 	m_ui.draw(game.resources);
