@@ -67,7 +67,6 @@ void MainMenuScene::update(Game* game) {
 			/* Menu */
 			m_ui.menu_begin();
 			{
-				m_ui.initially_focus_next_element();
 				if (m_ui.menu_item(game->input, game->resources, "Start")) {
 					game->scenes.push_scene(game, SceneID::Gameplay);
 				}

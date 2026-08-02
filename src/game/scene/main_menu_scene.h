@@ -1,8 +1,8 @@
 #pragma once
 
-struct Game;
-
 #include "game/ui/user_interface.h"
+
+struct Game;
 
 class MainMenuScene {
 public:

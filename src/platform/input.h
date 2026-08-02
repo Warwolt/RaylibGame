@@ -24,6 +24,7 @@ typedef enum {
 	ACTION_UI_RIGHT,
 	ACTION_UI_SELECT,
 	ACTION_UI_BACK,
+	ACTION_PAUSE_GAME,
 } InputAction;
 
 enum class InputType {
