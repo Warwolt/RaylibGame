@@ -5,7 +5,7 @@
 
 #include <raymath.h>
 
-constexpr Vector2 PLAYER_SIZE = { 64, 64 }; // pixels
+constexpr Vector2 PLAYER_SIZE = { 24, 30 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {

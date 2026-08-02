@@ -121,8 +121,8 @@ namespace ui {
 			const double period = 1.8; // seconds
 			const double freq = 1.0 / period;
 			const double two_pi = 2.0 * std::numbers::pi;
-			const float focus_indicator_offset = -10.0f * std::abs(std::cos(time_now * two_pi * freq));
-			const int focus_indicator_size = 48;
+			const float focus_indicator_offset = std::round(-10.0f * std::abs(std::cos(time_now * two_pi * freq)));
+			const int focus_indicator_size = 32;
 			const Style focus_indicator_style = {
 				.position =
 					AbsolutePosition {
@@ -138,13 +138,13 @@ namespace ui {
 
 			/* Menu text */
 			const Style item_label_style = {
-			.width = Pixels(130),
+			.width = Pixels(60),
 			.padding = {
 				.bottom = 2,
 			},
 			.alignment = Alignment::Center,
 			.font = {
-				.size = 32,
+				.size = 16,
 				.color = (hovered_and_mouse || focused_and_keyboard_or_gamepad) ? YELLOW : WHITE,
 			},
 		};

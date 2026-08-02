@@ -56,7 +56,7 @@ void MainMenuScene::update(Game* game) {
 			/* Title */
 			const ui::Style menu_title_style = {
 				.margin = {
-					.bottom = 48,
+					.bottom = 24,
 				},
 				.font = {
 					.size = 64,
