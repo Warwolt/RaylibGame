@@ -60,29 +60,35 @@ static float read_gamepad_stick(int axis) {
 
 std::unordered_map<InputAction, std::vector<KeyboardKey>> default_keyboard_bindings() {
 	return {
-		// clang-format off
-		{ ACTION_UI_UP, { KEY_UP }  },
-		{ ACTION_UI_LEFT, { KEY_LEFT } },
-		{ ACTION_UI_DOWN, { KEY_DOWN } },
-		{ ACTION_UI_RIGHT, { KEY_RIGHT } },
+		/* Common */
+		{ ACTION_UP, { KEY_UP } },
+		{ ACTION_LEFT, { KEY_LEFT } },
+		{ ACTION_DOWN, { KEY_DOWN } },
+		{ ACTION_RIGHT, { KEY_RIGHT } },
+
+		/* Gameplay */
+		{ ACTION_PAUSE_GAME, { KEY_ESCAPE } },
+
+		/* User interface */
 		{ ACTION_UI_SELECT, { KEY_ENTER, KEY_Z } },
 		{ ACTION_UI_BACK, { KEY_ESCAPE, KEY_X } },
-		{ ACTION_PAUSE_GAME, { KEY_ESCAPE } },
-		// clang-format on
 	};
 }
 
 std::unordered_map<InputAction, std::vector<GamepadButton>> default_gamepad_button_bindings() {
 	return {
-		// clang-format off
-		{ ACTION_UI_UP, { GAMEPAD_BUTTON_LEFT_FACE_UP }  },
-		{ ACTION_UI_LEFT, { GAMEPAD_BUTTON_LEFT_FACE_LEFT } },
-		{ ACTION_UI_DOWN, { GAMEPAD_BUTTON_LEFT_FACE_DOWN } },
-		{ ACTION_UI_RIGHT, { GAMEPAD_BUTTON_LEFT_FACE_RIGHT } },
+		/* Common */
+		{ ACTION_UP, { GAMEPAD_BUTTON_LEFT_FACE_UP } },
+		{ ACTION_LEFT, { GAMEPAD_BUTTON_LEFT_FACE_LEFT } },
+		{ ACTION_DOWN, { GAMEPAD_BUTTON_LEFT_FACE_DOWN } },
+		{ ACTION_RIGHT, { GAMEPAD_BUTTON_LEFT_FACE_RIGHT } },
+
+		/* Gameplay */
+		{ ACTION_PAUSE_GAME, { GAMEPAD_BUTTON_MIDDLE_RIGHT } },
+
+		/* User interface */
 		{ ACTION_UI_SELECT, { GAMEPAD_BUTTON_RIGHT_FACE_DOWN } },
 		{ ACTION_UI_BACK, { GAMEPAD_BUTTON_RIGHT_FACE_RIGHT } },
-		{ ACTION_PAUSE_GAME, { GAMEPAD_BUTTON_MIDDLE_RIGHT } },
-		// clang-format on
 	};
 }
 
@@ -168,6 +174,23 @@ bool Input::action_down(InputAction action) const {
 
 bool Input::action_pressed(InputAction action) const {
 	return input_action(action) == ButtonState::Pressed;
+}
+
+Vector2 Input::directional_input() const {
+	Vector2 vector = { 0, 0 };
+	if (action_down(ACTION_LEFT)) {
+		vector.x = -1;
+	}
+	if (action_down(ACTION_RIGHT)) {
+		vector.x = 1;
+	}
+	if (action_down(ACTION_UP)) {
+		vector.y = -1;
+	}
+	if (action_down(ACTION_DOWN)) {
+		vector.y = 1;
+	}
+	return Vector2Normalize(vector);
 }
 
 bool Input::last_input_was_mouse() const {
@@ -274,23 +297,25 @@ void read_input(Input* input, const Window& window) {
 			// flicking thumb stick navigates in UI
 			if (input->gamepad_left_stick_x.previous() == 0 && input->gamepad_left_stick_y == 0) {
 				if (input->gamepad_left_stick_x < 0) {
-					input->input_actions[ACTION_UI_LEFT] = ButtonState::Pressed;
+					input->input_actions[ACTION_LEFT] = ButtonState::Pressed;
 				}
 				if (input->gamepad_left_stick_x > 0) {
-					input->input_actions[ACTION_UI_RIGHT] = ButtonState::Pressed;
+					input->input_actions[ACTION_RIGHT] = ButtonState::Pressed;
 				}
 			}
 			if (input->gamepad_left_stick_y.previous() == 0 && input->gamepad_left_stick_x == 0) {
 				if (input->gamepad_left_stick_y < 0) {
-					input->input_actions[ACTION_UI_UP] = ButtonState::Pressed;
+					input->input_actions[ACTION_UP] = ButtonState::Pressed;
 				}
 				if (input->gamepad_left_stick_y > 0) {
-					input->input_actions[ACTION_UI_DOWN] = ButtonState::Pressed;
+					input->input_actions[ACTION_DOWN] = ButtonState::Pressed;
 				}
 			}
 		}
 
 		/* Time */
+		const Time prev_time_now = input->time_now;
 		input->time_now = Time::now();
+		input->time_delta = input->time_now - prev_time_now;
 	}
 }

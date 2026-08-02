@@ -257,8 +257,8 @@ struct TestStep {
 };
 
 std::vector<TestStep> change_focus_with_input_actions(ui::Direction direction) {
-	InputAction previous_action = direction == ui::Direction::Horizontal ? ACTION_UI_LEFT : ACTION_UI_UP;
-	InputAction next_action = direction == ui::Direction::Horizontal ? ACTION_UI_RIGHT : ACTION_UI_DOWN;
+	InputAction previous_action = direction == ui::Direction::Horizontal ? ACTION_LEFT : ACTION_UP;
+	InputAction next_action = direction == ui::Direction::Horizontal ? ACTION_RIGHT : ACTION_DOWN;
 	return {
 		{
 			.message = "Moving focus to next element when on child1 should focus child2.",

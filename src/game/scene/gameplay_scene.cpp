@@ -3,10 +3,16 @@
 #include "core/debug/profiling.h"
 #include "game/game.h"
 
-#include <raylib.h>
+#include <raymath.h>
+
+constexpr Vector2 PLAYER_SIZE = { 64, 64 }; // pixels
+constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
+
+	// put player in center of window
+	m_player_position = game->window.size() / 2;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -14,19 +20,30 @@ void GameplayScene::deinitialize(Game* /*game*/) {
 
 void GameplayScene::update(Game* game) {
 	PROFILING_SCOPE();
+	m_ui.frame_begin();
 
 	/* Toggle pause menu */
 	if (game->input.action_pressed(ACTION_PAUSE_GAME)) {
 		m_game_paused = !m_game_paused;
 	}
 
-	/* Pause menu */
+	/* Update state */
 	if (m_game_paused) {
-		const ui::Style menu_container_style = {
-			.alignment = ui::Alignment::Center,
-			.cross_alignment = ui::Alignment::Center,
-		};
-		const ui::Style menu_style = {
+		_update_pause_menu(game);
+	} else {
+		_update_gameplay(game);
+	}
+
+	m_ui.frame_end(game->input, game->resources, game->window.size());
+}
+
+void GameplayScene::_update_pause_menu(Game* game) {
+	PROFILING_SCOPE();
+	const ui::Style menu_container_style = {
+		.alignment = ui::Alignment::Center,
+		.cross_alignment = ui::Alignment::Center,
+	};
+	const ui::Style menu_style = {
 			.fit_content = true,
 			.padding = ui::Edges {
 				.top = 25,
@@ -38,8 +55,8 @@ void GameplayScene::update(Game* game) {
 				.color = BLACK,
 			},
 		};
-		m_ui.frame_begin();
-		m_ui.box_begin(menu_container_style);
+	m_ui.box_begin(menu_container_style);
+	{
 		m_ui.menu_begin(menu_style);
 		{
 			if (m_ui.menu_item(game->input, game->resources, "Continue")) {
@@ -51,33 +68,25 @@ void GameplayScene::update(Game* game) {
 			}
 		}
 		m_ui.menu_end();
-		m_ui.box_end();
-		m_ui.frame_end(game->input, game->resources, game->window.size());
 	}
+	m_ui.box_end();
+}
 
-	/* Gameplay */
-	if (!m_game_paused) {
-		// TODO run gameplay here
-	}
+void GameplayScene::_update_gameplay(Game* game) {
+	PROFILING_SCOPE();
+
+	const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
+	m_player_position += delta_speed * game->input.directional_input();
 }
 
 void GameplayScene::render(const Game& game) const {
 	PROFILING_SCOPE();
 
 	/* Render gameplay */
-	const Font& font = game.resources.get_font(FontID::default_font());
-	const int font_size = 32;
-	const char* text = "Gameplay";
-	const int text_width = Raylib_MeasureTextEx(font, text, font_size, 0.0f).x;
-	const Vector2 pos = {
-		.x = (game.window.width() - text_width) / 2.0f,
-		.y = (game.window.height() - font_size) / 2.0f,
-	};
-	Raylib_ClearBackground(Color { 0, 127, 0, 255 });
-	Raylib_DrawTextEx(font, text, pos, font_size, 0.0f, WHITE);
+	const Vector2 player_screen_position = m_player_position - PLAYER_SIZE / 2.0f;
+	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
+	Raylib_DrawRectangle(player_screen_position.x, player_screen_position.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
 
 	/* Render pause menu */
-	if (m_game_paused) {
-		m_ui.draw(game.resources);
-	}
+	m_ui.draw(game.resources);
 }

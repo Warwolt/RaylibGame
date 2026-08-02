@@ -18,13 +18,13 @@ enum class ButtonState {
 
 // C style enum to match Raylib style
 typedef enum {
-	ACTION_UI_UP,
-	ACTION_UI_LEFT,
-	ACTION_UI_DOWN,
-	ACTION_UI_RIGHT,
+	ACTION_UP,
+	ACTION_LEFT,
+	ACTION_DOWN,
+	ACTION_RIGHT,
+	ACTION_PAUSE_GAME,
 	ACTION_UI_SELECT,
 	ACTION_UI_BACK,
-	ACTION_PAUSE_GAME,
 } InputAction;
 
 enum class InputType {
@@ -79,11 +79,14 @@ struct Input {
 	bool action_down(InputAction action) const;
 	bool action_pressed(InputAction action) const;
 
+	Vector2 directional_input() const;
+
 	bool last_input_was_mouse() const;
 	bool last_input_was_keyboard() const;
 	bool last_input_was_gamepad() const;
 
 	/* Time */
+	Time time_delta = {};
 	Time time_now = {};
 };
 
