@@ -176,6 +176,23 @@ bool Input::action_pressed(InputAction action) const {
 	return input_action(action) == ButtonState::Pressed;
 }
 
+Vector2 Input::directional_input() const {
+	Vector2 vector = { 0, 0 };
+	if (action_down(ACTION_LEFT)) {
+		vector.x = -1;
+	}
+	if (action_down(ACTION_RIGHT)) {
+		vector.x = 1;
+	}
+	if (action_down(ACTION_UP)) {
+		vector.y = -1;
+	}
+	if (action_down(ACTION_DOWN)) {
+		vector.y = 1;
+	}
+	return Vector2Normalize(vector);
+}
+
 bool Input::last_input_was_mouse() const {
 	return this->last_input_type == InputType::Mouse;
 }

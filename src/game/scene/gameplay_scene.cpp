@@ -72,20 +72,8 @@ void GameplayScene::_update_pause_menu(Game* game) {
 void GameplayScene::_update_gameplay(Game* game) {
 	PROFILING_SCOPE();
 
-	Vector2 input_vector = { 0, 0 };
-	if (game->input.action_down(ACTION_LEFT)) {
-		input_vector.x = -1;
-	}
-	if (game->input.action_down(ACTION_RIGHT)) {
-		input_vector.x = 1;
-	}
-	if (game->input.action_down(ACTION_UP)) {
-		input_vector.y = -1;
-	}
-	if (game->input.action_down(ACTION_DOWN)) {
-		input_vector.y = 1;
-	}
-	m_player_position += (float)(game->input.time_delta.in_seconds() * PLAYER_SPEED) * Vector2Normalize(input_vector);
+	const Vector2 position_delta = (float)(game->input.time_delta.in_seconds() * PLAYER_SPEED) * game->input.directional_input();
+	m_player_position += position_delta;
 }
 
 void GameplayScene::render(const Game& game) const {

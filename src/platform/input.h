@@ -79,6 +79,8 @@ struct Input {
 	bool action_down(InputAction action) const;
 	bool action_pressed(InputAction action) const;
 
+	Vector2 directional_input() const;
+
 	bool last_input_was_mouse() const;
 	bool last_input_was_keyboard() const;
 	bool last_input_was_gamepad() const;
