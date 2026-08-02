@@ -17,7 +17,7 @@ public:
 private:
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
-	Vector2 m_player_position = { 0, 0 };
+	Vector2 m_player_position = { 0, 0 }; // relative center of player
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);
