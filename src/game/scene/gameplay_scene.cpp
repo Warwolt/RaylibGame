@@ -87,16 +87,15 @@ void GameplayScene::render(const Game& game) const {
 
 	/* Render gameplay */
 	const Vector2 player_rect_pos = m_player_position - PLAYER_SIZE / 2.0f;
-	const Rectangle hud_rect = { 0, 0, 384, HUD_HEIGHT };
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 	Raylib_DrawTexture(game.resources.get_image(m_level_background), 0, HUD_HEIGHT, WHITE);
 	Raylib_DrawRectangle(player_rect_pos.x, player_rect_pos.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
-	Raylib_DrawPixel(m_player_position.x, m_player_position.y, DARKGREEN);
 
 	/* HUD */
-	Raylib_DrawRectangleRec(hud_rect, BROWN);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Health: 8", { 8, 4 }, 16, 0, WHITE);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 8, 4 + 16 }, 16, 0, WHITE);
+	const Rectangle hud_rect = { 0, 0, 384, HUD_HEIGHT };
+	Raylib_DrawRectangleRec(hud_rect, BLACK);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Health: 8", { 8, 12 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 8, 12 + 16 }, 16, 0, WHITE);
 
 	/* Render pause menu */
 	m_ui.draw(game.resources);
