@@ -59,10 +59,10 @@ void MainMenuScene::update(Game* game) {
 					.bottom = 24,
 				},
 				.font = {
-					.size = 64,
+					.size = 32,
 				},
 			};
-			m_ui.text("Video Game", menu_title_style);
+			m_ui.text("Maze Explorer", menu_title_style);
 
 			/* Menu */
 			m_ui.menu_begin();
