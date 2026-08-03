@@ -1,5 +1,6 @@
 #include "game/scene/gameplay_scene.h"
 
+#include "core/debug/logging.h"
 #include "core/debug/profiling.h"
 #include "core/util.h"
 #include "game/game.h"
@@ -89,20 +90,21 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 
 	const Texture2D level_background = game.resources.get_image(m_level_background);
+	const Vector2 room_size = { 384, 160 };
 
 	Vector2 player_pixel_position = {
 		.x = std::round(m_player_position.x),
 		.y = std::round(m_player_position.y),
 	};
+	Vector2 player_room_position = {
+		.x = std::floor(player_pixel_position.x / room_size.x),
+		.y = std::floor(player_pixel_position.y / room_size.y),
+	};
 
-	const Vector2 viewport_size = { 384, 160 };
-	const Vector2 viewport_position = player_pixel_position - viewport_size / 2.0f;
+	const Vector2 viewport_position = room_size * player_room_position;
 	const Camera2D camera = {
 		.offset = { 0, HUD_HEIGHT },
-		.target = {
-			.x = util::clamp<float>(0, level_background.width - viewport_size.x, viewport_position.x),
-			.y = util::clamp<float>(0, level_background.height - viewport_size.y, viewport_position.y),
-		},
+		.target = viewport_position,
 		.zoom = 1.0f,
 	};
 	Raylib_BeginMode2D(camera);
