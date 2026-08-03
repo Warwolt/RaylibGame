@@ -1,6 +1,7 @@
 #include "game/scene/gameplay_scene.h"
 
 #include "core/debug/profiling.h"
+#include "core/util.h"
 #include "game/game.h"
 
 #include <raymath.h>
@@ -8,6 +9,7 @@
 constexpr float HUD_HEIGHT = 56; // pixels
 constexpr Vector2 PLAYER_SIZE = { 24, 30 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
+constexpr Vector2 LEVEL_SIZE = { 384, 160 };
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
@@ -15,7 +17,7 @@ void GameplayScene::initialize(Game* game) {
 	m_level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
 
 	// put player in center of level
-	m_player_position = (game->window.size() - Vector2 { 0, HUD_HEIGHT }) / 2 + Vector2 { 0, HUD_HEIGHT };
+	m_player_position = LEVEL_SIZE / 2.0;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -84,17 +86,39 @@ void GameplayScene::_update_gameplay(Game* game) {
 
 void GameplayScene::render(const Game& game) const {
 	PROFILING_SCOPE();
-
-	/* Render gameplay */
-	const Vector2 player_rect_pos = m_player_position - PLAYER_SIZE / 2.0f;
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
-	Raylib_DrawTexture(game.resources.get_image(m_level_background), 0, HUD_HEIGHT, WHITE);
-	Raylib_DrawRectangle(player_rect_pos.x, player_rect_pos.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+
+	const Texture2D level_background = game.resources.get_image(m_level_background);
+
+	Vector2 player_pixel_position = {
+		.x = std::round(m_player_position.x),
+		.y = std::round(m_player_position.y),
+	};
+
+	const Vector2 viewport_size = { 384, 160 };
+	const Vector2 viewport_position = player_pixel_position - viewport_size / 2.0f;
+	const Camera2D camera = {
+		.offset = { 0, HUD_HEIGHT },
+		.target = {
+			.x = util::clamp<float>(0, level_background.width - viewport_size.x, viewport_position.x),
+			.y = util::clamp<float>(0, level_background.height - viewport_size.y, viewport_position.y),
+		},
+		.zoom = 1.0f,
+	};
+	Raylib_BeginMode2D(camera);
+	{
+		/* Level */
+		Raylib_DrawTexture(level_background, 0, 0, WHITE);
+
+		/* Player */
+		const Vector2 player_rect_pos = player_pixel_position - PLAYER_SIZE / 2.0f;
+		Raylib_DrawRectangle(player_rect_pos.x, player_rect_pos.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+	}
+	Raylib_EndMode2D();
 
 	/* HUD */
-	const Rectangle hud_rect = { 0, 0, 384, HUD_HEIGHT };
-	Raylib_DrawRectangleRec(hud_rect, BLACK);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Health: 8", { 8, 12 }, 16, 0, WHITE);
+	Raylib_DrawRectangle(0, 0, game.window.width(), HUD_HEIGHT, BLACK);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 8, 12 }, 16, 0, WHITE);
 	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 8, 12 + 16 }, 16, 0, WHITE);
 
 	/* Render pause menu */

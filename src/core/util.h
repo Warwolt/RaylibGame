@@ -13,4 +13,9 @@ namespace util {
 		return std::find_if(items.begin(), items.end(), predicate) != items.end();
 	}
 
+	template <typename T>
+	T clamp(T min, T max, T value) {
+		return std::max(std::min(value, max), min);
+	}
+
 } // namespace util
