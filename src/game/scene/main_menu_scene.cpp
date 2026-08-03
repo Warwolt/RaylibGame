@@ -56,13 +56,13 @@ void MainMenuScene::update(Game* game) {
 			/* Title */
 			const ui::Style menu_title_style = {
 				.margin = {
-					.bottom = 48,
+					.bottom = 8,
 				},
 				.font = {
-					.size = 64,
+					.size = 32,
 				},
 			};
-			m_ui.text("Video Game", menu_title_style);
+			m_ui.text("Maze Explorer", menu_title_style);
 
 			/* Menu */
 			m_ui.menu_begin();

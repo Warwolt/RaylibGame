@@ -1,18 +1,23 @@
 #include "game/scene/gameplay_scene.h"
 
+#include "core/debug/logging.h"
 #include "core/debug/profiling.h"
+#include "core/util.h"
 #include "game/game.h"
 
 #include <raymath.h>
 
-constexpr Vector2 PLAYER_SIZE = { 64, 64 }; // pixels
+constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
+constexpr Vector2 LEVEL_SIZE = { 384, 160 };
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 
-	// put player in center of window
-	m_player_position = game->window.size() / 2;
+	m_level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+
+	// put player in center of level
+	m_player_position = LEVEL_SIZE / 2.0;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -46,10 +51,10 @@ void GameplayScene::_update_pause_menu(Game* game) {
 	const ui::Style menu_style = {
 			.fit_content = true,
 			.padding = ui::Edges {
-				.top = 25,
-				.bottom = 25,
-				.left = 75,
-				.right = 75,
+				.top = 15,
+				.bottom = 15,
+				.left = 50,
+				.right = 50,
 			},
 			.background = {
 				.color = BLACK,
@@ -81,11 +86,44 @@ void GameplayScene::_update_gameplay(Game* game) {
 
 void GameplayScene::render(const Game& game) const {
 	PROFILING_SCOPE();
-
-	/* Render gameplay */
-	const Vector2 player_screen_position = m_player_position - PLAYER_SIZE / 2.0f;
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
-	Raylib_DrawRectangle(player_screen_position.x, player_screen_position.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+
+	const Texture2D level_background = game.resources.get_image(m_level_background);
+	const Vector2 room_size = { 256, 128 };
+
+	Vector2 player_pixel_position = {
+		.x = std::round(m_player_position.x),
+		.y = std::round(m_player_position.y),
+	};
+	Vector2 player_room_position = {
+		.x = std::floor(player_pixel_position.x / room_size.x),
+		.y = std::floor(player_pixel_position.y / room_size.y),
+	};
+
+	const Vector2 camera_offset = { 0, 16 };
+	const Vector2 viewport_position = room_size * player_room_position;
+	const Camera2D camera = {
+		.offset = camera_offset,
+		.target = viewport_position,
+		.zoom = 1.0f,
+	};
+	Raylib_BeginMode2D(camera);
+	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, room_size.x, room_size.y);
+	{
+		/* Level */
+		Raylib_DrawTexture(level_background, 0, 0, WHITE);
+
+		/* Player */
+		const Vector2 player_rect_pos = player_pixel_position - PLAYER_SIZE / 2.0f;
+		Raylib_DrawRectangle(player_rect_pos.x, player_rect_pos.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+	}
+	Raylib_EndScissorMode();
+	Raylib_EndMode2D();
+
+	/* HUD */
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 4, -1 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Magic: 4", { 4 + 56, -1 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Gold: 255", { 4 + 56 + 4 + 56, -1 }, 16, 0, WHITE);
 
 	/* Render pause menu */
 	m_ui.draw(game.resources);
