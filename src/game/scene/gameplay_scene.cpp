@@ -9,15 +9,14 @@
 
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
-constexpr Vector2 LEVEL_SIZE = { 384, 160 };
+
+constexpr Vector2 ROOM_SIZE = { 256, 128 };
+constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
-
 	m_level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-
-	// put player in center of level
-	m_player_position = LEVEL_SIZE / 2.0;
+	m_player_position = ROOM_SIZE / 2.0;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -80,8 +79,37 @@ void GameplayScene::_update_pause_menu(Game* game) {
 void GameplayScene::_update_gameplay(Game* game) {
 	PROFILING_SCOPE();
 
-	const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-	m_player_position += delta_speed * game->input.directional_input();
+	const Vector2 player_room_position = {
+		.x = ROOM_SIZE.x * std::floor(m_player_position.x / ROOM_SIZE.x),
+		.y = ROOM_SIZE.y * std::floor(m_player_position.y / ROOM_SIZE.y),
+	};
+	const Vector2 camera_room_delta = player_room_position - m_camera_position;
+	const bool should_move_camera = m_camera_position != player_room_position;
+	if (should_move_camera) {
+		// Move camera
+		const float delta_speed = game->input.time_delta.in_seconds() * CAMERA_SPEED;
+		const float distance = Vector2Length(camera_room_delta);
+		const float move_amount = std::min(delta_speed, distance);
+		m_camera_position += move_amount * Vector2Normalize(camera_room_delta);
+
+		// Push player
+		// FIXME: take body size into consideration
+		// The body should get pushed by the camera while it's moving
+		// Gotta take into consideration that the player position is in the middle of the body
+		// So we are pushing a small box (the player body) with a larger box (the camera)
+		m_player_position = {
+			.x = util::clamp(m_camera_position.x, m_camera_position.x + ROOM_SIZE.x, m_player_position.x),
+			.y = util::clamp(m_camera_position.y, m_camera_position.y + ROOM_SIZE.y, m_player_position.y),
+		};
+	} else {
+		// Move player
+		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
+		m_player_position += delta_speed * game->input.directional_input();
+	}
+
+	if (game->input.key_pressed(KEY_F3)) {
+		LOG_DEBUG("camera_room_delta %f %f", camera_room_delta.x, camera_room_delta.y);
+	}
 }
 
 void GameplayScene::render(const Game& game) const {
@@ -89,26 +117,24 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 
 	const Texture2D level_background = game.resources.get_image(m_level_background);
-	const Vector2 room_size = { 256, 128 };
 
 	Vector2 player_pixel_position = {
 		.x = std::round(m_player_position.x),
 		.y = std::round(m_player_position.y),
 	};
 	Vector2 player_room_position = {
-		.x = std::floor(player_pixel_position.x / room_size.x),
-		.y = std::floor(player_pixel_position.y / room_size.y),
+		.x = std::floor(player_pixel_position.x / ROOM_SIZE.x),
+		.y = std::floor(player_pixel_position.y / ROOM_SIZE.y),
 	};
 
 	const Vector2 camera_offset = { 0, 16 };
-	const Vector2 viewport_position = room_size * player_room_position;
 	const Camera2D camera = {
 		.offset = camera_offset,
-		.target = viewport_position,
+		.target = m_camera_position,
 		.zoom = 1.0f,
 	};
 	Raylib_BeginMode2D(camera);
-	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, room_size.x, room_size.y);
+	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, ROOM_SIZE.x, ROOM_SIZE.y);
 	{
 		/* Level */
 		Raylib_DrawTexture(level_background, 0, 0, WHITE);

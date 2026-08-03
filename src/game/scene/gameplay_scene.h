@@ -20,6 +20,7 @@ private:
 	ui::UserInterface m_ui;
 	ImageID m_level_background;
 	Vector2 m_player_position = { 0, 0 }; // relative center of player
+	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);
