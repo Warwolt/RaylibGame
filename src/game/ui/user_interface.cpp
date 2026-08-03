@@ -118,7 +118,7 @@ namespace ui {
 
 			/* Focus indicator */
 			const double time_now = input.time_now.in_seconds();
-			const double period = 1.8; // seconds
+			const double period = 1.5; // seconds
 			const double freq = 1.0 / period;
 			const double two_pi = 2.0 * std::numbers::pi;
 			const float focus_indicator_offset = std::round(-10.0f * std::abs(std::cos(time_now * two_pi * freq)));
@@ -127,7 +127,7 @@ namespace ui {
 				.position =
 					AbsolutePosition {
 						.x = Pixels(-focus_indicator_size + focus_indicator_offset),
-						.y = Pixels(-8),
+						.y = Pixels(-focus_indicator_size / 4),
 					},
 				.width = Pixels(focus_indicator_size),
 				.height = Pixels(focus_indicator_size),

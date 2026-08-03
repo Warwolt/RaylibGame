@@ -89,7 +89,7 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 
 	const Texture2D level_background = game.resources.get_image(m_level_background);
-	const Vector2 room_size = { 288, 192 };
+	const Vector2 room_size = { 256, 128 };
 
 	Vector2 player_pixel_position = {
 		.x = std::round(m_player_position.x),
@@ -100,7 +100,7 @@ void GameplayScene::render(const Game& game) const {
 		.y = std::floor(player_pixel_position.y / room_size.y),
 	};
 
-	const Vector2 camera_offset = { 72, 12 };
+	const Vector2 camera_offset = { 0, 16 };
 	const Vector2 viewport_position = room_size * player_room_position;
 	const Camera2D camera = {
 		.offset = camera_offset,
@@ -121,8 +121,8 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_EndMode2D();
 
 	/* HUD */
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 8, 12 }, 16, 0, WHITE);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 8, 12 + 16 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 4, 0 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 4 + 56, 0 }, 16, 0, WHITE);
 
 	/* Render pause menu */
 	m_ui.draw(game.resources);
