@@ -14,10 +14,10 @@ constexpr char SCREEN_TITLE[] = "Video Game";
 
 Game* Game_initialize(int argc, char** argv) {
 	/* Parse command line */
-	bool start_fullscreen = false;
+	bool start_fullscreen = true;
 	for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "--fullscreen") == 0) {
-			start_fullscreen = true;
+		if (strcmp(argv[i], "--windowed") == 0) {
+			start_fullscreen = false;
 		} else {
 			LOG_ERROR("Unrecognized command: %s", argv[i]);
 		}
