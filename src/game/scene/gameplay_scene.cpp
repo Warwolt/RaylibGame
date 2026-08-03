@@ -7,7 +7,7 @@
 
 #include <raymath.h>
 
-constexpr Vector2 PLAYER_SIZE = { 24, 30 }; // pixels
+constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 constexpr Vector2 LEVEL_SIZE = { 384, 160 };
 
@@ -121,8 +121,9 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_EndMode2D();
 
 	/* HUD */
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 4, 0 }, 16, 0, WHITE);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 4 + 56, 0 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 4, -1 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Magic: 4", { 4 + 56, -1 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Gold: 255", { 4 + 56 + 4 + 56, -1 }, 16, 0, WHITE);
 
 	/* Render pause menu */
 	m_ui.draw(game.resources);
