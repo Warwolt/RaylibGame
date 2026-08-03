@@ -7,7 +7,6 @@
 
 #include <raymath.h>
 
-constexpr float HUD_HEIGHT = 56; // pixels
 constexpr Vector2 PLAYER_SIZE = { 24, 30 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 constexpr Vector2 LEVEL_SIZE = { 384, 160 };
@@ -52,10 +51,10 @@ void GameplayScene::_update_pause_menu(Game* game) {
 	const ui::Style menu_style = {
 			.fit_content = true,
 			.padding = ui::Edges {
-				.top = 25,
-				.bottom = 25,
-				.left = 75,
-				.right = 75,
+				.top = 15,
+				.bottom = 15,
+				.left = 50,
+				.right = 50,
 			},
 			.background = {
 				.color = BLACK,
@@ -90,7 +89,7 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 
 	const Texture2D level_background = game.resources.get_image(m_level_background);
-	const Vector2 room_size = { 384, 160 };
+	const Vector2 room_size = { 288, 192 };
 
 	Vector2 player_pixel_position = {
 		.x = std::round(m_player_position.x),
@@ -101,13 +100,15 @@ void GameplayScene::render(const Game& game) const {
 		.y = std::floor(player_pixel_position.y / room_size.y),
 	};
 
+	const Vector2 camera_offset = { 72, 12 };
 	const Vector2 viewport_position = room_size * player_room_position;
 	const Camera2D camera = {
-		.offset = { 0, HUD_HEIGHT },
+		.offset = camera_offset,
 		.target = viewport_position,
 		.zoom = 1.0f,
 	};
 	Raylib_BeginMode2D(camera);
+	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, room_size.x, room_size.y);
 	{
 		/* Level */
 		Raylib_DrawTexture(level_background, 0, 0, WHITE);
@@ -116,10 +117,10 @@ void GameplayScene::render(const Game& game) const {
 		const Vector2 player_rect_pos = player_pixel_position - PLAYER_SIZE / 2.0f;
 		Raylib_DrawRectangle(player_rect_pos.x, player_rect_pos.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
 	}
+	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
 
 	/* HUD */
-	Raylib_DrawRectangle(0, 0, game.window.width(), HUD_HEIGHT, BLACK);
 	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 8, 12 }, 16, 0, WHITE);
 	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 8, 12 + 16 }, 16, 0, WHITE);
 
