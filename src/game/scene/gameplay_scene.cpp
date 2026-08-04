@@ -86,23 +86,49 @@ void GameplayScene::_update_gameplay(Game* game) {
 	const Vector2 camera_room_delta = player_room_position - m_camera_position;
 	const bool should_move_camera = m_camera_position != player_room_position;
 	if (should_move_camera) {
-		// Move camera
+		/* Move camera */
 		const float delta_speed = game->input.time_delta.in_seconds() * CAMERA_SPEED;
 		const float distance = Vector2Length(camera_room_delta);
 		const float move_amount = std::min(delta_speed, distance);
 		m_camera_position += move_amount * Vector2Normalize(camera_room_delta);
 
-		// Push player
-		// FIXME: take body size into consideration
-		// The body should get pushed by the camera while it's moving
-		// Gotta take into consideration that the player position is in the middle of the body
-		// So we are pushing a small box (the player body) with a larger box (the camera)
-		m_player_position = {
-			.x = util::clamp(m_camera_position.x, m_camera_position.x + ROOM_SIZE.x, m_player_position.x),
-			.y = util::clamp(m_camera_position.y, m_camera_position.y + ROOM_SIZE.y, m_player_position.y),
-		};
+		/* Push player along with camera */
+		{
+			const bool camera_moving_right = camera_room_delta.x > 0;
+			const bool camera_moving_left = camera_room_delta.x < 0;
+			const bool camera_moving_down = camera_room_delta.y > 0;
+			const bool camera_moving_up = camera_room_delta.y < 0;
+			if (camera_moving_right) {
+				const float camera_left = m_camera_position.x;
+				const float player_left = m_player_position.x - PLAYER_SIZE.x / 2;
+				if (camera_left >= player_left) {
+					m_player_position.x = camera_left + PLAYER_SIZE.x / 2;
+				}
+			}
+			if (camera_moving_left) {
+				const float camera_right = m_camera_position.x + ROOM_SIZE.x;
+				const float player_right = m_player_position.x + PLAYER_SIZE.x / 2;
+				if (camera_right <= player_right) {
+					m_player_position.x = camera_right - PLAYER_SIZE.x / 2;
+				}
+			}
+			if (camera_moving_down) {
+				const float camera_top = m_camera_position.y;
+				const float player_top = m_player_position.y - PLAYER_SIZE.x / 2;
+				if (camera_top >= player_top) {
+					m_player_position.y = camera_top + PLAYER_SIZE.y / 2;
+				}
+			}
+			if (camera_moving_up) {
+				const float camera_bottom = m_camera_position.y + ROOM_SIZE.y;
+				const float player_bottom = m_player_position.y + PLAYER_SIZE.x / 2;
+				if (camera_bottom <= player_bottom) {
+					m_player_position.y = camera_bottom - PLAYER_SIZE.y / 2;
+				}
+			}
+		}
 	} else {
-		// Move player
+		/* Move player */
 		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
 		m_player_position += delta_speed * game->input.directional_input();
 	}
