@@ -79,6 +79,7 @@ void GameplayScene::_update_pause_menu(Game* game) {
 void GameplayScene::_update_gameplay(Game* game) {
 	PROFILING_SCOPE();
 
+	/* Check if camera should move */
 	const Vector2 player_room_position = {
 		.x = ROOM_SIZE.x * std::floor(m_player_position.x / ROOM_SIZE.x),
 		.y = ROOM_SIZE.y * std::floor(m_player_position.y / ROOM_SIZE.y),
@@ -127,14 +128,13 @@ void GameplayScene::_update_gameplay(Game* game) {
 				}
 			}
 		}
-	} else {
-		/* Move player */
-		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-		m_player_position += delta_speed * game->input.directional_input();
 	}
 
-	if (game->input.key_pressed(KEY_F3)) {
-		LOG_DEBUG("camera_room_delta %f %f", camera_room_delta.x, camera_room_delta.y);
+	/* Allow player to move as long as camera isn't moving */
+	const bool camera_is_moving = camera_room_delta != Vector2 { 0, 0 };
+	if (!camera_is_moving) {
+		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
+		m_player_position += delta_speed * game->input.directional_input();
 	}
 }
 
