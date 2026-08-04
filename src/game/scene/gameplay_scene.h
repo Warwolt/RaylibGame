@@ -7,6 +7,13 @@
 
 struct Game;
 
+enum class Direction {
+	Up,
+	Left,
+	Down,
+	Right,
+};
+
 class GameplayScene {
 public:
 	void initialize(Game* game);
@@ -25,6 +32,7 @@ private:
 	ui::UserInterface m_ui;
 	Vector2 m_player_position = { 0, 0 }; // relative center of player
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
+	Direction m_player_direction = Direction::Right;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);

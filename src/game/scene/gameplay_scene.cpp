@@ -133,8 +133,16 @@ void GameplayScene::_update_gameplay(Game* game) {
 	/* Allow player to move as long as camera isn't moving */
 	const bool camera_is_moving = camera_target_delta != Vector2 { 0, 0 };
 	if (!camera_is_moving) {
+		const Vector2 directional_input = game->input.directional_input();
 		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-		m_player_position += delta_speed * game->input.directional_input();
+		m_player_position += delta_speed * directional_input;
+
+		if (directional_input.x > 0) {
+			m_player_direction = Direction::Right;
+		}
+		if (directional_input.x < 0) {
+			m_player_direction = Direction::Left;
+		}
 	}
 }
 
@@ -162,9 +170,10 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		const float period = 0.5f; // seconds
+		const bool flip_horizontal = m_player_direction == Direction::Left;
+		const float period = 0.4f; // seconds
 		const int frame = std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1;
-		const Rectangle sprite_sheet_index = { frame * 16, 0, -16, 18 };
+		const Rectangle sprite_sheet_index = { frame * 16, 0, (flip_horizontal ? -1.0f : 1.0) * 16, 18 };
 		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
