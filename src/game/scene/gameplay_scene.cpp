@@ -9,15 +9,14 @@
 
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
-constexpr Vector2 LEVEL_SIZE = { 384, 160 };
+
+constexpr Vector2 ROOM_SIZE = { 256, 128 };
+constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
-
 	m_level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-
-	// put player in center of level
-	m_player_position = LEVEL_SIZE / 2.0;
+	m_player_position = ROOM_SIZE / 2.0;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -80,42 +79,87 @@ void GameplayScene::_update_pause_menu(Game* game) {
 void GameplayScene::_update_gameplay(Game* game) {
 	PROFILING_SCOPE();
 
-	const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-	m_player_position += delta_speed * game->input.directional_input();
+	/* Camera should show the current room player is in */
+	const Vector2 player_room_position = {
+		.x = ROOM_SIZE.x * std::floor(m_player_position.x / ROOM_SIZE.x),
+		.y = ROOM_SIZE.y * std::floor(m_player_position.y / ROOM_SIZE.y),
+	};
+	const Vector2 camera_target_delta = player_room_position - m_camera_position;
+	const bool should_move_camera = m_camera_position != player_room_position;
+	if (should_move_camera) {
+		/* Move camera */
+		const float delta_speed = game->input.time_delta.in_seconds() * CAMERA_SPEED;
+		const float distance = Vector2Length(camera_target_delta);
+		const float move_amount = std::min(delta_speed, distance);
+		m_camera_position += move_amount * Vector2Normalize(camera_target_delta);
+
+		/* Push player along with camera */
+		const bool camera_moving_right = camera_target_delta.x > 0;
+		const bool camera_moving_left = camera_target_delta.x < 0;
+		const bool camera_moving_down = camera_target_delta.y > 0;
+		const bool camera_moving_up = camera_target_delta.y < 0;
+		if (camera_moving_right) {
+			const float camera_left = m_camera_position.x;
+			const float player_left = m_player_position.x - PLAYER_SIZE.x / 2;
+			if (camera_left >= player_left) {
+				m_player_position.x = camera_left + PLAYER_SIZE.x / 2;
+			}
+		}
+		if (camera_moving_left) {
+			const float camera_right = m_camera_position.x + ROOM_SIZE.x;
+			const float player_right = m_player_position.x + PLAYER_SIZE.x / 2;
+			if (camera_right <= player_right) {
+				m_player_position.x = camera_right - PLAYER_SIZE.x / 2;
+			}
+		}
+		if (camera_moving_down) {
+			const float camera_top = m_camera_position.y;
+			const float player_top = m_player_position.y - PLAYER_SIZE.x / 2;
+			if (camera_top >= player_top) {
+				m_player_position.y = camera_top + PLAYER_SIZE.y / 2;
+			}
+		}
+		if (camera_moving_up) {
+			const float camera_bottom = m_camera_position.y + ROOM_SIZE.y;
+			const float player_bottom = m_player_position.y + PLAYER_SIZE.x / 2;
+			if (camera_bottom <= player_bottom) {
+				m_player_position.y = camera_bottom - PLAYER_SIZE.y / 2;
+			}
+		}
+	}
+
+	/* Allow player to move as long as camera isn't moving */
+	const bool camera_is_moving = camera_target_delta != Vector2 { 0, 0 };
+	if (!camera_is_moving) {
+		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
+		m_player_position += delta_speed * game->input.directional_input();
+	}
 }
 
 void GameplayScene::render(const Game& game) const {
 	PROFILING_SCOPE();
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 
-	const Texture2D level_background = game.resources.get_image(m_level_background);
-	const Vector2 room_size = { 256, 128 };
-
-	Vector2 player_pixel_position = {
-		.x = std::round(m_player_position.x),
-		.y = std::round(m_player_position.y),
-	};
-	Vector2 player_room_position = {
-		.x = std::floor(player_pixel_position.x / room_size.x),
-		.y = std::floor(player_pixel_position.y / room_size.y),
-	};
-
+	/* Play area viewport */
 	const Vector2 camera_offset = { 0, 16 };
-	const Vector2 viewport_position = room_size * player_room_position;
 	const Camera2D camera = {
 		.offset = camera_offset,
-		.target = viewport_position,
+		.target = m_camera_position,
 		.zoom = 1.0f,
 	};
 	Raylib_BeginMode2D(camera);
-	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, room_size.x, room_size.y);
+	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, ROOM_SIZE.x, ROOM_SIZE.y);
 	{
 		/* Level */
-		Raylib_DrawTexture(level_background, 0, 0, WHITE);
+		Raylib_DrawTexture(game.resources.get_image(m_level_background), 0, 0, WHITE);
 
 		/* Player */
-		const Vector2 player_rect_pos = player_pixel_position - PLAYER_SIZE / 2.0f;
-		Raylib_DrawRectangle(player_rect_pos.x, player_rect_pos.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+		const Vector2 player_pixel_position = {
+			.x = std::round(m_player_position.x),
+			.y = std::round(m_player_position.y),
+		};
+		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
+		Raylib_DrawRectangle(player_top_left.x, player_top_left.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
