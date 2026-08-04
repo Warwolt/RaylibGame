@@ -7,7 +7,7 @@
 
 #include <raymath.h>
 
-constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
+constexpr Vector2 PLAYER_SIZE = { 16, 18 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
 constexpr Vector2 ROOM_SIZE = { 256, 128 };
@@ -15,7 +15,9 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
-	m_level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+	m_images.knight_sprite_sheet = game->resources.load_image("resource/image/walk_animation.png").value();
+
 	m_player_position = ROOM_SIZE / 2.0;
 }
 
@@ -151,7 +153,7 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, ROOM_SIZE.x, ROOM_SIZE.y);
 	{
 		/* Level */
-		Raylib_DrawTexture(game.resources.get_image(m_level_background), 0, 0, WHITE);
+		Raylib_DrawTexture(game.resources.get_image(m_images.level_background), 0, 0, WHITE);
 
 		/* Player */
 		const Vector2 player_pixel_position = {
@@ -159,7 +161,11 @@ void GameplayScene::render(const Game& game) const {
 			.y = std::round(m_player_position.y),
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
-		Raylib_DrawRectangle(player_top_left.x, player_top_left.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+
+		const float period = 0.5f; // seconds
+		const int frame = std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1;
+		const Rectangle sprite_sheet_index = { frame * 16, 0, -16, 18 };
+		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();

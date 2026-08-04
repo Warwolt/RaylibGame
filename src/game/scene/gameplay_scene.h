@@ -16,9 +16,13 @@ public:
 	void render(const Game& game) const;
 
 private:
+	struct Images {
+		ImageID level_background;
+		ImageID knight_sprite_sheet;
+	} m_images;
+
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
-	ImageID m_level_background;
 	Vector2 m_player_position = { 0, 0 }; // relative center of player
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
 
