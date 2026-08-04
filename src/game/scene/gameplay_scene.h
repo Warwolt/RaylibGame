@@ -33,6 +33,7 @@ private:
 	Vector2 m_player_position = { 0, 0 }; // relative center of player
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
 	Direction m_player_direction = Direction::Right;
+	bool m_player_is_moving = false;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);

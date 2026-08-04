@@ -136,6 +136,7 @@ void GameplayScene::_update_gameplay(Game* game) {
 		const Vector2 directional_input = game->input.directional_input();
 		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
 		m_player_position += delta_speed * directional_input;
+		m_player_is_moving = directional_input != Vector2 { 0, 0 };
 
 		if (directional_input.x > 0) {
 			m_player_direction = Direction::Right;
@@ -172,7 +173,7 @@ void GameplayScene::render(const Game& game) const {
 
 		const bool flip_horizontal = m_player_direction == Direction::Left;
 		const float period = 0.4f; // seconds
-		const int frame = std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1;
+		const int frame = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 1;
 		const Rectangle sprite_sheet_index = { frame * 16, 0, (flip_horizontal ? -1.0f : 1.0) * 16, 18 };
 		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
 	}
@@ -181,7 +182,7 @@ void GameplayScene::render(const Game& game) const {
 
 	/* HUD */
 	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 4, -1 }, 16, 0, WHITE);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Magic: 4", { 4 + 56, -1 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 4 + 56, -1 }, 16, 0, WHITE);
 	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Gold: 255", { 4 + 56 + 4 + 56, -1 }, 16, 0, WHITE);
 
 	/* Render pause menu */
