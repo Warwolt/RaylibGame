@@ -171,9 +171,24 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
+		// FIXME: we need some lightweight spritesheet animation system
+		//
+		// Spec:
+		// When walking we should animate the player character
+		// Walk animation should start from frame with legs apart
+		// When idle frame with legs standing still should be used
+		//
+		// API:
+		// Load sprite sheet.
+		// Define animation (frames in sheet + duration of frames).
+		// Start animation.
+		// Stop animation.
+		// Set current frame.
+		// Flip horizontally.
+		//
 		const bool flip_horizontal = m_player_direction == Direction::Left;
 		const float period = 0.4f; // seconds
-		const int frame = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 1;
+		const int frame = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 0;
 		const Rectangle sprite_sheet_index = { frame * 16, 0, (flip_horizontal ? -1.0f : 1.0) * 16, 18 };
 		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
 	}

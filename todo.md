@@ -1,8 +1,7 @@
 # TODO
 - Gameplay scene with basic camera + character movement
-- Collision detection test screen
-- Collision resolution test screen
-- Bug: Fix clang format not formatting nested designated initializers
+- Hot reload resources (reload resource if file has changed? reload on F5?)
+- Add collisions to walls in level
 
 # Done
 - Make box direction a style property instead of a content property
