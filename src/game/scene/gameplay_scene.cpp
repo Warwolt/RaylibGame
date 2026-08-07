@@ -7,7 +7,7 @@
 
 #include <raymath.h>
 
-constexpr Vector2 PLAYER_SIZE = { 16, 18 }; // pixels
+constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
 constexpr Vector2 ROOM_SIZE = { 256, 128 };
@@ -144,6 +144,12 @@ void GameplayScene::_update_gameplay(Game* game) {
 		if (directional_input.x < 0) {
 			m_player_direction = Direction::Left;
 		}
+		if (directional_input.y > 0) {
+			m_player_direction = Direction::Down;
+		}
+		if (directional_input.y < 0) {
+			m_player_direction = Direction::Up;
+		}
 	}
 }
 
@@ -188,8 +194,21 @@ void GameplayScene::render(const Game& game) const {
 		//
 		const bool flip_horizontal = m_player_direction == Direction::Left;
 		const float period = 0.4f; // seconds
-		const int frame = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 0;
-		const Rectangle sprite_sheet_index = { frame * 16, 0, (flip_horizontal ? -1.0f : 1.0) * 16, 18 };
+		const int animation_index = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 1;
+		int frame = 0;
+		switch (m_player_direction) {
+			case Direction::Left:
+			case Direction::Right:
+				frame = animation_index + 0;
+				break;
+			case Direction::Down:
+				frame = animation_index + 2;
+				break;
+			case Direction::Up:
+				frame = animation_index + 4;
+				break;
+		}
+		const Rectangle sprite_sheet_index = { frame * 16, 0, (flip_horizontal ? -1.0f : 1.0) * 16, 16 };
 		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
