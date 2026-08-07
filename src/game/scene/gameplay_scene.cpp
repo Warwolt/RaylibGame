@@ -3,9 +3,12 @@
 #include "core/debug/logging.h"
 #include "core/debug/profiling.h"
 #include "core/util.h"
+#include "core/util/time.h"
 #include "game/game.h"
 
 #include <raymath.h>
+
+#include <unordered_map>
 
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
@@ -190,42 +193,64 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		// FIXME: we need some lightweight spritesheet animation system
-		//
-		// Spec:
-		// When walking we should animate the player character
-		// Walk animation should start from frame with legs apart
-		// When idle frame with legs standing still should be used
-		//
-		// API:
-		// Load sprite sheet.
-		// Define animation (frames in sheet + duration of frames).
-		// Start animation.
-		// Stop animation.
-		// Set current frame.
-		// Flip horizontally.
-		//
-		const bool flip_horizontal = m_player_direction == Direction::Left;
-		const float period = 0.4f; // seconds
-		const int animation_index = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 1;
-		int frame = 0;
-		switch (m_player_direction) {
-			case Direction::Left:
-			case Direction::Right:
-				frame = animation_index + 0;
-				break;
-			case Direction::Down:
-				frame = animation_index + 2;
-				break;
-			case Direction::Up:
-				frame = animation_index + 4;
-				break;
+		using namespace std::chrono_literals;
+		struct SpriteFrame {
+			size_t sprite_index;
+			Time duration;
+		};
+		struct SpriteAnimation {
+			std::vector<SpriteFrame> frames;
+			bool flip_horizontally = false;
+
+			Time duration() const {
+				Time acc = 0ms;
+				for (const SpriteFrame& frame : frames) {
+					acc += frame.duration;
+				}
+				return acc;
+			}
+		};
+
+		const std::unordered_map<Direction, SpriteAnimation> walk_animations = {
+			{
+				Direction::Left,
+				SpriteAnimation { .frames = { { 0, 250ms }, { 1, 250ms } }, .flip_horizontally = true },
+			},
+			{
+				Direction::Right,
+				SpriteAnimation { .frames = { { 0, 250ms }, { 1, 250ms } } },
+			},
+			{
+				Direction::Down,
+				SpriteAnimation { .frames = { { 2, 250ms }, { 3, 250ms } } },
+			},
+			{
+				Direction::Up,
+				SpriteAnimation { .frames = { { 4, 250ms }, { 5, 250ms } } },
+			},
+		};
+
+		const bool animation_is_playing = m_player_is_moving;
+		const Time animation_start = 0ms;
+		const SpriteAnimation& animation = walk_animations.at(m_player_direction);
+		size_t frame_index = 0;
+		if (animation_is_playing) {
+			const Time animation_now = (game.input.time_now - animation_start) % animation.duration();
+			Time frame_start = 0ms;
+			for (const SpriteFrame& frame : animation.frames) {
+				if (animation_now <= frame_start + frame.duration) {
+					break;
+				}
+				frame_start += frame.duration;
+				frame_index++;
+			}
 		}
-		Rectangle sprite_sheet_rect = m_images.knight_sprite_sheet.frames[frame];
-		if (flip_horizontal) {
-			sprite_sheet_rect.width *= -1;
+		Rectangle sprite_rect = m_images.knight_sprite_sheet.frames.at(animation.frames.at(frame_index).sprite_index);
+		if (animation.flip_horizontally) {
+			sprite_rect.width *= -1;
 		}
-		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet.image), sprite_sheet_rect, player_top_left, WHITE);
+		Texture2D sprite_sheet_texture = game.resources.get_image(m_images.knight_sprite_sheet.image);
+		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_rect, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
