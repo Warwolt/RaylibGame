@@ -7,6 +7,13 @@
 
 struct Game;
 
+enum class Direction {
+	Up,
+	Left,
+	Down,
+	Right,
+};
+
 class GameplayScene {
 public:
 	void initialize(Game* game);
@@ -16,11 +23,17 @@ public:
 	void render(const Game& game) const;
 
 private:
+	struct Images {
+		ImageID level_background;
+		ImageID knight_sprite_sheet;
+	} m_images;
+
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
-	ImageID m_level_background;
 	Vector2 m_player_position = { 0, 0 }; // relative center of player
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
+	Direction m_player_direction = Direction::Right;
+	bool m_player_is_moving = false;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);

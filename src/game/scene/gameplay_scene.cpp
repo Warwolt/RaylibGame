@@ -15,7 +15,9 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
-	m_level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+	m_images.knight_sprite_sheet = game->resources.load_image("resource/image/walk_animation.png").value();
+
 	m_player_position = ROOM_SIZE / 2.0;
 }
 
@@ -131,8 +133,23 @@ void GameplayScene::_update_gameplay(Game* game) {
 	/* Allow player to move as long as camera isn't moving */
 	const bool camera_is_moving = camera_target_delta != Vector2 { 0, 0 };
 	if (!camera_is_moving) {
+		const Vector2 directional_input = game->input.directional_input();
 		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-		m_player_position += delta_speed * game->input.directional_input();
+		m_player_position += delta_speed * directional_input;
+		m_player_is_moving = directional_input != Vector2 { 0, 0 };
+
+		if (directional_input.x > 0) {
+			m_player_direction = Direction::Right;
+		}
+		if (directional_input.x < 0) {
+			m_player_direction = Direction::Left;
+		}
+		if (directional_input.y > 0) {
+			m_player_direction = Direction::Down;
+		}
+		if (directional_input.y < 0) {
+			m_player_direction = Direction::Up;
+		}
 	}
 }
 
@@ -151,7 +168,7 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, ROOM_SIZE.x, ROOM_SIZE.y);
 	{
 		/* Level */
-		Raylib_DrawTexture(game.resources.get_image(m_level_background), 0, 0, WHITE);
+		Raylib_DrawTexture(game.resources.get_image(m_images.level_background), 0, 0, WHITE);
 
 		/* Player */
 		const Vector2 player_pixel_position = {
@@ -159,14 +176,47 @@ void GameplayScene::render(const Game& game) const {
 			.y = std::round(m_player_position.y),
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
-		Raylib_DrawRectangle(player_top_left.x, player_top_left.y, PLAYER_SIZE.x, PLAYER_SIZE.y, GREEN);
+
+		// FIXME: we need some lightweight spritesheet animation system
+		//
+		// Spec:
+		// When walking we should animate the player character
+		// Walk animation should start from frame with legs apart
+		// When idle frame with legs standing still should be used
+		//
+		// API:
+		// Load sprite sheet.
+		// Define animation (frames in sheet + duration of frames).
+		// Start animation.
+		// Stop animation.
+		// Set current frame.
+		// Flip horizontally.
+		//
+		const bool flip_horizontal = m_player_direction == Direction::Left;
+		const float period = 0.4f; // seconds
+		const int animation_index = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 1;
+		int frame = 0;
+		switch (m_player_direction) {
+			case Direction::Left:
+			case Direction::Right:
+				frame = animation_index + 0;
+				break;
+			case Direction::Down:
+				frame = animation_index + 2;
+				break;
+			case Direction::Up:
+				frame = animation_index + 4;
+				break;
+		}
+		const Rectangle sprite_sheet_index = { frame * 16, 0, (flip_horizontal ? -1.0f : 1.0) * 16, 16 };
+		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
 
 	/* HUD */
 	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 4, -1 }, 16, 0, WHITE);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Magic: 4", { 4 + 56, -1 }, 16, 0, WHITE);
+	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 4 + 56, -1 }, 16, 0, WHITE);
 	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Gold: 255", { 4 + 56 + 4 + 56, -1 }, 16, 0, WHITE);
 
 	/* Render pause menu */
