@@ -19,20 +19,7 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-	m_images.knight_sprite_sheet.image = game->resources.load_image("resource/image/walk_animation.png").value();
-	// clang-format off
-	m_images.knight_sprite_sheet.frames = {
-		// Right
-		Rectangle { 0, 0, 16, 16 },
-		Rectangle { 16, 0, 16, 16 },
-		// Down
-		Rectangle { 32, 0, 16, 16 },
-		Rectangle { 48, 0, 16, 16 },
-		// Up
-		Rectangle { 64, 0, 16, 16 },
-		Rectangle { 80, 0, 16, 16 },
-	};
-	// clang-format on
+	m_images.knight_sprite_sheet = game->resources.load_image("resource/image/walk_animation.png").value();
 
 	m_player_position = ROOM_SIZE / 2.0;
 }
@@ -194,10 +181,12 @@ void GameplayScene::render(const Game& game) const {
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
 		using namespace std::chrono_literals;
+
 		struct SpriteFrame {
-			size_t sprite_index;
+			Rectangle source;
 			Time duration;
 		};
+
 		struct SpriteAnimation {
 			std::vector<SpriteFrame> frames;
 			bool flip_horizontally = false;
@@ -214,19 +203,40 @@ void GameplayScene::render(const Game& game) const {
 		const std::unordered_map<Direction, SpriteAnimation> walk_animations = {
 			{
 				Direction::Left,
-				SpriteAnimation { .frames = { { 0, 250ms }, { 1, 250ms } }, .flip_horizontally = true },
+				SpriteAnimation {
+					.frames = {
+						{ Rectangle { 0, 0, 16, 16 }, 250ms },
+						{ Rectangle { 16, 0, 16, 16 }, 250ms },
+					},
+					.flip_horizontally = true,
+				},
 			},
 			{
 				Direction::Right,
-				SpriteAnimation { .frames = { { 0, 250ms }, { 1, 250ms } } },
+				SpriteAnimation {
+					.frames = {
+						{ Rectangle { 0, 0, 16, 16 }, 250ms },
+						{ Rectangle { 16, 0, 16, 16 }, 250ms },
+					},
+				},
 			},
 			{
 				Direction::Down,
-				SpriteAnimation { .frames = { { 2, 250ms }, { 3, 250ms } } },
+				SpriteAnimation {
+					.frames = {
+						{ Rectangle { 32, 0, 16, 16 }, 250ms },
+						{ Rectangle { 48, 0, 16, 16 }, 250ms },
+					},
+				},
 			},
 			{
 				Direction::Up,
-				SpriteAnimation { .frames = { { 4, 250ms }, { 5, 250ms } } },
+				SpriteAnimation {
+					.frames = {
+						{ Rectangle { 64, 0, 16, 16 }, 250ms },
+						{ Rectangle { 80, 0, 16, 16 }, 250ms },
+					},
+				},
 			},
 		};
 
@@ -245,12 +255,12 @@ void GameplayScene::render(const Game& game) const {
 				frame_index++;
 			}
 		}
-		Rectangle sprite_rect = m_images.knight_sprite_sheet.frames.at(animation.frames.at(frame_index).sprite_index);
+		Rectangle sprite_sheet_source = animation.frames.at(frame_index).source;
 		if (animation.flip_horizontally) {
-			sprite_rect.width *= -1;
+			sprite_sheet_source.width *= -1;
 		}
-		Texture2D sprite_sheet_texture = game.resources.get_image(m_images.knight_sprite_sheet.image);
-		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_rect, player_top_left, WHITE);
+		Texture2D sprite_sheet_texture = game.resources.get_image(m_images.knight_sprite_sheet);
+		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_sheet_source, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();

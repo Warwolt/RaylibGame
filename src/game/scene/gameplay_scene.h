@@ -14,11 +14,6 @@ enum class Direction {
 	Right,
 };
 
-struct SpriteSheet {
-	ImageID image;
-	std::vector<Rectangle> frames;
-};
-
 class GameplayScene {
 public:
 	void initialize(Game* game);
@@ -30,7 +25,7 @@ public:
 private:
 	struct Images {
 		ImageID level_background;
-		SpriteSheet knight_sprite_sheet;
+		ImageID knight_sprite_sheet;
 	} m_images;
 
 	bool m_game_paused = false;
