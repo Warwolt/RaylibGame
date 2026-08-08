@@ -16,6 +16,10 @@ Time Time::now() {
 	return Time { std::chrono::nanoseconds(whole_seconds * 1000000000LL + (remainder * 1000000000LL) / frequency.QuadPart) };
 }
 
+Time Time::zero() {
+	return std::chrono::nanoseconds(0);
+}
+
 Time::Time(std::chrono::nanoseconds ns)
 	: value(ns) {
 }

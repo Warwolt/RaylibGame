@@ -5,6 +5,7 @@
 struct Time {
 	std::chrono::nanoseconds value;
 	static Time now(); // since epoch
+	static Time zero();
 	Time() = default;
 	Time(std::chrono::nanoseconds ns);
 	Time(std::chrono::milliseconds ms);
