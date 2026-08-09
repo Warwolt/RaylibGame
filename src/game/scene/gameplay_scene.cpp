@@ -198,25 +198,6 @@ void GameplayScene::render(const Game& game) const {
 			std::vector<SpriteFrame> frames;
 		};
 
-		// FIXME: figure out a nice way to express the animation as function of time
-		//
-		// What is it that we're animating? The source rectangle indexing a sprite in the sprite sheet.
-		// We have two integers `start_frame` and `end_frame` that map into SpriteSheet::frames.
-		// So, given AnimationFrame<T> defined as:
-		//
-		// 		template <typename T>
-		// 		struct AnimationFrame {
-		// 			T value;
-		// 			Time duration;
-		// 		};
-		//
-		// Rectangle frame_source = f(t)
-		//
-		// f(t) can be defined "piece-wise" by providing a number of frames.
-		// We define the function with a list of (value, duration) pairs, which
-		// in other words means f(t) can be derived from a function g(frames, t)
-		// which in turn can be derived from h(frames, start_time, global_now)
-
 		auto animation_length = [](const SpriteSheet& sprite_sheet, const SpriteAnimation& animation) -> Time {
 			Time acc = 0ms;
 			for (size_t i = animation.start_frame; i <= animation.end_frame; i++) {

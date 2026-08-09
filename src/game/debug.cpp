@@ -10,15 +10,18 @@ using namespace std::chrono_literals;
 void render_debug_overlay(const Game& game) {
 	switch (game.debug.reload_state.value()) {
 		case HotReloadState::Rebuilding: {
-			const std::vector<AnimationFrame<std::string>> frames = {
-				{ "Rebuilding", 500ms },
-				{ "Rebuilding.", 500ms },
-				{ "Rebuilding..", 500ms },
-				{ "Rebuilding...", 500ms },
+			const FrameAnimation<std::string> overlay_text_animation = {
+				.frames = {
+					{ "Rebuilding", 500ms },
+					{ "Rebuilding.", 500ms },
+					{ "Rebuilding..", 500ms },
+					{ "Rebuilding...", 500ms },
+				},
+				.start_time = game.debug.reload_state.last_changed(),
 			};
-			const std::string text = current_animation_frame(frames, game.debug.reload_state.last_changed(), Time::now());
+			const std::string overlay_text = overlay_text_animation.current_frame(game.input.time_now);
 			Raylib_DrawRectangle(0, 0, game.window.width(), game.window.height(), Color { 0, 0, 0, 127 });
-			Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), text.c_str(), { 4, 0 }, 16, 0, YELLOW);
+			Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), overlay_text.c_str(), { 4, 0 }, 16, 0, YELLOW);
 		} break;
 
 		case HotReloadState::Failed: {
