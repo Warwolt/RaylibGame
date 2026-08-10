@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+template <typename T>
 struct AnimationID {
 	int value;
 	bool operator==(const AnimationID& rhs) const = default;
@@ -22,8 +23,9 @@ struct Animation {
 	std::vector<AnimationFrame<T>> frames;
 };
 
+template <typename T>
 struct AnimationPlayback {
-	AnimationID animation_id = AnimationID(0);
+	AnimationID<T> animation_id = AnimationID<T>{0};
 	bool is_started = false;
 	Time start_time = Time::zero();
 
@@ -38,7 +40,7 @@ struct AnimationPlayback {
 };
 
 template <typename T>
-const T& current_animation_frame(const std::vector<AnimationFrame<T>>& frames, const AnimationPlayback& playback) {
+const T& current_animation_frame(const std::vector<AnimationFrame<T>>& frames, const AnimationPlayback<T>& playback) {
 	/* Check if animation is playing */
 	if (!playback.is_started) {
 		return frames[0].value;
@@ -67,9 +69,9 @@ const T& current_animation_frame(const std::vector<AnimationFrame<T>>& frames, c
 
 class AnimationManager {
 public:
-	AnimationID add_text_animation(Animation<std::string> animation);
-	const Animation<std::string>& get_text_animation(AnimationID id) const;
-	const std::string& current_text_frame(const AnimationPlayback& playback) const;
+	AnimationID<std::string> add_text_animation(Animation<std::string> animation);
+	const Animation<std::string>& get_text_animation(AnimationID<std::string> id) const;
+	const std::string& current_text_frame(const AnimationPlayback<std::string>& playback) const;
 
 private:
 	std::unordered_map<int, Animation<std::string>> m_text_animations;

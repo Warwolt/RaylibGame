@@ -229,7 +229,7 @@ void GameplayScene::render(const Game& game) const {
 				},
 			},
 		};
-		const AnimationPlayback walk_animation_playback = {
+		const AnimationPlayback<int> walk_animation_playback = {
 			.is_started = m_player_is_moving,
 			.start_time = 0ms,
 		};
