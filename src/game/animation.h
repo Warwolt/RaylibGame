@@ -53,26 +53,6 @@ public:
 	const Animation<std::string>& get_text_animation(AnimationID id) const;
 	const std::string& current_frame(const AnimationPlayback<std::string>& playback) const;
 
-	template <typename T>
-	const T& current_frame(const AnimationPlayback<T>& playback, const Animation<T>& animation) const {
-		if (!playback.is_started) {
-			return animation.frames[0].value;
-		}
-
-		Time frame_start = Time::zero();
-		size_t frame_index = 0;
-		const Time t = (Time::now() - playback.start_time) % animation.duration();
-		for (const AnimationFrame<T>& frame : animation.frames) {
-			if (frame_start <= t && t < frame_start + frame.duration) {
-				break;
-			}
-			frame_start += frame.duration;
-			frame_index += 1;
-		}
-		return animation.frames[frame_index].value;
-	}
-
-
 private:
 	std::unordered_map<int, Animation<std::string>> m_text_animations;
 	int m_next_animation_id = 1;
