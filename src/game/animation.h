@@ -25,7 +25,7 @@ struct Animation {
 
 template <typename T>
 struct AnimationPlayback {
-	AnimationID<T> animation_id = AnimationID<T>{0};
+	AnimationID<T> animation_id = AnimationID<T> { 0 };
 	bool is_started = false;
 	Time start_time = Time::zero();
 
@@ -69,9 +69,9 @@ const T& current_animation_frame(const std::vector<AnimationFrame<T>>& frames, c
 
 class AnimationManager {
 public:
-	AnimationID<std::string> add_text_animation(Animation<std::string> animation);
-	const Animation<std::string>& get_text_animation(AnimationID<std::string> id) const;
-	const std::string& current_text_frame(const AnimationPlayback<std::string>& playback) const;
+	AnimationID<std::string> add_animation(Animation<std::string> animation);
+	const Animation<std::string>& get_animation(AnimationID<std::string> id) const;
+	const std::string& current_frame(const AnimationPlayback<std::string>& playback) const;
 
 private:
 	std::unordered_map<int, Animation<std::string>> m_text_animations;
