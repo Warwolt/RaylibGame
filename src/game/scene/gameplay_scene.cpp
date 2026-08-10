@@ -30,6 +30,11 @@ void GameplayScene::initialize(Game* game) {
 			Rectangle { 112, 0, 16, 16 },
 		},
 	};
+	using namespace std::chrono_literals;
+	m_animations.walk_left = game->animations.add_animation({
+		{ 0, 250ms },
+		{ 1, 250ms },
+	});
 
 	m_player_position = ROOM_SIZE / 2.0;
 }

@@ -69,11 +69,17 @@ const T& get_animation_frame(const std::vector<AnimationFrame<T>>& frames, const
 
 class AnimationManager {
 public:
-	AnimationID<std::string> add_animation(Animation<std::string> animation);
+	AnimationID<int> add_animation(std::vector<AnimationFrame<int>> frames);
+	AnimationID<std::string> add_animation(std::vector<AnimationFrame<std::string>> frames);
+
+	const Animation<int>& get_animation(AnimationID<int> id) const;
 	const Animation<std::string>& get_animation(AnimationID<std::string> id) const;
+
+	int current_frame(const AnimationPlayback<int>& playback) const;
 	const std::string& current_frame(const AnimationPlayback<std::string>& playback) const;
 
 private:
+	std::unordered_map<int, Animation<int>> m_int_animations;
 	std::unordered_map<int, Animation<std::string>> m_text_animations;
 	int m_next_animation_id = 1;
 };

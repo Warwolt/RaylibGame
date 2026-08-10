@@ -2,6 +2,7 @@
 
 #include "game/resource_id.h"
 #include "game/ui/user_interface.h"
+#include "game/animation.h"
 
 #include <raylib.h>
 
@@ -41,6 +42,12 @@ private:
 	Direction m_player_direction = Direction::Right;
 	bool m_player_is_moving = false;
 	SpriteSheet m_player_sprite_sheet;
+	struct Animations {
+		AnimationID<int> walk_left;
+		AnimationID<int> walk_right;
+		AnimationID<int> walk_down;
+		AnimationID<int> walk_up;
+	} m_animations;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);
