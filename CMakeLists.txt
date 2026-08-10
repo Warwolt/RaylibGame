@@ -34,6 +34,7 @@ set(SRC
     src/core/debug/logging.cpp
     src/core/util.cpp
     src/core/util/time.cpp
+    src/game/animation.cpp
     src/game/debug.cpp
     src/game/game.cpp
     src/game/resource.cpp

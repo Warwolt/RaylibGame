@@ -47,18 +47,11 @@ struct AnimationPlayback {
 	}
 };
 
-// FIXME: move impl to cpp file
 class AnimationManager {
 public:
-	AnimationID add_text_animation(Animation<std::string> animation) {
-		AnimationID id = AnimationID(m_next_animation_id++);
-		m_text_animations.insert({ id.value, animation });
-		return id;
-	}
-
-	const Animation<std::string>& get_text_animation(AnimationID id) const {
-		return m_text_animations.at(id.value);
-	}
+	AnimationID add_text_animation(Animation<std::string> animation);
+	const Animation<std::string>& get_text_animation(AnimationID id) const;
+	const std::string& current_frame(const AnimationPlayback<std::string>& playback) const;
 
 	template <typename T>
 	const T& current_frame(const AnimationPlayback<T>& playback, const Animation<T>& animation) const {
@@ -79,10 +72,6 @@ public:
 		return animation.frames[frame_index].value;
 	}
 
-	const std::string& current_frame(const AnimationPlayback<std::string>& playback) const {
-		const Animation<std::string>& animation = m_text_animations.at(playback.animation_id.value);
-		return current_frame(playback, animation);
-	}
 
 private:
 	std::unordered_map<int, Animation<std::string>> m_text_animations;
