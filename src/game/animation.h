@@ -6,6 +6,11 @@
 #include <unordered_map>
 #include <vector>
 
+struct AnimationID {
+	int value;
+	bool operator==(const AnimationID& rhs) const = default;
+};
+
 template <typename T>
 struct AnimationFrame {
 	T value;
@@ -15,7 +20,6 @@ struct AnimationFrame {
 template <typename T>
 struct Animation {
 	std::vector<AnimationFrame<T>> frames;
-	std::optional<Time> start_time;
 
 	Time duration() const {
 		Time duration = Time::zero();
@@ -24,11 +28,6 @@ struct Animation {
 		}
 		return duration;
 	}
-};
-
-struct AnimationID {
-	int value;
-	bool operator==(const AnimationID& rhs) const = default;
 };
 
 template <typename T>
