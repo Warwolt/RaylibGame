@@ -8,7 +8,7 @@
 using namespace std::chrono_literals;
 
 void initialize_debug_overlay(Game* game) {
-	game->debug.overlay_text_animation.animation_id = game->animations.add_animation({
+	game->debug.overlay_text_animation.clip_id = game->animations.add_animation({
 		{ "Rebuilding", 500ms },
 		{ "Rebuilding.", 500ms },
 		{ "Rebuilding..", 500ms },

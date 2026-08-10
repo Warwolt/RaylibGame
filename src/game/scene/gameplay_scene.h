@@ -15,6 +15,8 @@ struct SpriteSheet {
 	std::vector<Rectangle> sprites;
 };
 
+using SpriteIndex = int;
+
 class GameplayScene {
 public:
 	void initialize(Game* game);
@@ -27,12 +29,12 @@ private:
 	struct Images {
 		ImageID level_background;
 	} m_images;
-	struct Animations {
-		AnimationID<int> walk_left;
-		AnimationID<int> walk_right;
-		AnimationID<int> walk_down;
-		AnimationID<int> walk_up;
-	} m_animations;
+	struct AnimationClips {
+		AnimationClipID<SpriteIndex> walk_left;
+		AnimationClipID<SpriteIndex> walk_right;
+		AnimationClipID<SpriteIndex> walk_down;
+		AnimationClipID<SpriteIndex> walk_up;
+	} m_clips;
 
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
@@ -40,7 +42,7 @@ private:
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
 	bool m_player_is_moving = false;
 	SpriteSheet m_player_sprite_sheet;
-	AnimationPlayback<int> m_player_sprite_animation;
+	Animation<SpriteIndex> m_player_sprite_index;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);

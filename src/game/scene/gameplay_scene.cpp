@@ -33,25 +33,25 @@ void GameplayScene::initialize(Game* game) {
 		},
 	};
 
-	m_animations.walk_left = game->animations.add_animation(
+	m_clips.walk_left = game->animations.add_animation(
 		{
 			{ 0, 250ms },
 			{ 1, 250ms },
 		}
 	);
-	m_animations.walk_right = game->animations.add_animation(
+	m_clips.walk_right = game->animations.add_animation(
 		{
 			{ 2, 250ms },
 			{ 3, 250ms },
 		}
 	);
-	m_animations.walk_down = game->animations.add_animation(
+	m_clips.walk_down = game->animations.add_animation(
 		{
 			{ 4, 250ms },
 			{ 5, 250ms },
 		}
 	);
-	m_animations.walk_up = game->animations.add_animation(
+	m_clips.walk_up = game->animations.add_animation(
 		{
 			{ 6, 250ms },
 			{ 7, 250ms },
@@ -59,7 +59,7 @@ void GameplayScene::initialize(Game* game) {
 	);
 
 	m_player_position = ROOM_SIZE / 2.0;
-	m_player_sprite_animation.animation_id = m_animations.walk_right;
+	m_player_sprite_index.clip_id = m_clips.walk_right;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -183,22 +183,22 @@ void GameplayScene::_update_gameplay(Game* game) {
 		// look nice we want to start on the 2nd frame, since the 1th frame is
 		// standing still. (Make it look like we're always taking a step on input):
 		if (directional_input.x > 0) {
-			m_player_sprite_animation.set_animation(m_animations.walk_right);
+			m_player_sprite_index.set_clip(m_clips.walk_right);
 		}
 		if (directional_input.x < 0) {
-			m_player_sprite_animation.set_animation(m_animations.walk_left);
+			m_player_sprite_index.set_clip(m_clips.walk_left);
 		}
 		if (directional_input.y > 0) {
-			m_player_sprite_animation.set_animation(m_animations.walk_down);
+			m_player_sprite_index.set_clip(m_clips.walk_down);
 		}
 		if (directional_input.y < 0) {
-			m_player_sprite_animation.set_animation(m_animations.walk_up);
+			m_player_sprite_index.set_clip(m_clips.walk_up);
 		}
 
 		if (m_player_is_moving) {
-			m_player_sprite_animation.start();
+			m_player_sprite_index.start();
 		} else {
-			m_player_sprite_animation.stop();
+			m_player_sprite_index.stop();
 		}
 	}
 }
@@ -227,7 +227,7 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		const int frame = game.animations.current_frame(m_player_sprite_animation);
+		const int frame = game.animations.current_frame(m_player_sprite_index);
 		const Rectangle sprite_source = m_player_sprite_sheet.sprites[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);
