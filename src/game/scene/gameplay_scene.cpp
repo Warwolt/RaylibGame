@@ -8,6 +8,8 @@
 
 #include <unordered_map>
 
+using namespace std::chrono_literals;
+
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
@@ -30,11 +32,31 @@ void GameplayScene::initialize(Game* game) {
 			Rectangle { 112, 0, 16, 16 },
 		},
 	};
-	using namespace std::chrono_literals;
-	m_animations.walk_left = game->animations.add_animation({
-		{ 0, 250ms },
-		{ 1, 250ms },
-	});
+
+	m_animations.walk_left = game->animations.add_animation(
+		{
+			{ 0, 250ms },
+			{ 1, 250ms },
+		}
+	);
+	m_animations.walk_right = game->animations.add_animation(
+		{
+			{ 2, 250ms },
+			{ 3, 250ms },
+		}
+	);
+	m_animations.walk_down = game->animations.add_animation(
+		{
+			{ 4, 250ms },
+			{ 5, 250ms },
+		}
+	);
+	m_animations.walk_up = game->animations.add_animation(
+		{
+			{ 6, 250ms },
+			{ 7, 250ms },
+		}
+	);
 
 	m_player_position = ROOM_SIZE / 2.0;
 }
@@ -195,46 +217,22 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		using namespace std::chrono_literals;
-		const std::unordered_map<Direction, Animation<int>> walk_animations = {
-			{
-				Direction::Left,
-				{
-					.frames = {
-						{ 0, 250ms },
-						{ 1, 250ms },
-					},
-				},
-			},
-			{
-				Direction::Right,
-				{
-					.frames = {
-						{ 2, 250ms },
-						{ 3, 250ms },
-					},
-				},
-			},
-			{
-				Direction::Down,
-				{
-					.frames = {
-						{ 4, 250ms },
-						{ 5, 250ms },
-					},
-				},
-			},
-			{
-				Direction::Up,
-				{
-					.frames = {
-						{ 6, 250ms },
-						{ 7, 250ms },
-					},
-				},
-			},
-		};
-		const Animation<int>& walk_animation = walk_animations.at(m_player_direction);
+		AnimationID<int> walk_animation_id = {};
+		switch (m_player_direction) {
+			case Direction::Up:
+				walk_animation_id = m_animations.walk_up;
+				break;
+			case Direction::Left:
+				walk_animation_id = m_animations.walk_left;
+				break;
+			case Direction::Down:
+				walk_animation_id = m_animations.walk_down;
+				break;
+			case Direction::Right:
+				walk_animation_id = m_animations.walk_right;
+				break;
+		}
+		const Animation<int>& walk_animation = game.animations.get_animation(walk_animation_id);
 		const AnimationPlayback<int> walk_animation_playback = {
 			.is_started = m_player_is_moving,
 			.start_time = 0ms,
