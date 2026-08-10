@@ -1,6 +1,5 @@
 #include "game/debug.h"
 
-#include "core/debug/logging.h"
 #include "game/animation.h"
 #include "game/game.h"
 
@@ -28,7 +27,7 @@ void update_debug_overlay(Game* game) {
 void render_debug_overlay(const Game& game) {
 	switch (game.debug.reload_state.value()) {
 		case HotReloadState::Rebuilding: {
-			const std::string overlay_text = game.animations.current_frame(game.debug.overlay_text);
+			const std::string overlay_text = game.animations.current_text_frame(game.debug.overlay_text);
 			Raylib_DrawRectangle(0, 0, game.window.width(), game.window.height(), Color { 0, 0, 0, 127 });
 			Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), overlay_text.c_str(), { 4, 0 }, 16, 0, YELLOW);
 		} break;
