@@ -48,6 +48,7 @@ std::expected<GameLibrary, std::string> HotReloading::load_library() const {
 }
 
 void HotReloading::update(Game* game_state, GameLibrary* game_library) {
+	game_state->debug.reload_state.update();
 	switch (game_state->debug.reload_state.value()) {
 		case HotReloadState::Idle:
 		case HotReloadState::Failed: {

@@ -40,6 +40,7 @@ Game* Game_initialize(int argc, char** argv) {
 		game->window.toggle_fullscreen();
 	}
 	game->resources.load_default_font("resource/font/8bitoperator_jve.ttf");
+	initialize_debug_overlay(game);
 
 	LOG_INFO("Game initialized");
 
@@ -65,6 +66,7 @@ void Game_update(Game* game) {
 	}
 
 	/* Update systems */
+	update_debug_overlay(game);
 	game->window.update();
 
 	/* Update scene */

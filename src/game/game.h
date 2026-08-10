@@ -3,6 +3,7 @@
 #include "game/debug.h"
 #include "game/resource.h"
 #include "game/scene/scene.h"
+#include "game\animation.h"
 #include "platform/input.h"
 #include "platform/window.h"
 
@@ -18,6 +19,7 @@ struct Game {
 	Input input;
 	SceneManager scenes;
 	ResourceManager resources;
+	AnimationManager animations;
 };
 
 extern "C" __declspec(dllexport) Game* Game_initialize(int argc, char** argv);

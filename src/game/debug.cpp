@@ -1,5 +1,6 @@
 #include "game/debug.h"
 
+#include "core/debug/logging.h"
 #include "game/animation.h"
 #include "game/game.h"
 
@@ -7,19 +8,27 @@
 
 using namespace std::chrono_literals;
 
+void initialize_debug_overlay(Game* game) {
+	game->debug.overlay_text.animation_id = game->animations.add_text_animation({
+		.frames = {
+			{ "Rebuilding", 500ms },
+			{ "Rebuilding.", 500ms },
+			{ "Rebuilding..", 500ms },
+			{ "Rebuilding...", 500ms },
+		},
+	});
+}
+
+void update_debug_overlay(Game* game) {
+	if (game->debug.reload_state.has_changed_to(HotReloadState::Rebuilding)) {
+		game->debug.overlay_text.start();
+	}
+}
+
 void render_debug_overlay(const Game& game) {
 	switch (game.debug.reload_state.value()) {
 		case HotReloadState::Rebuilding: {
-			const FrameAnimation<std::string> overlay_text_animation = {
-				.frames = {
-					{ "Rebuilding", 500ms },
-					{ "Rebuilding.", 500ms },
-					{ "Rebuilding..", 500ms },
-					{ "Rebuilding...", 500ms },
-				},
-				.start_time = game.debug.reload_state.last_changed(),
-			};
-			const std::string overlay_text = overlay_text_animation.current_frame(game.input.time_now);
+			const std::string overlay_text = game.animations.current_frame(game.debug.overlay_text);
 			Raylib_DrawRectangle(0, 0, game.window.width(), game.window.height(), Color { 0, 0, 0, 127 });
 			Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), overlay_text.c_str(), { 4, 0 }, 16, 0, YELLOW);
 		} break;
