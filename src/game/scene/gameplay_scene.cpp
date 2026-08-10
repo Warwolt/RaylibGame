@@ -1,8 +1,6 @@
 #include "game/scene/gameplay_scene.h"
 
-#include "core/debug/logging.h"
 #include "core/debug/profiling.h"
-#include "core/util.h"
 #include "core/util/time.h"
 #include "game/game.h"
 
@@ -19,7 +17,19 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-	m_images.knight_sprite_sheet = game->resources.load_image("resource/image/walk_animation.png").value();
+	m_player_sprite_sheet = {
+		.image = game->resources.load_image("resource/image/walk_animation.png").value(),
+		.sprites = {
+			Rectangle { 0, 0, 16, 16 },
+			Rectangle { 16, 0, 16, 16 },
+			Rectangle { 32, 0, 16, 16 },
+			Rectangle { 48, 0, 16, 16 },
+			Rectangle { 64, 0, 16, 16 },
+			Rectangle { 80, 0, 16, 16 },
+			Rectangle { 96, 0, 16, 16 },
+			Rectangle { 112, 0, 16, 16 },
+		},
+	};
 
 	m_player_position = ROOM_SIZE / 2.0;
 }
@@ -181,26 +191,6 @@ void GameplayScene::render(const Game& game) const {
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
 		using namespace std::chrono_literals;
-
-		struct SpriteSheet {
-			Texture2D texture;
-			std::vector<Rectangle> sprites;
-		};
-
-		const SpriteSheet sprite_sheet = {
-			.texture = game.resources.get_image(m_images.knight_sprite_sheet),
-			.sprites = {
-				Rectangle { 0, 0, 16, 16 },
-				Rectangle { 16, 0, 16, 16 },
-				Rectangle { 32, 0, 16, 16 },
-				Rectangle { 48, 0, 16, 16 },
-				Rectangle { 64, 0, 16, 16 },
-				Rectangle { 80, 0, 16, 16 },
-				Rectangle { 96, 0, 16, 16 },
-				Rectangle { 112, 0, 16, 16 },
-			},
-		};
-
 		const std::unordered_map<Direction, Animation<int>> walk_animations = {
 			{
 				Direction::Left,
@@ -244,8 +234,9 @@ void GameplayScene::render(const Game& game) const {
 			.start_time = 0ms,
 		};
 		const int frame = current_animation_frame(walk_animations.at(m_player_direction).frames, walk_animation_playback);
-		const Rectangle sprite_source = sprite_sheet.sprites[frame];
-		Raylib_DrawTextureRec(sprite_sheet.texture, sprite_source, player_top_left, WHITE);
+		const Rectangle sprite_source = m_player_sprite_sheet.sprites[frame];
+		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
+		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();

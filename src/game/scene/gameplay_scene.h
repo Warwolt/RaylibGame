@@ -5,6 +5,8 @@
 
 #include <raylib.h>
 
+#include <vector>
+
 struct Game;
 
 enum class Direction {
@@ -12,6 +14,11 @@ enum class Direction {
 	Left,
 	Down,
 	Right,
+};
+
+struct SpriteSheet {
+	ImageID image;
+	std::vector<Rectangle> sprites;
 };
 
 class GameplayScene {
@@ -25,7 +32,6 @@ public:
 private:
 	struct Images {
 		ImageID level_background;
-		ImageID knight_sprite_sheet;
 	} m_images;
 
 	bool m_game_paused = false;
@@ -34,6 +40,7 @@ private:
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
 	Direction m_player_direction = Direction::Right;
 	bool m_player_is_moving = false;
+	SpriteSheet m_player_sprite_sheet;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);
