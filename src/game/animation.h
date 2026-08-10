@@ -40,7 +40,7 @@ struct AnimationPlayback {
 };
 
 template <typename T>
-const T& current_animation_frame(const std::vector<AnimationFrame<T>>& frames, const AnimationPlayback<T>& playback) {
+const T& get_animation_frame(const std::vector<AnimationFrame<T>>& frames, const AnimationPlayback<T>& playback, Time time_now) {
 	/* Check if animation is playing */
 	if (!playback.is_started) {
 		return frames[0].value;
@@ -55,7 +55,7 @@ const T& current_animation_frame(const std::vector<AnimationFrame<T>>& frames, c
 	/* Find index of current frame */
 	Time frame_start = Time::zero();
 	size_t frame_index = 0;
-	const Time t = (Time::now() - playback.start_time) % animation_duration;
+	const Time t = (time_now - playback.start_time) % animation_duration;
 	for (const AnimationFrame<T>& frame : frames) {
 		if (frame_start <= t && t < frame_start + frame.duration) {
 			break;

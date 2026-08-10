@@ -12,5 +12,5 @@ const Animation<std::string>& AnimationManager::get_animation(AnimationID<std::s
 
 const std::string& AnimationManager::current_frame(const AnimationPlayback<std::string>& playback) const {
 	const Animation<std::string>& animation = m_text_animations.at(playback.animation_id.value);
-	return current_animation_frame(animation.frames, playback);
+	return get_animation_frame(animation.frames, playback, Time::now());
 }

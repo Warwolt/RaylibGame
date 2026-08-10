@@ -229,11 +229,12 @@ void GameplayScene::render(const Game& game) const {
 				},
 			},
 		};
+		const Animation<int>& walk_animation = walk_animations.at(m_player_direction);
 		const AnimationPlayback<int> walk_animation_playback = {
 			.is_started = m_player_is_moving,
 			.start_time = 0ms,
 		};
-		const int frame = current_animation_frame(walk_animations.at(m_player_direction).frames, walk_animation_playback);
+		const int frame = get_animation_frame(walk_animation.frames, walk_animation_playback, Time::now());
 		const Rectangle sprite_source = m_player_sprite_sheet.sprites[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);
