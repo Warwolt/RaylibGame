@@ -59,6 +59,7 @@ void GameplayScene::initialize(Game* game) {
 	);
 
 	m_player_position = ROOM_SIZE / 2.0;
+	m_player_sprite_animation.animation_id = m_animations.walk_right;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -178,17 +179,26 @@ void GameplayScene::_update_gameplay(Game* game) {
 		m_player_position += delta_speed * directional_input;
 		m_player_is_moving = directional_input != Vector2 { 0, 0 };
 
+		// FIXME: need some way of setting which frame we're on to make walking
+		// look nice we want to start on the 2nd frame, since the 1th frame is
+		// standing still. (Make it look like we're always taking a step on input):
 		if (directional_input.x > 0) {
-			m_player_direction = Direction::Right;
+			m_player_sprite_animation.set_animation(m_animations.walk_right);
 		}
 		if (directional_input.x < 0) {
-			m_player_direction = Direction::Left;
+			m_player_sprite_animation.set_animation(m_animations.walk_left);
 		}
 		if (directional_input.y > 0) {
-			m_player_direction = Direction::Down;
+			m_player_sprite_animation.set_animation(m_animations.walk_down);
 		}
 		if (directional_input.y < 0) {
-			m_player_direction = Direction::Up;
+			m_player_sprite_animation.set_animation(m_animations.walk_up);
+		}
+
+		if (m_player_is_moving) {
+			m_player_sprite_animation.start();
+		} else {
+			m_player_sprite_animation.stop();
 		}
 	}
 }
@@ -217,27 +227,7 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		AnimationID<int> walk_animation_id = {};
-		switch (m_player_direction) {
-			case Direction::Up:
-				walk_animation_id = m_animations.walk_up;
-				break;
-			case Direction::Left:
-				walk_animation_id = m_animations.walk_left;
-				break;
-			case Direction::Down:
-				walk_animation_id = m_animations.walk_down;
-				break;
-			case Direction::Right:
-				walk_animation_id = m_animations.walk_right;
-				break;
-		}
-		const Animation<int>& walk_animation = game.animations.get_animation(walk_animation_id);
-		const AnimationPlayback<int> walk_animation_playback = {
-			.is_started = m_player_is_moving,
-			.start_time = 0ms,
-		};
-		const int frame = get_animation_frame(walk_animation.frames, walk_animation_playback, Time::now());
+		const int frame = game.animations.current_frame(m_player_sprite_animation);
 		const Rectangle sprite_source = m_player_sprite_sheet.sprites[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);

@@ -29,9 +29,15 @@ struct AnimationPlayback {
 	bool is_started = false;
 	Time start_time = Time::zero();
 
+	void set_animation(AnimationID<T> animation_id) {
+		this->animation_id = animation_id;
+	}
+
 	void start() {
-		this->is_started = true;
-		this->start_time = Time::now();
+		if (!this->is_started) {
+			this->is_started = true;
+			this->start_time = Time::now();
+		}
 	}
 
 	void stop() {
