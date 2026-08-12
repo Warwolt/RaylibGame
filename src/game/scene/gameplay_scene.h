@@ -22,10 +22,15 @@ struct SpriteSheetID {
 
 struct Sprite {
 	SpriteSheetID sprite_sheet_id;
-	int index;
+	int frame;
 };
 
-using SpriteIndex = int;
+struct AnimatedSprite {
+	SpriteSheetID sprite_sheet_id;
+	Animation<int> sprite_sheet_index;
+};
+
+using FrameIndex = int;
 
 class GameplayScene {
 public:
@@ -40,23 +45,24 @@ private:
 		ImageID level_background;
 	} m_images;
 
-	struct AnimationClips {
-		AnimationClipID<SpriteIndex> walk_left;
-		AnimationClipID<SpriteIndex> walk_right;
-		AnimationClipID<SpriteIndex> walk_down;
-		AnimationClipID<SpriteIndex> walk_up;
-	} m_animation_clips;
+	struct PlayerAnimations {
+		AnimationClipID<FrameIndex> walk_left;
+		AnimationClipID<FrameIndex> walk_right;
+		AnimationClipID<FrameIndex> walk_down;
+		AnimationClipID<FrameIndex> walk_up;
+	};
 
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
 		bool is_moving = false;
+		AnimatedSprite sprite;
+		PlayerAnimations animations;
 	} m_player;
 
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
 	SpriteSheet m_player_sprite_sheet;
-	Animation<SpriteIndex> m_player_sprite_index;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);
