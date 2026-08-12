@@ -15,6 +15,16 @@ struct SpriteSheet {
 	std::vector<Rectangle> sprites;
 };
 
+struct SpriteSheetID {
+	int value;
+	bool operator==(const SpriteSheetID& rhs) const = default;
+};
+
+struct Sprite {
+	SpriteSheetID sprite_sheet_id;
+	int index;
+};
+
 using SpriteIndex = int;
 
 class GameplayScene {
@@ -29,18 +39,22 @@ private:
 	struct Images {
 		ImageID level_background;
 	} m_images;
+
 	struct AnimationClips {
 		AnimationClipID<SpriteIndex> walk_left;
 		AnimationClipID<SpriteIndex> walk_right;
 		AnimationClipID<SpriteIndex> walk_down;
 		AnimationClipID<SpriteIndex> walk_up;
-	} m_clips;
+	} m_animation_clips;
+
+	struct Player {
+		Vector2 position = { 0, 0 }; // relative center of player
+		bool is_moving = false;
+	} m_player;
 
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
-	Vector2 m_player_position = { 0, 0 }; // relative center of player
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
-	bool m_player_is_moving = false;
 	SpriteSheet m_player_sprite_sheet;
 	Animation<SpriteIndex> m_player_sprite_index;
 

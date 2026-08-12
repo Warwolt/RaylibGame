@@ -6,8 +6,6 @@
 
 #include <raymath.h>
 
-#include <unordered_map>
-
 using namespace std::chrono_literals;
 
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
@@ -33,33 +31,33 @@ void GameplayScene::initialize(Game* game) {
 		},
 	};
 
-	m_clips.walk_left = game->animations.add_animation(
+	m_animation_clips.walk_left = game->animations.add_animation(
 		{
 			{ 0, 250ms },
 			{ 1, 250ms },
 		}
 	);
-	m_clips.walk_right = game->animations.add_animation(
+	m_animation_clips.walk_right = game->animations.add_animation(
 		{
 			{ 2, 250ms },
 			{ 3, 250ms },
 		}
 	);
-	m_clips.walk_down = game->animations.add_animation(
+	m_animation_clips.walk_down = game->animations.add_animation(
 		{
 			{ 4, 250ms },
 			{ 5, 250ms },
 		}
 	);
-	m_clips.walk_up = game->animations.add_animation(
+	m_animation_clips.walk_up = game->animations.add_animation(
 		{
 			{ 6, 250ms },
 			{ 7, 250ms },
 		}
 	);
 
-	m_player_position = ROOM_SIZE / 2.0;
-	m_player_sprite_index.clip_id = m_clips.walk_right;
+	m_player.position = ROOM_SIZE / 2.0;
+	m_player_sprite_index.clip_id = m_animation_clips.walk_right;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -124,8 +122,8 @@ void GameplayScene::_update_gameplay(Game* game) {
 
 	/* Camera should show the current room player is in */
 	const Vector2 player_room_position = {
-		.x = ROOM_SIZE.x * std::floor(m_player_position.x / ROOM_SIZE.x),
-		.y = ROOM_SIZE.y * std::floor(m_player_position.y / ROOM_SIZE.y),
+		.x = ROOM_SIZE.x * std::floor(m_player.position.x / ROOM_SIZE.x),
+		.y = ROOM_SIZE.y * std::floor(m_player.position.y / ROOM_SIZE.y),
 	};
 	const Vector2 camera_target_delta = player_room_position - m_camera_position;
 	const bool should_move_camera = m_camera_position != player_room_position;
@@ -143,30 +141,30 @@ void GameplayScene::_update_gameplay(Game* game) {
 		const bool camera_moving_up = camera_target_delta.y < 0;
 		if (camera_moving_right) {
 			const float camera_left = m_camera_position.x;
-			const float player_left = m_player_position.x - PLAYER_SIZE.x / 2;
+			const float player_left = m_player.position.x - PLAYER_SIZE.x / 2;
 			if (camera_left >= player_left) {
-				m_player_position.x = camera_left + PLAYER_SIZE.x / 2;
+				m_player.position.x = camera_left + PLAYER_SIZE.x / 2;
 			}
 		}
 		if (camera_moving_left) {
 			const float camera_right = m_camera_position.x + ROOM_SIZE.x;
-			const float player_right = m_player_position.x + PLAYER_SIZE.x / 2;
+			const float player_right = m_player.position.x + PLAYER_SIZE.x / 2;
 			if (camera_right <= player_right) {
-				m_player_position.x = camera_right - PLAYER_SIZE.x / 2;
+				m_player.position.x = camera_right - PLAYER_SIZE.x / 2;
 			}
 		}
 		if (camera_moving_down) {
 			const float camera_top = m_camera_position.y;
-			const float player_top = m_player_position.y - PLAYER_SIZE.x / 2;
+			const float player_top = m_player.position.y - PLAYER_SIZE.x / 2;
 			if (camera_top >= player_top) {
-				m_player_position.y = camera_top + PLAYER_SIZE.y / 2;
+				m_player.position.y = camera_top + PLAYER_SIZE.y / 2;
 			}
 		}
 		if (camera_moving_up) {
 			const float camera_bottom = m_camera_position.y + ROOM_SIZE.y;
-			const float player_bottom = m_player_position.y + PLAYER_SIZE.x / 2;
+			const float player_bottom = m_player.position.y + PLAYER_SIZE.x / 2;
 			if (camera_bottom <= player_bottom) {
-				m_player_position.y = camera_bottom - PLAYER_SIZE.y / 2;
+				m_player.position.y = camera_bottom - PLAYER_SIZE.y / 2;
 			}
 		}
 	}
@@ -176,26 +174,26 @@ void GameplayScene::_update_gameplay(Game* game) {
 	if (!camera_is_moving) {
 		const Vector2 directional_input = game->input.directional_input();
 		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-		m_player_position += delta_speed * directional_input;
-		m_player_is_moving = directional_input != Vector2 { 0, 0 };
+		m_player.position += delta_speed * directional_input;
+		m_player.is_moving = directional_input != Vector2 { 0, 0 };
 
 		// FIXME: need some way of setting which frame we're on to make walking
 		// look nice we want to start on the 2nd frame, since the 1th frame is
 		// standing still. (Make it look like we're always taking a step on input):
 		if (directional_input.x > 0) {
-			m_player_sprite_index.set_clip(m_clips.walk_right);
+			m_player_sprite_index.set_clip(m_animation_clips.walk_right);
 		}
 		if (directional_input.x < 0) {
-			m_player_sprite_index.set_clip(m_clips.walk_left);
+			m_player_sprite_index.set_clip(m_animation_clips.walk_left);
 		}
 		if (directional_input.y > 0) {
-			m_player_sprite_index.set_clip(m_clips.walk_down);
+			m_player_sprite_index.set_clip(m_animation_clips.walk_down);
 		}
 		if (directional_input.y < 0) {
-			m_player_sprite_index.set_clip(m_clips.walk_up);
+			m_player_sprite_index.set_clip(m_animation_clips.walk_up);
 		}
 
-		if (m_player_is_moving) {
+		if (m_player.is_moving) {
 			m_player_sprite_index.start();
 		} else {
 			m_player_sprite_index.stop();
@@ -222,8 +220,8 @@ void GameplayScene::render(const Game& game) const {
 
 		/* Player */
 		const Vector2 player_pixel_position = {
-			.x = std::round(m_player_position.x),
-			.y = std::round(m_player_position.y),
+			.x = std::round(m_player.position.x),
+			.y = std::round(m_player.position.y),
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
