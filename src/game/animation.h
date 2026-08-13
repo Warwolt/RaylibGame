@@ -2,8 +2,6 @@
 
 #include "core/util/time.h"
 
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 template <typename T>
@@ -19,18 +17,16 @@ struct AnimationFrame {
 };
 
 template <typename T>
-struct AnimationClip {
-	std::vector<AnimationFrame<T>> frames;
-};
+using AnimationClip = std::vector<AnimationFrame<T>>;
 
 template <typename T>
 struct Animation {
-	AnimationClip<T> clip;
+	AnimationClip<T> frames;
 	bool is_started = false;
 	Time start_time = Time::zero();
 
-	void set_clip(AnimationClip<T> new_clip) {
-		this->clip = new_clip;
+	void set_clip(AnimationClip<T> new_frames) {
+		this->frames = new_frames;
 	}
 
 	void start() {
@@ -49,12 +45,12 @@ template <typename T>
 const T& get_animation_frame(const Animation<T>& animation, Time time_now) {
 	/* Check if animation is playing */
 	if (!animation.is_started) {
-		return animation.clip.frames[0].value;
+		return animation.frames[0].value;
 	}
 
 	/* Compute duration */
 	Time animation_duration = Time::zero();
-	for (const AnimationFrame<T>& frame : animation.clip.frames) {
+	for (const AnimationFrame<T>& frame : animation.frames) {
 		animation_duration += frame.duration;
 	}
 
@@ -62,7 +58,7 @@ const T& get_animation_frame(const Animation<T>& animation, Time time_now) {
 	Time frame_start = Time::zero();
 	size_t frame_index = 0;
 	const Time t = (time_now - animation.start_time) % animation_duration;
-	for (const AnimationFrame<T>& frame : animation.clip.frames) {
+	for (const AnimationFrame<T>& frame : animation.frames) {
 		if (frame_start <= t && t < frame_start + frame.duration) {
 			break;
 		}
@@ -70,5 +66,5 @@ const T& get_animation_frame(const Animation<T>& animation, Time time_now) {
 		frame_index += 1;
 	}
 
-	return animation.clip.frames[frame_index].value;
+	return animation.frames[frame_index].value;
 }

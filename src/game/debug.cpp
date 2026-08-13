@@ -8,7 +8,7 @@
 using namespace std::chrono_literals;
 
 void initialize_debug_overlay(Game* game) {
-	game->debug.overlay_text_animation.clip.frames = {
+	game->debug.overlay_text_animation.frames = {
 		{ "Rebuilding", 500ms },
 		{ "Rebuilding.", 500ms },
 		{ "Rebuilding..", 500ms },

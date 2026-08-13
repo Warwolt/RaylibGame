@@ -38,19 +38,19 @@ void GameplayScene::initialize(Game* game) {
 			);
 		}
 
-		m_player.animations.walk_left.frames = {
+		m_player.animations.walk_left = {
 			{ 0, 250ms },
 			{ 1, 250ms },
 		};
-		m_player.animations.walk_right.frames = {
+		m_player.animations.walk_right = {
 			{ 2, 250ms },
 			{ 3, 250ms },
 		};
-		m_player.animations.walk_down.frames = {
+		m_player.animations.walk_down = {
 			{ 4, 250ms },
 			{ 5, 250ms },
 		};
-		m_player.animations.walk_up.frames = {
+		m_player.animations.walk_up = {
 			{ 6, 250ms },
 			{ 7, 250ms },
 		};
