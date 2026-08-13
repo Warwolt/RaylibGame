@@ -56,10 +56,10 @@ private:
 	} m_images;
 
 	struct PlayerAnimations {
-		AnimationClipID<FrameIndex> walk_left;
-		AnimationClipID<FrameIndex> walk_right;
-		AnimationClipID<FrameIndex> walk_down;
-		AnimationClipID<FrameIndex> walk_up;
+		AnimationClip<FrameIndex> walk_left;
+		AnimationClip<FrameIndex> walk_right;
+		AnimationClip<FrameIndex> walk_down;
+		AnimationClip<FrameIndex> walk_up;
 	};
 
 	struct Player {

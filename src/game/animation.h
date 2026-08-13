@@ -25,12 +25,12 @@ struct AnimationClip {
 
 template <typename T>
 struct Animation {
-	AnimationClipID<T> clip_id = AnimationClipID<T> { 0 };
+	AnimationClip<T> clip;
 	bool is_started = false;
 	Time start_time = Time::zero();
 
-	void set_clip(AnimationClipID<T> new_clip_id) {
-		this->clip_id = new_clip_id;
+	void set_clip(AnimationClip<T> new_clip) {
+		this->clip = new_clip;
 	}
 
 	void start() {
@@ -46,15 +46,15 @@ struct Animation {
 };
 
 template <typename T>
-const T& get_animation_frame(const std::vector<AnimationFrame<T>>& frames, const Animation<T>& animation, Time time_now) {
+const T& get_animation_frame(const Animation<T>& animation, Time time_now) {
 	/* Check if animation is playing */
 	if (!animation.is_started) {
-		return frames[0].value;
+		return animation.clip.frames[0].value;
 	}
 
 	/* Compute duration */
 	Time animation_duration = Time::zero();
-	for (const AnimationFrame<T>& frame : frames) {
+	for (const AnimationFrame<T>& frame : animation.clip.frames) {
 		animation_duration += frame.duration;
 	}
 
@@ -62,7 +62,7 @@ const T& get_animation_frame(const std::vector<AnimationFrame<T>>& frames, const
 	Time frame_start = Time::zero();
 	size_t frame_index = 0;
 	const Time t = (time_now - animation.start_time) % animation_duration;
-	for (const AnimationFrame<T>& frame : frames) {
+	for (const AnimationFrame<T>& frame : animation.clip.frames) {
 		if (frame_start <= t && t < frame_start + frame.duration) {
 			break;
 		}
@@ -70,22 +70,5 @@ const T& get_animation_frame(const std::vector<AnimationFrame<T>>& frames, const
 		frame_index += 1;
 	}
 
-	return frames[frame_index].value;
+	return animation.clip.frames[frame_index].value;
 }
-
-class AnimationManager {
-public:
-	AnimationClipID<int> add_animation(std::vector<AnimationFrame<int>> frames);
-	AnimationClipID<std::string> add_animation(std::vector<AnimationFrame<std::string>> frames);
-
-	const AnimationClip<int>& get_animation(AnimationClipID<int> id) const;
-	const AnimationClip<std::string>& get_animation(AnimationClipID<std::string> id) const;
-
-	int current_frame(const Animation<int>& animation) const;
-	const std::string& current_frame(const Animation<std::string>& animation) const;
-
-private:
-	std::unordered_map<int, AnimationClip<int>> m_int_animations;
-	std::unordered_map<int, AnimationClip<std::string>> m_text_animations;
-	int m_next_clip_id = 1;
-};

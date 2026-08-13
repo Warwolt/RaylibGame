@@ -38,30 +38,22 @@ void GameplayScene::initialize(Game* game) {
 			);
 		}
 
-		m_player.animations.walk_left = game->animations.add_animation(
-			{
-				{ 0, 250ms },
-				{ 1, 250ms },
-			}
-		);
-		m_player.animations.walk_right = game->animations.add_animation(
-			{
-				{ 2, 250ms },
-				{ 3, 250ms },
-			}
-		);
-		m_player.animations.walk_down = game->animations.add_animation(
-			{
-				{ 4, 250ms },
-				{ 5, 250ms },
-			}
-		);
-		m_player.animations.walk_up = game->animations.add_animation(
-			{
-				{ 6, 250ms },
-				{ 7, 250ms },
-			}
-		);
+		m_player.animations.walk_left.frames = {
+			{ 0, 250ms },
+			{ 1, 250ms },
+		};
+		m_player.animations.walk_right.frames = {
+			{ 2, 250ms },
+			{ 3, 250ms },
+		};
+		m_player.animations.walk_down.frames = {
+			{ 4, 250ms },
+			{ 5, 250ms },
+		};
+		m_player.animations.walk_up.frames = {
+			{ 6, 250ms },
+			{ 7, 250ms },
+		};
 	}
 
 	m_player.position = ROOM_SIZE / 2.0;
@@ -233,7 +225,7 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		const int frame = game.animations.current_frame(m_player.sprite.sprite_sheet_index);
+		const int frame = get_animation_frame(m_player.sprite.sprite_sheet_index, Time::now());
 		const Rectangle sprite_source = m_player_sprite_sheet.frames[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);

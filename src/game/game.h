@@ -19,7 +19,6 @@ struct Game {
 	Input input;
 	SceneManager scenes;
 	ResourceManager resources;
-	AnimationManager animations;
 };
 
 extern "C" __declspec(dllexport) Game* Game_initialize(int argc, char** argv);
