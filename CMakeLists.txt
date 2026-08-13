@@ -53,9 +53,10 @@ set(SRC
     src/platform/window.cpp
 )
 set(LIB
+    dbghelp
+    nlohmann_json
     raylib
     shlwapi
-    dbghelp
     TracyClient
 )
 
@@ -90,6 +91,7 @@ set_target_properties(Executable PROPERTIES OUTPUT_NAME "Game")
 # Tests
 add_executable(UnitTests
     $<TARGET_OBJECTS:Source>
+    test/unit_tests/nlohmann_json_tests.cpp
     test/unit_tests/ui_element_tests.cpp
     test/unit_tests/ui_style_tests.cpp
     test/unit_tests/ui_tree_tests.cpp
