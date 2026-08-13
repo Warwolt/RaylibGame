@@ -9,6 +9,9 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
 add_subdirectory(lib/raylib)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
+# Add Nlohmann JSON
+add_subdirectory(lib/nlohmann)
+
 # Google Test
 add_subdirectory(lib/googletest)
 
