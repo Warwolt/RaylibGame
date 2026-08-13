@@ -4,7 +4,10 @@
 #include "core/util/time.h"
 #include "game/game.h"
 
+#include <nlohmann/json.hpp>
 #include <raymath.h>
+
+#include <fstream>
 
 using namespace std::chrono_literals;
 
@@ -17,44 +20,49 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-	m_player_sprite_sheet = {
-		.image = game->resources.load_image("resource/image/walk_animation.png").value(),
-		.frames = {
-			Rectangle { 0, 0, 16, 16 },
-			Rectangle { 16, 0, 16, 16 },
-			Rectangle { 32, 0, 16, 16 },
-			Rectangle { 48, 0, 16, 16 },
-			Rectangle { 64, 0, 16, 16 },
-			Rectangle { 80, 0, 16, 16 },
-			Rectangle { 96, 0, 16, 16 },
-			Rectangle { 112, 0, 16, 16 },
-		},
-	};
 
-	m_player.animations.walk_left = game->animations.add_animation(
-		{
-			{ 0, 250ms },
-			{ 1, 250ms },
+	// Read sprite sheet
+	{
+		m_player_sprite_sheet.image = game->resources.load_image("resource/image/walk_animation.png").value();
+		std::ifstream sprite_sheet_json_file = std::ifstream("resource/image/walk_animation.json");
+		nlohmann::json sprite_sheet_json = nlohmann::json::parse(sprite_sheet_json_file);
+
+		for (const nlohmann::json& frame_json : sprite_sheet_json["frames"]) {
+			m_player_sprite_sheet.frames.push_back(
+				Rectangle {
+					.x = frame_json["frame"]["x"].get<float>(),
+					.y = frame_json["frame"]["y"].get<float>(),
+					.width = frame_json["frame"]["w"].get<float>(),
+					.height = frame_json["frame"]["h"].get<float>(),
+				}
+			);
 		}
-	);
-	m_player.animations.walk_right = game->animations.add_animation(
-		{
-			{ 2, 250ms },
-			{ 3, 250ms },
-		}
-	);
-	m_player.animations.walk_down = game->animations.add_animation(
-		{
-			{ 4, 250ms },
-			{ 5, 250ms },
-		}
-	);
-	m_player.animations.walk_up = game->animations.add_animation(
-		{
-			{ 6, 250ms },
-			{ 7, 250ms },
-		}
-	);
+
+		m_player.animations.walk_left = game->animations.add_animation(
+			{
+				{ 0, 250ms },
+				{ 1, 250ms },
+			}
+		);
+		m_player.animations.walk_right = game->animations.add_animation(
+			{
+				{ 2, 250ms },
+				{ 3, 250ms },
+			}
+		);
+		m_player.animations.walk_down = game->animations.add_animation(
+			{
+				{ 4, 250ms },
+				{ 5, 250ms },
+			}
+		);
+		m_player.animations.walk_up = game->animations.add_animation(
+			{
+				{ 6, 250ms },
+				{ 7, 250ms },
+			}
+		);
+	}
 
 	m_player.position = ROOM_SIZE / 2.0;
 	m_player.sprite.sprite_sheet_index.set_clip(m_player.animations.walk_right);
