@@ -22,6 +22,10 @@ void GameplayScene::initialize(Game* game) {
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
 
 	// Read sprite sheet
+	// FIXME: should we store animations inside the SpriteSheet data structure?
+	// Isn't sprite sheets more or less always associated with animations?
+	// The raison d'etre of sprite sheets.
+	std::unordered_map<std::string, AnimationClip<int>> frame_animations;
 	{
 		m_player_sprite_sheet.image = game->resources.load_image("resource/image/walk_animation.png").value();
 		std::ifstream sprite_sheet_json_file = std::ifstream("resource/image/walk_animation.json");
@@ -38,47 +42,27 @@ void GameplayScene::initialize(Game* game) {
 			);
 		}
 
-		std::unordered_map<std::string, AnimationClipID<int>> frame_animations;
-		for (const nlohmann::json& frame_tag : sprite_sheet_json["meta"]["frameTags"].items()) {
-			AnimationClip<int> animation_clip;
+		for (const nlohmann::json& frame_tag : sprite_sheet_json["meta"]["frameTags"]) {
+			AnimationClip<int> frames;
 			const int from = frame_tag["from"].get<int>();
 			const int to = frame_tag["to"].get<int>();
 			for (int i = from; i <= to; i++) {
 				int duration_ms = sprite_sheet_json["frames"][i]["duration"].get<int>();
-				animation_clip.frames.push_back(
+				frames.push_back(
 					AnimationFrame<int> {
 						.value = i,
 						.duration = std::chrono::milliseconds(duration_ms),
 					}
 				);
 			}
+			frame_animations.insert({ frame_tag["name"].get<std::string>(), frames });
 		}
-
-		m_player.animations.walk_left = game->animations.add_animation(
-			{
-				{ 0, 250ms },
-				{ 1, 250ms },
-			}
-		);
-		m_player.animations.walk_right = game->animations.add_animation(
-			{
-				{ 2, 250ms },
-				{ 3, 250ms },
-			}
-		);
-		m_player.animations.walk_down = game->animations.add_animation(
-			{
-				{ 4, 250ms },
-				{ 5, 250ms },
-			}
-		);
-		m_player.animations.walk_up = game->animations.add_animation(
-			{
-				{ 6, 250ms },
-				{ 7, 250ms },
-			}
-		);
 	}
+
+	m_player.animations.walk_left = frame_animations["Left"];
+	m_player.animations.walk_right = frame_animations["Right"];
+	m_player.animations.walk_down = frame_animations["Down"];
+	m_player.animations.walk_up = frame_animations["Up"];
 
 	m_player.position = ROOM_SIZE / 2.0;
 	m_player.sprite.sprite_sheet_index.set_clip(m_player.animations.walk_right);

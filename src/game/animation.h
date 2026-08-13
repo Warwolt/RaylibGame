@@ -5,12 +5,6 @@
 #include <vector>
 
 template <typename T>
-struct AnimationClipID {
-	int value;
-	bool operator==(const AnimationClipID& rhs) const = default;
-};
-
-template <typename T>
 struct AnimationFrame {
 	T value;
 	Time duration;
