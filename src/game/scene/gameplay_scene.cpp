@@ -38,22 +38,46 @@ void GameplayScene::initialize(Game* game) {
 			);
 		}
 
-		m_player.animations.walk_left = {
-			{ 0, 250ms },
-			{ 1, 250ms },
-		};
-		m_player.animations.walk_right = {
-			{ 2, 250ms },
-			{ 3, 250ms },
-		};
-		m_player.animations.walk_down = {
-			{ 4, 250ms },
-			{ 5, 250ms },
-		};
-		m_player.animations.walk_up = {
-			{ 6, 250ms },
-			{ 7, 250ms },
-		};
+		std::unordered_map<std::string, AnimationClipID<int>> frame_animations;
+		for (const nlohmann::json& frame_tag : sprite_sheet_json["meta"]["frameTags"].items()) {
+			AnimationClip<int> animation_clip;
+			const int from = frame_tag["from"].get<int>();
+			const int to = frame_tag["to"].get<int>();
+			for (int i = from; i <= to; i++) {
+				int duration_ms = sprite_sheet_json["frames"][i]["duration"].get<int>();
+				animation_clip.frames.push_back(
+					AnimationFrame<int> {
+						.value = i,
+						.duration = std::chrono::milliseconds(duration_ms),
+					}
+				);
+			}
+		}
+
+		m_player.animations.walk_left = game->animations.add_animation(
+			{
+				{ 0, 250ms },
+				{ 1, 250ms },
+			}
+		);
+		m_player.animations.walk_right = game->animations.add_animation(
+			{
+				{ 2, 250ms },
+				{ 3, 250ms },
+			}
+		);
+		m_player.animations.walk_down = game->animations.add_animation(
+			{
+				{ 4, 250ms },
+				{ 5, 250ms },
+			}
+		);
+		m_player.animations.walk_up = game->animations.add_animation(
+			{
+				{ 6, 250ms },
+				{ 7, 250ms },
+			}
+		);
 	}
 
 	m_player.position = ROOM_SIZE / 2.0;
