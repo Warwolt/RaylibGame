@@ -22,7 +22,7 @@ struct Game;
 //
 struct SpriteSheet {
 	ImageID image;
-	std::vector<Rectangle> sprites;
+	std::vector<Rectangle> frames;
 };
 
 struct SpriteSheetID {

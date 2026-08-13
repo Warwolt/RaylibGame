@@ -19,7 +19,7 @@ void GameplayScene::initialize(Game* game) {
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
 	m_player_sprite_sheet = {
 		.image = game->resources.load_image("resource/image/walk_animation.png").value(),
-		.sprites = {
+		.frames = {
 			Rectangle { 0, 0, 16, 16 },
 			Rectangle { 16, 0, 16, 16 },
 			Rectangle { 32, 0, 16, 16 },
@@ -226,7 +226,7 @@ void GameplayScene::render(const Game& game) const {
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
 		const int frame = game.animations.current_frame(m_player.sprite.sprite_sheet_index);
-		const Rectangle sprite_source = m_player_sprite_sheet.sprites[frame];
+		const Rectangle sprite_source = m_player_sprite_sheet.frames[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);
 	}
