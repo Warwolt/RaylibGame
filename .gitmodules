@@ -7,3 +7,6 @@
 [submodule "lib/tracy"]
 	path = lib/tracy
 	url = https://github.com/wolfpld/tracy.git
+[submodule "lib/nlohmann"]
+	path = lib/nlohmann
+	url = https://github.com/nlohmann/json.git
