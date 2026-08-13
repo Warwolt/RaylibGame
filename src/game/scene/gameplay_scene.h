@@ -10,6 +10,16 @@
 
 struct Game;
 
+// FIXME: who should own SpriteSheets?
+// It's probably easiest to store them in the ResourceManager
+// But, importing a sprite sheet depends on both an image and meta data
+//
+// So, probably best if we just have `ResourceManager::add_sprite_sheet` and
+// have e.g. `load_aseprite_sprite_sheet` as a helper function that takes the
+// path to the .png file, the .json file and ResourceManager* as pointer.
+//
+// Or, we just get a JSON parser and add a `ResoureManager::load_aseprite_sprite_sheet`
+//
 struct SpriteSheet {
 	ImageID image;
 	std::vector<Rectangle> sprites;
