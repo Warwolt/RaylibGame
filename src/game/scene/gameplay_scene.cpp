@@ -20,49 +20,14 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 
-	game->resources.load_aseprite_sprite_sheet("resource/image/walk_animation.png", "resource/image/walk_animation.json");
-
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
 
-	// Read sprite sheet
-	// FIXME: should we store animations inside the SpriteSheet data structure?
-	// Isn't sprite sheets more or less always associated with animations?
-	// The raison d'etre of sprite sheets.
-	{
-		m_player_sprite_sheet.image = game->resources.load_image("resource/image/walk_animation.png").value();
-		std::ifstream sprite_sheet_json_file = std::ifstream("resource/image/walk_animation.json");
-		nlohmann::json sprite_sheet_json = nlohmann::json::parse(sprite_sheet_json_file);
-
-		for (const nlohmann::json& frame_json : sprite_sheet_json["frames"]) {
-			m_player_sprite_sheet.frames.push_back(
-				Rectangle {
-					.x = frame_json["frame"]["x"].get<float>(),
-					.y = frame_json["frame"]["y"].get<float>(),
-					.width = frame_json["frame"]["w"].get<float>(),
-					.height = frame_json["frame"]["h"].get<float>(),
-				}
-			);
-		}
-
-		for (const nlohmann::json& frame_tag : sprite_sheet_json["meta"]["frameTags"]) {
-			Animation<int> animation;
-			const int from = frame_tag["from"].get<int>();
-			const int to = frame_tag["to"].get<int>();
-			for (int i = from; i <= to; i++) {
-				int duration_ms = sprite_sheet_json["frames"][i]["duration"].get<int>();
-				animation.push_back(
-					AnimationFrame<int> {
-						.value = i,
-						.duration = std::chrono::milliseconds(duration_ms),
-					}
-				);
-			}
-			m_player_sprite_sheet.animations.insert({ frame_tag["name"].get<std::string>(), animation });
-		}
-	}
-
+	const std::string image_path = "resource/image/walk_animation.png";
+	const std::string json_path = "resource/image/walk_animation.json";
+	m_player.sprite.sprite_sheet_id = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
+	const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
+	m_player.sprite.frame.set_animation(sprite_sheet.animations.at("Right"));
 	m_player.position = ROOM_SIZE / 2.0;
-	m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Right"]);
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -185,17 +150,18 @@ void GameplayScene::_update_gameplay(Game* game) {
 		// FIXME: need some way of setting which frame we're on to make walking
 		// look nice we want to start on the 2nd frame, since the 1th frame is
 		// standing still. (Make it look like we're always taking a step on input):
+		const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
 		if (directional_input.x > 0) {
-			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Right"]);
+			m_player.sprite.frame.set_animation(sprite_sheet.animations.at("Right"));
 		}
 		if (directional_input.x < 0) {
-			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Left"]);
+			m_player.sprite.frame.set_animation(sprite_sheet.animations.at("Left"));
 		}
 		if (directional_input.y > 0) {
-			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Down"]);
+			m_player.sprite.frame.set_animation(sprite_sheet.animations.at("Down"));
 		}
 		if (directional_input.y < 0) {
-			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Up"]);
+			m_player.sprite.frame.set_animation(sprite_sheet.animations.at("Up"));
 		}
 
 		if (m_player.is_moving) {
@@ -230,9 +196,10 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
+		const SpriteSheet& sprite_sheet = game.resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
 		const int frame = m_player.sprite.frame.value_at_time(Time::now());
-		const Rectangle sprite_source = m_player_sprite_sheet.frames[frame];
-		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
+		const Rectangle sprite_source = sprite_sheet.frames[frame];
+		const Texture2D sprite_sheet_texture = game.resources.get_image(sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();

@@ -30,7 +30,6 @@ private:
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
-	SpriteSheet m_player_sprite_sheet;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);

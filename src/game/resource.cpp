@@ -135,7 +135,7 @@ std::optional<SpriteSheetID> ResourceManager::load_aseprite_sprite_sheet(const s
 	return id;
 }
 
-const SpriteSheet& ResourceManager::get_sprite_sheet(SpriteSheetID sprite_sheet_id) {
+const SpriteSheet& ResourceManager::get_sprite_sheet(SpriteSheetID sprite_sheet_id) const {
 	if (auto it = m_sprite_sheets.find(sprite_sheet_id.value); it != m_sprite_sheets.end()) {
 		return it->second;
 	}

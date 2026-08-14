@@ -22,7 +22,7 @@ public:
 	const Sound& get_sound(SoundID sound_id) const;
 
 	std::optional<SpriteSheetID> load_aseprite_sprite_sheet(const std::string& image_path, const std::string& json_path);
-	const SpriteSheet& get_sprite_sheet(SpriteSheetID sprite_sheet_id);
+	const SpriteSheet& get_sprite_sheet(SpriteSheetID sprite_sheet_id) const;
 
 private:
 	Font m_default_font = {};
