@@ -24,8 +24,8 @@ struct Game;
 //
 struct SpriteSheet {
 	ImageID image;
-	std::vector<Rectangle> frames;
-	std::unordered_map<std::string, AnimationClip<int>> animations;
+	std::vector<Rectangle> animation;
+	std::unordered_map<std::string, Animation<int>> animations;
 };
 
 struct SpriteSheetID {
@@ -40,7 +40,7 @@ struct Sprite {
 
 struct AnimatedSprite {
 	SpriteSheetID sprite_sheet_id;
-	Animation<int> sprite_sheet_index;
+	AnimatedValue<int> frame;
 };
 
 using FrameIndex = int;

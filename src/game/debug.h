@@ -14,7 +14,7 @@ enum class HotReloadState {
 
 struct Debug {
 	Tracked<HotReloadState> reload_state;
-	Animation<std::string> overlay_text_animation;
+	AnimatedValue<std::string> overlay_text_animation;
 };
 
 void initialize_debug_overlay(Game* game);

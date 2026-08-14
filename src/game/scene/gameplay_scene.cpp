@@ -31,7 +31,7 @@ void GameplayScene::initialize(Game* game) {
 		nlohmann::json sprite_sheet_json = nlohmann::json::parse(sprite_sheet_json_file);
 
 		for (const nlohmann::json& frame_json : sprite_sheet_json["frames"]) {
-			m_player_sprite_sheet.frames.push_back(
+			m_player_sprite_sheet.animation.push_back(
 				Rectangle {
 					.x = frame_json["frame"]["x"].get<float>(),
 					.y = frame_json["frame"]["y"].get<float>(),
@@ -42,24 +42,24 @@ void GameplayScene::initialize(Game* game) {
 		}
 
 		for (const nlohmann::json& frame_tag : sprite_sheet_json["meta"]["frameTags"]) {
-			AnimationClip<int> frames;
+			Animation<int> animation;
 			const int from = frame_tag["from"].get<int>();
 			const int to = frame_tag["to"].get<int>();
 			for (int i = from; i <= to; i++) {
 				int duration_ms = sprite_sheet_json["frames"][i]["duration"].get<int>();
-				frames.push_back(
+				animation.push_back(
 					AnimationFrame<int> {
 						.value = i,
 						.duration = std::chrono::milliseconds(duration_ms),
 					}
 				);
 			}
-			m_player_sprite_sheet.animations.insert({ frame_tag["name"].get<std::string>(), frames });
+			m_player_sprite_sheet.animations.insert({ frame_tag["name"].get<std::string>(), animation });
 		}
 	}
 
 	m_player.position = ROOM_SIZE / 2.0;
-	m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Right"]);
+	m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Right"]);
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -183,22 +183,22 @@ void GameplayScene::_update_gameplay(Game* game) {
 		// look nice we want to start on the 2nd frame, since the 1th frame is
 		// standing still. (Make it look like we're always taking a step on input):
 		if (directional_input.x > 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Right"]);
+			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Right"]);
 		}
 		if (directional_input.x < 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Left"]);
+			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Left"]);
 		}
 		if (directional_input.y > 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Down"]);
+			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Down"]);
 		}
 		if (directional_input.y < 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Up"]);
+			m_player.sprite.frame.set_animation(m_player_sprite_sheet.animations["Up"]);
 		}
 
 		if (m_player.is_moving) {
-			m_player.sprite.sprite_sheet_index.start();
+			m_player.sprite.frame.start();
 		} else {
-			m_player.sprite.sprite_sheet_index.stop();
+			m_player.sprite.frame.stop();
 		}
 	}
 }
@@ -227,8 +227,8 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		const int frame = get_animation_frame(m_player.sprite.sprite_sheet_index, Time::now());
-		const Rectangle sprite_source = m_player_sprite_sheet.frames[frame];
+		const int frame = m_player.sprite.frame.value_at_time(Time::now());
+		const Rectangle sprite_source = m_player_sprite_sheet.animation[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);
 	}

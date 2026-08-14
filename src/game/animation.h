@@ -12,54 +12,55 @@ struct AnimationFrame {
 
 // FIXME: should this be Animation<T>? And the animated thing be e.g. Animated<Sprite>?
 template <typename T>
-using AnimationClip = std::vector<AnimationFrame<T>>;
+using Animation = std::vector<AnimationFrame<T>>;
 
 template <typename T>
-struct Animation {
-	AnimationClip<T> frames;
-	bool is_started = false;
-	Time start_time = Time::zero();
-
-	void set_clip(AnimationClip<T> new_frames) {
-		this->frames = new_frames;
-	}
-
+class AnimatedValue {
+public:
 	void start() {
-		if (!this->is_started) {
-			this->is_started = true;
-			this->start_time = Time::now();
+		if (!m_is_started) {
+			m_is_started = true;
+			m_start_time = Time::now();
 		}
 	}
 
 	void stop() {
-		this->is_started = false;
-	}
-};
-
-template <typename T>
-const T& get_animation_frame(const Animation<T>& animation, Time time_now) {
-	/* Check if animation is playing */
-	if (!animation.is_started) {
-		return animation.frames[0].value;
+		m_is_started = false;
 	}
 
-	/* Compute duration */
-	Time animation_duration = Time::zero();
-	for (const AnimationFrame<T>& frame : animation.frames) {
-		animation_duration += frame.duration;
+	void set_animation(Animation<T> animation) {
+		m_animation = animation;
 	}
 
-	/* Find index of current frame */
-	Time frame_start = Time::zero();
-	size_t frame_index = 0;
-	const Time t = (time_now - animation.start_time) % animation_duration;
-	for (const AnimationFrame<T>& frame : animation.frames) {
-		if (frame_start <= t && t < frame_start + frame.duration) {
-			break;
+	T value_at_time(Time time_now) const {
+		/* Check if animation is playing */
+		if (!m_is_started) {
+			return m_animation[0].value;
 		}
-		frame_start += frame.duration;
-		frame_index += 1;
+
+		/* Compute duration */
+		Time animation_duration = Time::zero();
+		for (const AnimationFrame<T>& frame : m_animation) {
+			animation_duration += frame.duration;
+		}
+
+		/* Find index of current frame */
+		Time frame_start = Time::zero();
+		size_t frame_index = 0;
+		const Time t = (time_now - m_start_time) % animation_duration;
+		for (const AnimationFrame<T>& frame : m_animation) {
+			if (frame_start <= t && t < frame_start + frame.duration) {
+				break;
+			}
+			frame_start += frame.duration;
+			frame_index += 1;
+		}
+
+		return m_animation[frame_index].value;
 	}
 
-	return animation.frames[frame_index].value;
-}
+private:
+	Animation<T> m_animation;
+	bool m_is_started = false;
+	Time m_start_time = Time::zero();
+};
