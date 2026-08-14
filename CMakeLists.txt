@@ -10,6 +10,7 @@ add_subdirectory(lib/raylib)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # Add Nlohmann JSON
+add_compile_definitions(JSON_NOEXCEPTION)
 add_subdirectory(lib/nlohmann)
 
 # Google Test

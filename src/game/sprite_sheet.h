@@ -15,7 +15,7 @@ struct SpriteSheetID {
 
 struct SpriteSheet {
 	ImageID image;
-	std::vector<Rectangle> animation;
+	std::vector<Rectangle> frames;
 	std::unordered_map<std::string, Animation<int>> animations;
 };
 

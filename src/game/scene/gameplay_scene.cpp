@@ -19,6 +19,9 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
+
+	game->resources.load_aseprite_sprite_sheet("resource/image/walk_animation.png", "resource/image/walk_animation.json");
+
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
 
 	// Read sprite sheet
@@ -31,7 +34,7 @@ void GameplayScene::initialize(Game* game) {
 		nlohmann::json sprite_sheet_json = nlohmann::json::parse(sprite_sheet_json_file);
 
 		for (const nlohmann::json& frame_json : sprite_sheet_json["frames"]) {
-			m_player_sprite_sheet.animation.push_back(
+			m_player_sprite_sheet.frames.push_back(
 				Rectangle {
 					.x = frame_json["frame"]["x"].get<float>(),
 					.y = frame_json["frame"]["y"].get<float>(),
@@ -228,7 +231,7 @@ void GameplayScene::render(const Game& game) const {
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
 		const int frame = m_player.sprite.frame.value_at_time(Time::now());
-		const Rectangle sprite_source = m_player_sprite_sheet.animation[frame];
+		const Rectangle sprite_source = m_player_sprite_sheet.frames[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(m_player_sprite_sheet.image);
 		Raylib_DrawTextureRec(sprite_sheet_texture, sprite_source, player_top_left, WHITE);
 	}
