@@ -6,6 +6,8 @@
 
 #include <raylib.h>
 
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 struct Game;
@@ -23,6 +25,7 @@ struct Game;
 struct SpriteSheet {
 	ImageID image;
 	std::vector<Rectangle> frames;
+	std::unordered_map<std::string, AnimationClip<int>> animations;
 };
 
 struct SpriteSheetID {
@@ -55,18 +58,10 @@ private:
 		ImageID level_background;
 	} m_images;
 
-	struct PlayerAnimations {
-		AnimationClip<FrameIndex> walk_left;
-		AnimationClip<FrameIndex> walk_right;
-		AnimationClip<FrameIndex> walk_down;
-		AnimationClip<FrameIndex> walk_up;
-	};
-
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
 		bool is_moving = false;
 		AnimatedSprite sprite;
-		PlayerAnimations animations;
 	} m_player;
 
 	bool m_game_paused = false;

@@ -25,7 +25,6 @@ void GameplayScene::initialize(Game* game) {
 	// FIXME: should we store animations inside the SpriteSheet data structure?
 	// Isn't sprite sheets more or less always associated with animations?
 	// The raison d'etre of sprite sheets.
-	std::unordered_map<std::string, AnimationClip<int>> frame_animations;
 	{
 		m_player_sprite_sheet.image = game->resources.load_image("resource/image/walk_animation.png").value();
 		std::ifstream sprite_sheet_json_file = std::ifstream("resource/image/walk_animation.json");
@@ -55,17 +54,12 @@ void GameplayScene::initialize(Game* game) {
 					}
 				);
 			}
-			frame_animations.insert({ frame_tag["name"].get<std::string>(), frames });
+			m_player_sprite_sheet.animations.insert({ frame_tag["name"].get<std::string>(), frames });
 		}
 	}
 
-	m_player.animations.walk_left = frame_animations["Left"];
-	m_player.animations.walk_right = frame_animations["Right"];
-	m_player.animations.walk_down = frame_animations["Down"];
-	m_player.animations.walk_up = frame_animations["Up"];
-
 	m_player.position = ROOM_SIZE / 2.0;
-	m_player.sprite.sprite_sheet_index.set_clip(m_player.animations.walk_right);
+	m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Right"]);
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -189,16 +183,16 @@ void GameplayScene::_update_gameplay(Game* game) {
 		// look nice we want to start on the 2nd frame, since the 1th frame is
 		// standing still. (Make it look like we're always taking a step on input):
 		if (directional_input.x > 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player.animations.walk_right);
+			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Right"]);
 		}
 		if (directional_input.x < 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player.animations.walk_left);
+			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Left"]);
 		}
 		if (directional_input.y > 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player.animations.walk_down);
+			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Down"]);
 		}
 		if (directional_input.y < 0) {
-			m_player.sprite.sprite_sheet_index.set_clip(m_player.animations.walk_up);
+			m_player.sprite.sprite_sheet_index.set_clip(m_player_sprite_sheet.animations["Up"]);
 		}
 
 		if (m_player.is_moving) {

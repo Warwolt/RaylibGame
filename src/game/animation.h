@@ -10,6 +10,7 @@ struct AnimationFrame {
 	Time duration;
 };
 
+// FIXME: should this be Animation<T>? And the animated thing be e.g. Animated<Sprite>?
 template <typename T>
 using AnimationClip = std::vector<AnimationFrame<T>>;
 
