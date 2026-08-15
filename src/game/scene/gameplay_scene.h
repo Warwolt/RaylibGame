@@ -38,13 +38,17 @@ private:
 		ImageID level_background;
 	} m_images;
 
+	struct Player {
+		Vector2 position = { 0, 0 }; // relative center of player
+		Direction direction = Direction::Right;
+		bool is_moving = false;
+		SpriteSheet sprite_sheet;
+	};
+
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
-	Vector2 m_player_position = { 0, 0 }; // relative center of player
+	Player m_player;
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
-	Direction m_player_direction = Direction::Right;
-	bool m_player_is_moving = false;
-	SpriteSheet m_player_sprite_sheet;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);
