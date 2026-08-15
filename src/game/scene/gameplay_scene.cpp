@@ -16,7 +16,19 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-	m_images.knight_sprite_sheet = game->resources.load_image("resource/image/walk_animation.png").value();
+	m_player_sprite_sheet.image = game->resources.load_image("resource/image/walk_animation.png").value();
+	// clang-format off
+	m_player_sprite_sheet.frames = {
+		{ 0, 0, 16, 16 },
+		{ 16, 0, 16, 16 },
+		{ 32, 0, 16, 16 },
+		{ 48, 0, 16, 16 },
+		{ 64, 0, 16, 16 },
+		{ 80, 0, 16, 16 },
+		{ 96, 0, 16, 16 },
+		{ 112, 0, 16, 16 },
+	};
+	// clang-format on
 
 	m_player_position = ROOM_SIZE / 2.0;
 }
@@ -194,8 +206,8 @@ void GameplayScene::render(const Game& game) const {
 				frame = animation_index + 6;
 				break;
 		}
-		const Rectangle sprite_sheet_index = { frame * 16, 0, 16, 16 };
-		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
+		const Rectangle frame_source = m_player_sprite_sheet.frames[frame];
+		Raylib_DrawTextureRec(game.resources.get_image(m_player_sprite_sheet.image), frame_source, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
