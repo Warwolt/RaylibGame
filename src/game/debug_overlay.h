@@ -13,9 +13,11 @@ enum class HotReloadState {
 	Failed,
 };
 
-struct DebugOverlay {
-	Animation<std::string> overlay_text_animation;
-};
+class DebugOverlay {
+public:
+	void initialize();
+	void render(const Game& game) const;
 
-void initialize_debug_overlay(Game* game);
-void render_debug_overlay(const Game& game);
+private:
+	Animation<std::string> m_overlay_text_animation;
+};
