@@ -3,8 +3,6 @@
 #include "core/debug/logging.h"
 #include "core/debug/profiling.h"
 #include "game/scene/scene_id.h"
-#include "game_api.h"
-
 
 #include <raylib.h>
 #include <raymath.h>
