@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/debug.h"
+#include "game/debug_overlay.h"
 #include "game/resource.h"
 #include "game/scene/scene.h"
 #include "platform/input.h"

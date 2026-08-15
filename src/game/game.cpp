@@ -66,6 +66,7 @@ void Game_update(Game* game) {
 
 	/* Update systems */
 	game->window.update();
+	initialize_debug_overlay(game);
 
 	/* Update scene */
 	game->scenes.update_current_scene(game);

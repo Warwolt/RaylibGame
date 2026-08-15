@@ -37,7 +37,7 @@ set(SRC
     src/core/debug/logging.cpp
     src/core/util.cpp
     src/core/util/time.cpp
-    src/game/debug.cpp
+    src/game/debug_overlay.cpp
     src/game/game.cpp
     src/game/resource.cpp
     src/game/scene/gameplay_scene.cpp
