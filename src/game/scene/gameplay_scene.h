@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/animation.h"
 #include "game/resource_id.h"
 #include "game/ui/user_interface.h"
 
