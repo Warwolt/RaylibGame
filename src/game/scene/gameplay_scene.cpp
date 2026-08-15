@@ -24,8 +24,8 @@ void GameplayScene::initialize(Game* game) {
 
 	const std::string image_path = "resource/image/walk_animation.png";
 	const std::string json_path = "resource/image/walk_animation.json";
-	m_player.sprite.sprite_sheet_id = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
-	const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
+	m_player.sprite.sprite_sheet_id = game->sprites.load_aseprite_sprite_sheet(&game->resources, image_path, json_path).value();
+	const SpriteSheet& sprite_sheet = game->sprites.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
 	m_player.sprite.frame.set_animation(sprite_sheet.animations.at("Right"));
 	m_player.position = ROOM_SIZE / 2.0;
 }
@@ -150,7 +150,7 @@ void GameplayScene::_update_gameplay(Game* game) {
 		// FIXME: need some way of setting which frame we're on to make walking
 		// look nice we want to start on the 2nd frame, since the 1th frame is
 		// standing still. (Make it look like we're always taking a step on input):
-		const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
+		const SpriteSheet& sprite_sheet = game->sprites.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
 		if (directional_input.x > 0) {
 			m_player.sprite.frame.set_animation(sprite_sheet.animations.at("Right"));
 		}
@@ -196,7 +196,7 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		const SpriteSheet& sprite_sheet = game.resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
+		const SpriteSheet& sprite_sheet = game.sprites.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
 		const int frame = m_player.sprite.frame.value_at_time(Time::now());
 		const Rectangle sprite_source = sprite_sheet.frames[frame];
 		const Texture2D sprite_sheet_texture = game.resources.get_image(sprite_sheet.image);

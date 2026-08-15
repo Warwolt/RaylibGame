@@ -1,10 +1,10 @@
 #pragma once
 
 #include "game/resource_id.h"
-#include "game/sprite_sheet.h"
+
+#include <raylib.h>
 
 #include <optional>
-#include <raylib.h>
 #include <string>
 #include <unordered_map>
 
@@ -21,8 +21,6 @@ public:
 	std::optional<SoundID> load_sound(const std::string& path);
 	const Sound& get_sound(SoundID sound_id) const;
 
-	std::optional<SpriteSheetID> load_aseprite_sprite_sheet(const std::string& image_path, const std::string& json_path);
-	const SpriteSheet& get_sprite_sheet(SpriteSheetID sprite_sheet_id) const;
 
 private:
 	Font m_default_font = {};
@@ -34,8 +32,4 @@ private:
 	int m_next_sound_id = 1;
 	std::unordered_map<int, Sound> m_sounds;
 	inline static const Sound m_empty_sound = {};
-
-	int m_next_sprite_sheet_id = 1;
-	std::unordered_map<int, SpriteSheet> m_sprite_sheets;
-	inline static const SpriteSheet m_empty_sprite_sheet = {};
 };
