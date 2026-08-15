@@ -2,6 +2,8 @@
 
 #include "game/animation.h"
 
+#include <raylib.h>
+
 #include <string>
 
 struct Game;
@@ -9,8 +11,11 @@ struct Game;
 class DebugOverlay {
 public:
 	void initialize();
+	void update(Game* game);
 	void render(const Game& game) const;
 
 private:
-	Animation<std::string> m_overlay_text_animation;
+	std::string m_overlay_text;
+	Color m_overlay_text_color = YELLOW;
+	AnimationPlayer<std::string> m_overlay_text_animation;
 };

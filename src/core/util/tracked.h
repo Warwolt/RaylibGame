@@ -43,6 +43,10 @@ public:
 		return m_current != m_previous && m_current == value;
 	}
 
+	bool has_changed_from(const T& value) const {
+		return m_current != m_previous && m_previous == value;
+	}
+
 	T& operator=(T value) {
 		m_previous = m_current;
 		m_current = value;
