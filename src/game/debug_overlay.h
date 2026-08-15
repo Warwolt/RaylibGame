@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/util/time.h"
 #include "game/animation.h"
 
 #include <string>
@@ -14,8 +13,7 @@ enum class HotReloadState {
 	Failed,
 };
 
-struct Debug {
-	Timestamped<HotReloadState> reload_state;
+struct DebugOverlay {
 	Animation<std::string> overlay_text_animation;
 };
 
