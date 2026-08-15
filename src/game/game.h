@@ -1,8 +1,10 @@
 #pragma once
 
-#include "game/debug.h"
+#include "core/util/time.h"
+#include "game/debug_overlay.h"
 #include "game/resource.h"
 #include "game/scene/scene.h"
+#include "hot_reload.h"
 #include "platform/input.h"
 #include "platform/window.h"
 
@@ -13,14 +15,10 @@
 // pointer will point into the library that was just unloaded.
 struct Game {
 	bool should_quit = false;
-	Debug debug;
+	Timestamped<HotReloadState> hot_reload_state;
+	DebugOverlay debug_overlay;
 	Window window;
 	Input input;
 	SceneManager scenes;
 	ResourceManager resources;
 };
-
-extern "C" __declspec(dllexport) Game* Game_initialize(int argc, char** argv);
-extern "C" __declspec(dllexport) void Game_update(Game* game);
-extern "C" __declspec(dllexport) void Game_render(const Game& game);
-extern "C" __declspec(dllexport) void Game_shutdown(Game* game);

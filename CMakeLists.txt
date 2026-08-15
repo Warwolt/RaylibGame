@@ -37,7 +37,7 @@ set(SRC
     src/core/debug/logging.cpp
     src/core/util.cpp
     src/core/util/time.cpp
-    src/game/debug.cpp
+    src/game/debug_overlay.cpp
     src/game/game.cpp
     src/game/resource.cpp
     src/game/scene/gameplay_scene.cpp
@@ -76,7 +76,7 @@ set_target_properties(Library PROPERTIES OUTPUT_NAME "GameLib")
 # Executable
 add_executable(Executable
     src/main.cpp
-    src/library.cpp
+    src/hot_reload.cpp
     src/core/debug/assert.cpp
     src/core/debug/logging.cpp
     src/platform/win32.cpp

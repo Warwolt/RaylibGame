@@ -1,7 +1,9 @@
-#include "library.h"
+#include "hot_reload.h"
 
 #include "core/debug/assert.h"
 #include "core/debug/logging.h"
+#include "game/game.h"
+#include "library.h"
 #include "platform/win32.h"
 
 static std::optional<HotReloadState> g_rebuild_result;
@@ -48,13 +50,13 @@ std::expected<GameLibrary, std::string> HotReloading::load_library() const {
 }
 
 void HotReloading::update(Game* game_state, GameLibrary* game_library) {
-	switch (game_state->debug.reload_state.value()) {
+	switch (game_state->hot_reload_state.value()) {
 		case HotReloadState::Idle:
 		case HotReloadState::Failed: {
 			/* Trigger rebuild */
 			if (Raylib_IsKeyPressed(KEY_F5)) {
 				LOG_INFO("Rebuilding game library");
-				game_state->debug.reload_state = HotReloadState::Rebuilding;
+				game_state->hot_reload_state = HotReloadState::Rebuilding;
 				auto on_build_command_done = [](int exit_code) {
 					if (exit_code == 0) {
 						g_rebuild_result = HotReloadState::ReadyToReload;
@@ -71,13 +73,13 @@ void HotReloading::update(Game* game_state, GameLibrary* game_library) {
 		case HotReloadState::Rebuilding:
 			/* Wait for rebuild to finish */
 			if (g_rebuild_result) {
-				game_state->debug.reload_state = g_rebuild_result.value();
+				game_state->hot_reload_state = g_rebuild_result.value();
 				g_rebuild_result = {};
 			}
 			break;
 
 		case HotReloadState::ReadyToReload: {
-			game_state->debug.reload_state = HotReloadState::Idle;
+			game_state->hot_reload_state = HotReloadState::Idle;
 
 			/* Reload copied library */
 			FreeLibrary(game_library->handle);

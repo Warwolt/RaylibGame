@@ -41,8 +41,10 @@ Game* Game_initialize(int argc, char** argv) {
 	}
 	game->resources.load_default_font("resource/font/8bitoperator_jve.ttf");
 
-	LOG_INFO("Game initialized");
+	/* Initialize systems */
+	game->debug_overlay.initialize();
 
+	LOG_INFO("Game initialized");
 	return game;
 }
 
@@ -79,7 +81,7 @@ void Game_render(const Game& game) {
 		PROFILING_SCOPE(); // anything worth measuring is in the scene
 		Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 		game.scenes.render_current_scene(game);
-		render_debug_overlay(game);
+		game.debug_overlay.render(game);
 	}
 	Raylib_EndTextureMode();
 
