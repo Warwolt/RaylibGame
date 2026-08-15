@@ -76,7 +76,7 @@ set_target_properties(Library PROPERTIES OUTPUT_NAME "GameLib")
 # Executable
 add_executable(Executable
     src/main.cpp
-    src/library.cpp
+    src/hot_reload.cpp
     src/core/debug/assert.cpp
     src/core/debug/logging.cpp
     src/platform/win32.cpp

@@ -1,6 +1,7 @@
 #include "game/debug_overlay.h"
 
 #include "game/game.h"
+#include "library.h"
 
 #include <raylib.h>
 

@@ -1,7 +1,9 @@
-#include "library.h"
+#include "hot_reload.h"
 
+#include "game/game.h"
 #include "core/debug/assert.h"
 #include "core/debug/logging.h"
+#include "library.h"
 #include "platform/win32.h"
 
 static std::optional<HotReloadState> g_rebuild_result;

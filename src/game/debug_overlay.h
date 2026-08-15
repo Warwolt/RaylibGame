@@ -6,13 +6,6 @@
 
 struct Game;
 
-enum class HotReloadState {
-	Idle,
-	Rebuilding,
-	ReadyToReload,
-	Failed,
-};
-
 class DebugOverlay {
 public:
 	void initialize();
