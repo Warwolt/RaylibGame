@@ -7,6 +7,8 @@
 
 #include <raymath.h>
 
+using namespace std::chrono_literals;
+
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
@@ -28,8 +30,14 @@ void GameplayScene::initialize(Game* game) {
 		{ 96, 0, 16, 16 },
 		{ 112, 0, 16, 16 },
 	};
+	m_player.sprite_sheet.animations = {
+		{ "Left", { { 0, 250ms }, { 1, 250ms } } },
+		{ "Right", { { 2, 250ms }, { 3, 250ms } } },
+		{ "Down", { { 4, 250ms }, { 5, 250ms } } },
+		{ "Up", { { 6, 250ms }, { 7, 250ms } } },
+	};
 	// clang-format on
-
+	m_player.sprite_animation.set_animation(m_player.sprite_sheet.animations["Right"]);
 	m_player.position = ROOM_SIZE / 2.0;
 }
 
@@ -148,19 +156,24 @@ void GameplayScene::_update_gameplay(Game* game) {
 		const Vector2 directional_input = game->input.directional_input();
 		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
 		m_player.position += delta_speed * directional_input;
-		m_player.is_moving = directional_input != Vector2 { 0, 0 };
 
 		if (directional_input.x > 0) {
-			m_player.direction = Direction::Right;
+			m_player.sprite_animation.set_animation(m_player.sprite_sheet.animations["Right"]);
 		}
 		if (directional_input.x < 0) {
-			m_player.direction = Direction::Left;
+			m_player.sprite_animation.set_animation(m_player.sprite_sheet.animations["Left"]);
 		}
 		if (directional_input.y > 0) {
-			m_player.direction = Direction::Down;
+			m_player.sprite_animation.set_animation(m_player.sprite_sheet.animations["Down"]);
 		}
 		if (directional_input.y < 0) {
-			m_player.direction = Direction::Up;
+			m_player.sprite_animation.set_animation(m_player.sprite_sheet.animations["Up"]);
+		}
+
+		if (directional_input != Vector2 { 0, 0 }) {
+			m_player.sprite_animation.start(Time::now());
+		} else {
+			m_player.sprite_animation.stop();
 		}
 	}
 }
@@ -189,23 +202,7 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		const float period = 0.4f; // seconds
-		const int animation_index = m_player.is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 0;
-		int frame = 0;
-		switch (m_player.direction) {
-			case Direction::Left:
-				frame = animation_index + 0;
-				break;
-			case Direction::Right:
-				frame = animation_index + 2;
-				break;
-			case Direction::Down:
-				frame = animation_index + 4;
-				break;
-			case Direction::Up:
-				frame = animation_index + 6;
-				break;
-		}
+		const int frame = m_player.sprite_animation.value(Time::now());
 		const Rectangle frame_source = m_player.sprite_sheet.frames[frame];
 		Raylib_DrawTextureRec(game.resources.get_image(m_player.sprite_sheet.image), frame_source, player_top_left, WHITE);
 	}

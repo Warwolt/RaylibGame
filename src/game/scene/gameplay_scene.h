@@ -12,13 +12,6 @@
 
 struct Game;
 
-enum class Direction {
-	Up,
-	Left,
-	Down,
-	Right,
-};
-
 struct SpriteSheet {
 	ImageID image;
 	std::vector<Rectangle> frames;
@@ -40,9 +33,8 @@ private:
 
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
-		Direction direction = Direction::Right;
-		bool is_moving = false;
 		SpriteSheet sprite_sheet;
+		AnimationPlayer<int> sprite_animation;
 	};
 
 	bool m_game_paused = false;
