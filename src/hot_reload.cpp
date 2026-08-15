@@ -1,8 +1,8 @@
 #include "hot_reload.h"
 
-#include "game/game.h"
 #include "core/debug/assert.h"
 #include "core/debug/logging.h"
+#include "game/game.h"
 #include "library.h"
 #include "platform/win32.h"
 
