@@ -6,7 +6,20 @@
 
 #include <raylib.h>
 
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 struct Game;
+
+enum class Direction {
+	Down,
+	Up,
+	Left,
+	Right,
+};
+
+Vector2 direction_to_vector2(Direction direction);
 
 class GameplayScene {
 public:
@@ -24,6 +37,9 @@ private:
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
 		AnimatedSprite sprite;
+		Direction direction;
+		std::vector<Direction> direction_stack;
+		std::unordered_map<Direction, std::string> direction_animation;
 	};
 
 	bool m_game_paused = false;

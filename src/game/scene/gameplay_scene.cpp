@@ -13,14 +13,33 @@ constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 constexpr Vector2 ROOM_SIZE = { 256, 128 };
 constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 
+Vector2 direction_to_vector2(Direction direction) {
+	switch (direction) {
+		case Direction::Up:
+			return { 0, -1 };
+		case Direction::Left:
+			return { -1, 0 };
+		case Direction::Down:
+			return { 0, 1 };
+		case Direction::Right:
+			return { 1, 0 };
+	}
+	return {};
+}
+
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
 	const char* image_path = "resource/image/walk_animation.png";
 	const char* json_path = "resource/image/walk_animation.json";
 	m_player.sprite.sprite_sheet_id = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
-	m_player.sprite.set_animation(&game->resources, "Right");
 	m_player.position = ROOM_SIZE / 2.0;
+	m_player.direction_animation = {
+		{ Direction::Up, "Up" },
+		{ Direction::Left, "Left" },
+		{ Direction::Down, "Down" },
+		{ Direction::Right, "Right" },
+	};
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -83,6 +102,27 @@ void GameplayScene::_update_pause_menu(Game* game) {
 void GameplayScene::_update_gameplay(Game* game) {
 	PROFILING_SCOPE();
 
+	/* Handle 4-directional player input */
+	{
+		std::array<std::pair<InputAction, Direction>, 4> input_mappings = { {
+			{ InputAction::ACTION_UP, Direction::Up },
+			{ InputAction::ACTION_LEFT, Direction::Left },
+			{ InputAction::ACTION_DOWN, Direction::Down },
+			{ InputAction::ACTION_RIGHT, Direction::Right },
+		} };
+		for (const auto& [action, direction] : input_mappings) {
+			if (game->input.action_pressed(action)) {
+				m_player.direction_stack.push_back(direction);
+			}
+			if (game->input.action_released(action)) {
+				std::erase(m_player.direction_stack, direction);
+			}
+		}
+		if (!m_player.direction_stack.empty()) {
+			m_player.direction = m_player.direction_stack.back();
+		}
+	}
+
 	/* Camera should show the current room player is in */
 	const Vector2 player_room_position = {
 		.x = ROOM_SIZE.x * std::floor(m_player.position.x / ROOM_SIZE.x),
@@ -136,31 +176,18 @@ void GameplayScene::_update_gameplay(Game* game) {
 	const bool camera_is_moving = camera_target_delta != Vector2 { 0, 0 };
 	if (!camera_is_moving) {
 		/* Move player */
-		const Vector2 directional_input = game->input.directional_input();
-		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-		m_player.position += delta_speed * directional_input;
+		if (!m_player.direction_stack.empty()) {
+			const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
+			m_player.position += delta_speed * direction_to_vector2(m_player.direction);
+		}
 
-		/* Update animation */
-		if (directional_input != Vector2 { 0, 0 }) {
-			std::string animation_name;
-			if (directional_input.x > 0) {
-				animation_name = "Right";
-			}
-			if (directional_input.x < 0) {
-				animation_name = "Left";
-			}
-			if (directional_input.y > 0) {
-				animation_name = "Down";
-			}
-			if (directional_input.y < 0) {
-				animation_name = "Up";
-			}
+		/* Update direction facing */
+		if (!m_player.direction_stack.empty()) {
 			if (!m_player.sprite.animation_is_playing()) {
 				m_player.sprite.set_animation_frame(1);
 			}
-			m_player.sprite.set_animation(&game->resources, animation_name);
+			m_player.sprite.set_animation(&game->resources, m_player.direction_animation[m_player.direction]);
 			m_player.sprite.start_animation(Time::now());
-
 		} else {
 			m_player.sprite.set_animation_frame(0);
 			m_player.sprite.stop_animation();

@@ -2,6 +2,7 @@
 
 #include "core/util/time.h"
 
+#include <algorithm>
 #include <vector>
 
 template <typename T>
@@ -42,8 +43,8 @@ public:
 	}
 
 	void set_frame(int frame) {
-		m_frame = frame;
-		m_frame_remainder = m_animation[frame].duration;
+		m_frame = std::clamp<int>(frame, 0, (int)m_animation.size());
+		m_frame_remainder = m_animation.empty() ? Time::zero() : m_animation[frame].duration;
 	}
 
 	void start(Time time_now) {
@@ -79,7 +80,7 @@ public:
 	}
 
 	T value() const {
-		return m_animation[m_frame].value;
+		return m_animation.empty() ? T() : m_animation[m_frame].value;
 	}
 
 	bool is_playing() const {
