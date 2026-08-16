@@ -41,27 +41,51 @@ public:
 		m_animation = animation;
 	}
 
+	void set_frame(int frame) {
+		m_frame = frame;
+		m_frame_remainder = Time::zero();
+	}
+
 	void start(Time time_now) {
 		if (!m_is_playing) {
 			m_is_playing = true;
-			m_start_time = time_now;
+			m_time_previous = time_now;
 		}
 	}
 
 	void stop() {
 		m_is_playing = false;
+		m_frame = 0;
 	}
 
-	T value(Time time_now) const {
-		if (m_is_playing) {
-			return get_animation_value(m_animation, m_start_time, time_now);
-		} else {
-			return m_animation[0].value;
+	void update(Time time_now) {
+		if (!m_is_playing || m_animation.empty()) {
+			return;
 		}
+
+		Time delta_time = time_now - m_time_previous;
+		m_time_previous = time_now;
+
+		while (delta_time > Time::zero()) {
+			if (m_frame_remainder <= delta_time) {
+				delta_time -= m_frame_remainder;
+				m_frame = (m_frame + 1) % m_animation.size();
+				m_frame_remainder = m_animation[m_frame].duration;
+			} else {
+				m_frame_remainder -= delta_time;
+				delta_time = Time::zero();
+			}
+		}
+	}
+
+	T value() const {
+		return m_animation[m_frame].value;
 	}
 
 private:
 	Animation<T> m_animation;
+	int m_frame;
 	bool m_is_playing;
-	Time m_start_time;
+	Time m_time_previous;
+	Time m_frame_remainder;
 };

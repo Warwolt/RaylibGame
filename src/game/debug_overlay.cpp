@@ -29,7 +29,8 @@ void DebugOverlay::update(Game* game) {
 
 	switch (game->hot_reload_state) {
 		case HotReloadState::Rebuilding:
-			m_overlay_text = m_overlay_text_animation.value(Time::now());
+			m_overlay_text_animation.update(Time::now());
+			m_overlay_text = m_overlay_text_animation.value();
 			m_overlay_text_color = YELLOW;
 			break;
 

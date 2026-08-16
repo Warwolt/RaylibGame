@@ -161,6 +161,8 @@ void GameplayScene::_update_gameplay(Game* game) {
 			m_player.sprite.stop_animation();
 		}
 	}
+
+	m_player.sprite.update_animation(Time::now());
 }
 
 void GameplayScene::render(const Game& game) const {
@@ -186,7 +188,7 @@ void GameplayScene::render(const Game& game) const {
 			.y = std::round(m_player.position.y),
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
-		m_player.sprite.draw(game.resources, player_top_left, Time::now());
+		m_player.sprite.draw(game.resources, player_top_left);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();

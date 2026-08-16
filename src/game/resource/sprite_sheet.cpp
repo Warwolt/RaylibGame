@@ -15,8 +15,12 @@ void AnimatedSprite::stop_animation() {
 	this->frame_animation.stop();
 }
 
-void AnimatedSprite::draw(const ResourceManager& resources, Vector2 position, Time time_now) const {
-	const int frame = this->frame_animation.value(time_now);
+void AnimatedSprite::update_animation(Time time_now) {
+	this->frame_animation.update(time_now);
+}
+
+void AnimatedSprite::draw(const ResourceManager& resources, Vector2 position) const {
+	const int frame = this->frame_animation.value();
 	const SpriteSheet& sprite_sheet = resources.get_sprite_sheet(this->sprite_sheet_id);
 	const Rectangle source_rect = sprite_sheet.frames[frame];
 	Raylib_DrawTextureRec(resources.get_image(sprite_sheet.image_id), source_rect, position, WHITE);
