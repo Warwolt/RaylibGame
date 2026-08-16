@@ -40,6 +40,7 @@ set(SRC
     src/game/debug_overlay.cpp
     src/game/game.cpp
     src/game/resource/resource.cpp
+    src/game/resource/sprite_sheet.cpp
     src/game/scene/gameplay_scene.cpp
     src/game/scene/main_menu_scene.cpp
     src/game/scene/scene.cpp

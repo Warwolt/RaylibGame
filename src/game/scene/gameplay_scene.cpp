@@ -20,9 +20,8 @@ void GameplayScene::initialize(Game* game) {
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
 	const char* image_path = "resource/image/walk_animation.png";
 	const char* json_path = "resource/image/walk_animation.json";
-	m_player.sprite_sheet = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
-	const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite_sheet);
-	m_player.sprite_animation.set_animation(sprite_sheet.animations.at("Right"));
+	m_player.sprite.sprite_sheet_id = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
+	m_player.sprite.set_animation(&game->resources, "Right");
 	m_player.position = ROOM_SIZE / 2.0;
 }
 
@@ -158,11 +157,10 @@ void GameplayScene::_update_gameplay(Game* game) {
 			animation_name = "Up";
 		}
 		if (directional_input != Vector2 { 0, 0 }) {
-			const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite_sheet);
-			m_player.sprite_animation.set_animation(sprite_sheet.animations.at(animation_name));
-			m_player.sprite_animation.start(Time::now());
+			m_player.sprite.set_animation(&game->resources, animation_name);
+			m_player.sprite.frame_animation.start(Time::now());
 		} else {
-			m_player.sprite_animation.stop();
+			m_player.sprite.frame_animation.stop();
 		}
 	}
 }
@@ -191,10 +189,10 @@ void GameplayScene::render(const Game& game) const {
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
-		const int frame = m_player.sprite_animation.value(Time::now());
-		const SpriteSheet& sprite_sheet = game.resources.get_sprite_sheet(m_player.sprite_sheet);
+		const int frame = m_player.sprite.frame_animation.value(Time::now());
+		const SpriteSheet& sprite_sheet = game.resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
 		const Rectangle frame_source = sprite_sheet.frames[frame];
-		Raylib_DrawTextureRec(game.resources.get_image(sprite_sheet.image), frame_source, player_top_left, WHITE);
+		Raylib_DrawTextureRec(game.resources.get_image(sprite_sheet.image_id), frame_source, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();

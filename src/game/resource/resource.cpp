@@ -40,8 +40,8 @@ const Texture2D& ResourceManager::get_image(ImageID image_id) const {
 
 std::optional<SpriteSheetID> ResourceManager::load_aseprite_sprite_sheet(const std::string& image_path, const std::string& json_path) {
 	/* Load sprite sheet image */
-	std::optional<ImageID> image = load_image(image_path);
-	if (!image.has_value()) {
+	std::optional<ImageID> image_id = load_image(image_path);
+	if (!image_id.has_value()) {
 		LOG_ERROR("Couldn't open file %s, can't load sprite sheet", image_path.c_str());
 		return {};
 	}
@@ -104,7 +104,7 @@ std::optional<SpriteSheetID> ResourceManager::load_aseprite_sprite_sheet(const s
 
 	/* Add sprite sheet */
 	SpriteSheet sprite_sheet = {
-		.image = image.value(),
+		.image_id = image_id.value(),
 		.frames = std::move(frames),
 		.animations = std::move(animations),
 	};

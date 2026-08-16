@@ -24,8 +24,7 @@ private:
 
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
-		SpriteSheetID sprite_sheet;
-		AnimationPlayer<int> sprite_animation;
+		AnimatedSprite sprite;
 	};
 
 	bool m_game_paused = false;
