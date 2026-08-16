@@ -158,9 +158,9 @@ void GameplayScene::_update_gameplay(Game* game) {
 		}
 		if (directional_input != Vector2 { 0, 0 }) {
 			m_player.sprite.set_animation(&game->resources, animation_name);
-			m_player.sprite.frame_animation.start(Time::now());
+			m_player.sprite.start_animation(Time::now());
 		} else {
-			m_player.sprite.frame_animation.stop();
+			m_player.sprite.stop_animation();
 		}
 	}
 }
@@ -188,11 +188,7 @@ void GameplayScene::render(const Game& game) const {
 			.y = std::round(m_player.position.y),
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
-
-		const int frame = m_player.sprite.frame_animation.value(Time::now());
-		const SpriteSheet& sprite_sheet = game.resources.get_sprite_sheet(m_player.sprite.sprite_sheet_id);
-		const Rectangle frame_source = sprite_sheet.frames[frame];
-		Raylib_DrawTextureRec(game.resources.get_image(sprite_sheet.image_id), frame_source, player_top_left, WHITE);
+		m_player.sprite.draw(game.resources, player_top_left, Time::now());
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
