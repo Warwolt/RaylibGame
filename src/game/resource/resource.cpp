@@ -25,13 +25,13 @@ std::optional<ImageID> ResourceManager::load_image(const std::string& path) {
 	return id;
 }
 
-Texture2D ResourceManager::get_image(ImageID image_id) const {
+const Texture2D& ResourceManager::get_image(ImageID image_id) const {
 	if (auto it = m_images.find(image_id.value); it != m_images.end()) {
 		return it->second;
 	}
 
 	LOG_ERROR("Missing image for ImageID(%d)", image_id.value);
-	return {};
+	return m_empty_image;
 }
 
 std::optional<SoundID> ResourceManager::load_sound(const std::string& path) {
@@ -44,11 +44,11 @@ std::optional<SoundID> ResourceManager::load_sound(const std::string& path) {
 	return id;
 }
 
-Sound ResourceManager::get_sound(SoundID sound_id) const {
+const Sound& ResourceManager::get_sound(SoundID sound_id) const {
 	if (auto it = m_sounds.find(sound_id.value); it != m_sounds.end()) {
 		return it->second;
 	}
 
 	LOG_ERROR("Missing image for SoundID(%d)", sound_id.value);
-	return {};
+	return m_empty_sound;
 }
