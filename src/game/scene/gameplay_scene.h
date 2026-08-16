@@ -13,9 +13,9 @@
 struct Game;
 
 enum class Direction {
+	Down,
 	Up,
 	Left,
-	Down,
 	Right,
 };
 

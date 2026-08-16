@@ -105,11 +105,7 @@ void GameplayScene::_update_gameplay(Game* game) {
 
 	/* Handle 4-directional player input */
 	{
-		struct InputMapping {
-			InputAction action;
-			Direction direction;
-		};
-		std::array<InputMapping, 4> input_mappings = { {
+		std::array<std::pair<InputAction, Direction>, 4> input_mappings = { {
 			{ InputAction::ACTION_UP, Direction::Up },
 			{ InputAction::ACTION_LEFT, Direction::Left },
 			{ InputAction::ACTION_DOWN, Direction::Down },
