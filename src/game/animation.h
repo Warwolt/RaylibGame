@@ -43,7 +43,7 @@ public:
 
 	void set_frame(int frame) {
 		m_frame = frame;
-		m_frame_remainder = Time::zero();
+		m_frame_remainder = m_animation[frame].duration;
 	}
 
 	void start(Time time_now) {
@@ -80,6 +80,10 @@ public:
 
 	T value() const {
 		return m_animation[m_frame].value;
+	}
+
+	bool is_playing() const {
+		return m_is_playing;
 	}
 
 private:

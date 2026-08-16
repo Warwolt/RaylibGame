@@ -141,23 +141,28 @@ void GameplayScene::_update_gameplay(Game* game) {
 		m_player.position += delta_speed * directional_input;
 
 		/* Update animation */
-		std::string animation_name;
-		if (directional_input.x > 0) {
-			animation_name = "Right";
-		}
-		if (directional_input.x < 0) {
-			animation_name = "Left";
-		}
-		if (directional_input.y > 0) {
-			animation_name = "Down";
-		}
-		if (directional_input.y < 0) {
-			animation_name = "Up";
-		}
 		if (directional_input != Vector2 { 0, 0 }) {
+			std::string animation_name;
+			if (directional_input.x > 0) {
+				animation_name = "Right";
+			}
+			if (directional_input.x < 0) {
+				animation_name = "Left";
+			}
+			if (directional_input.y > 0) {
+				animation_name = "Down";
+			}
+			if (directional_input.y < 0) {
+				animation_name = "Up";
+			}
+			if (!m_player.sprite.animation_is_playing()) {
+				m_player.sprite.set_animation_frame(1);
+			}
 			m_player.sprite.set_animation(&game->resources, animation_name);
 			m_player.sprite.start_animation(Time::now());
+
 		} else {
+			m_player.sprite.set_animation_frame(0);
 			m_player.sprite.stop_animation();
 		}
 	}

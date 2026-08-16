@@ -22,8 +22,10 @@ struct AnimatedSprite {
 	AnimationPlayer<int> frame_animation;
 
 	void set_animation(ResourceManager* resources, std::string animation_name);
+	void set_animation_frame(int frame);
 	void start_animation(Time time_now);
 	void stop_animation();
 	void update_animation(Time time_now);
+	bool animation_is_playing() const;
 	void draw(const ResourceManager& resources, Vector2 position) const;
 };
