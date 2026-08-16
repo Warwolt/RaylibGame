@@ -1,4 +1,4 @@
-#include "game/resource.h"
+#include "game/resource/resource.h"
 
 #include "core/debug/logging.h"
 

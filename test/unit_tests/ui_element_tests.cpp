@@ -1,6 +1,6 @@
 #include "game/ui/element.h"
 
-#include "game/resource.h"
+#include "game/resource/resource.h"
 
 #include <gtest/gtest.h>
 #include <raylib.h>

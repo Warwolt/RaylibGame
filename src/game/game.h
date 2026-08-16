@@ -2,7 +2,7 @@
 
 #include "core/util/tracked.h"
 #include "game/debug_overlay.h"
-#include "game/resource.h"
+#include "game/resource/resource.h"
 #include "game/scene/scene.h"
 #include "hot_reload.h"
 #include "platform/input.h"

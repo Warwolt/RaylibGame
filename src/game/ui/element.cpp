@@ -3,7 +3,7 @@
 #include "core/debug/assert.h"
 #include "core/debug/profiling.h"
 #include "core/util.h"
-#include "game/resource.h"
+#include "game/resource/resource.h"
 #include "platform/input.h"
 
 #include <algorithm>
