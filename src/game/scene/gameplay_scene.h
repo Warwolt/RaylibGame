@@ -1,6 +1,5 @@
 #pragma once
 
-#include "game/animation.h"
 #include "game/resource/resource_id.h"
 #include "game/resource/sprite_sheet.h"
 #include "game/ui/user_interface.h"
