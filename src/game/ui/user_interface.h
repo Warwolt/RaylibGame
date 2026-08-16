@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/resource.h"
+#include "game/resource/resource.h"
 #include "game/ui/element.h"
 #include "game/ui/tree.h"
 

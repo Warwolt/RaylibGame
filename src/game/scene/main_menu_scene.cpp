@@ -4,7 +4,7 @@
 #include "core/debug/profiling.h"
 
 #include "game/game.h"
-#include "game/resource.h"
+#include "game/resource/resource.h"
 #include "game/scene/scene_id.h"
 #include "game/ui/user_interface.h"
 
