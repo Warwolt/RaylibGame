@@ -7,8 +7,6 @@
 
 #include <raymath.h>
 
-using namespace std::chrono_literals;
-
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
