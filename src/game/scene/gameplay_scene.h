@@ -1,22 +1,13 @@
 #pragma once
 
 #include "game/animation.h"
+#include "game/resource/sprite_sheet.h"
 #include "game/resource_id.h"
 #include "game/ui/user_interface.h"
 
 #include <raylib.h>
 
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 struct Game;
-
-struct SpriteSheet {
-	ImageID image;
-	std::vector<Rectangle> frames;
-	std::unordered_map<std::string, Animation<int>> animations;
-};
 
 class GameplayScene {
 public:
@@ -33,7 +24,7 @@ private:
 
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
-		SpriteSheet sprite_sheet;
+		SpriteSheet sprite_sheet; // FIXME: replace with SpriteSheetID
 		AnimationPlayer<int> sprite_animation;
 	};
 
