@@ -40,6 +40,7 @@ void GameplayScene::initialize(Game* game) {
 		{ Direction::Down, "Down" },
 		{ Direction::Right, "Right" },
 	};
+	m_player.sprite.set_animation(game->resources, m_player.direction_animation[Direction::Down]);
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -186,7 +187,7 @@ void GameplayScene::_update_gameplay(Game* game) {
 			if (!m_player.sprite.animation_is_playing()) {
 				m_player.sprite.set_animation_frame(1);
 			}
-			m_player.sprite.set_animation(&game->resources, m_player.direction_animation[m_player.direction]);
+			m_player.sprite.set_animation(game->resources, m_player.direction_animation[m_player.direction]);
 			m_player.sprite.start_animation(Time::now());
 		} else {
 			m_player.sprite.set_animation_frame(0);

@@ -21,7 +21,7 @@ struct AnimatedSprite {
 	SpriteSheetID sprite_sheet_id;
 	AnimationPlayer<int> frame_animation;
 
-	void set_animation(ResourceManager* resources, std::string animation_name);
+	void set_animation(const ResourceManager& resources, std::string animation_name);
 	void set_animation_frame(int frame);
 	void start_animation(Time time_now);
 	void stop_animation();
