@@ -18,26 +18,11 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-	m_player.sprite_sheet.image = game->resources.load_image("resource/image/walk_animation.png").value();
-	// clang-format off
-	m_player.sprite_sheet.frames = {
-		{ 0, 0, 16, 16 },
-		{ 16, 0, 16, 16 },
-		{ 32, 0, 16, 16 },
-		{ 48, 0, 16, 16 },
-		{ 64, 0, 16, 16 },
-		{ 80, 0, 16, 16 },
-		{ 96, 0, 16, 16 },
-		{ 112, 0, 16, 16 },
-	};
-	m_player.sprite_sheet.animations = {
-		{ "Left", { { 0, 250ms }, { 1, 250ms } } },
-		{ "Right", { { 2, 250ms }, { 3, 250ms } } },
-		{ "Down", { { 4, 250ms }, { 5, 250ms } } },
-		{ "Up", { { 6, 250ms }, { 7, 250ms } } },
-	};
-	// clang-format on
-	m_player.sprite_animation.set_animation(m_player.sprite_sheet.animations["Right"]);
+	const char* image_path = "resource/image/walk_animation.png";
+	const char* json_path = "resource/image/walk_animation.json";
+	m_player.sprite_sheet = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
+	const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite_sheet);
+	m_player.sprite_animation.set_animation(sprite_sheet.animations.at("Right"));
 	m_player.position = ROOM_SIZE / 2.0;
 }
 
@@ -173,7 +158,8 @@ void GameplayScene::_update_gameplay(Game* game) {
 			animation_name = "Up";
 		}
 		if (directional_input != Vector2 { 0, 0 }) {
-			m_player.sprite_animation.set_animation(m_player.sprite_sheet.animations[animation_name]);
+			const SpriteSheet& sprite_sheet = game->resources.get_sprite_sheet(m_player.sprite_sheet);
+			m_player.sprite_animation.set_animation(sprite_sheet.animations.at(animation_name));
 			m_player.sprite_animation.start(Time::now());
 		} else {
 			m_player.sprite_animation.stop();
@@ -206,8 +192,9 @@ void GameplayScene::render(const Game& game) const {
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
 
 		const int frame = m_player.sprite_animation.value(Time::now());
-		const Rectangle frame_source = m_player.sprite_sheet.frames[frame];
-		Raylib_DrawTextureRec(game.resources.get_image(m_player.sprite_sheet.image), frame_source, player_top_left, WHITE);
+		const SpriteSheet& sprite_sheet = game.resources.get_sprite_sheet(m_player.sprite_sheet);
+		const Rectangle frame_source = sprite_sheet.frames[frame];
+		Raylib_DrawTextureRec(game.resources.get_image(sprite_sheet.image), frame_source, player_top_left, WHITE);
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();

@@ -5,7 +5,6 @@
 #include "game/resource/sprite_sheet.h"
 #include "game/ui/user_interface.h"
 
-
 #include <raylib.h>
 
 struct Game;
@@ -25,7 +24,7 @@ private:
 
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
-		SpriteSheet sprite_sheet; // FIXME: replace with SpriteSheetID
+		SpriteSheetID sprite_sheet;
 		AnimationPlayer<int> sprite_animation;
 	};
 

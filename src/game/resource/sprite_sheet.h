@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game/resource/resource_id.h"
+#include "game/animation.h"
 
 #include <raylib.h>
 
