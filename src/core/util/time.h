@@ -3,8 +3,9 @@
 #include <chrono>
 
 struct Time {
-	std::chrono::nanoseconds value;
+	std::chrono::nanoseconds value { 0 };
 	static Time now(); // since epoch
+	static Time zero();
 	Time() = default;
 	Time(std::chrono::nanoseconds ns);
 	Time(std::chrono::milliseconds ms);

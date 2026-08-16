@@ -7,6 +7,10 @@ void AnimatedSprite::set_animation(ResourceManager* resources, std::string anima
 	this->frame_animation.set_animation(sprite_sheet.animations.at(animation_name));
 }
 
+void AnimatedSprite::set_animation_frame(int frame) {
+	this->frame_animation.set_frame(frame);
+}
+
 void AnimatedSprite::start_animation(Time time_now) {
 	this->frame_animation.start(time_now);
 }
@@ -15,8 +19,16 @@ void AnimatedSprite::stop_animation() {
 	this->frame_animation.stop();
 }
 
-void AnimatedSprite::draw(const ResourceManager& resources, Vector2 position, Time time_now) const {
-	const int frame = this->frame_animation.value(time_now);
+void AnimatedSprite::update_animation(Time time_now) {
+	this->frame_animation.update(time_now);
+}
+
+bool AnimatedSprite::animation_is_playing() const {
+	return this->frame_animation.is_playing();
+}
+
+void AnimatedSprite::draw(const ResourceManager& resources, Vector2 position) const {
+	const int frame = this->frame_animation.value();
 	const SpriteSheet& sprite_sheet = resources.get_sprite_sheet(this->sprite_sheet_id);
 	const Rectangle source_rect = sprite_sheet.frames[frame];
 	Raylib_DrawTextureRec(resources.get_image(sprite_sheet.image_id), source_rect, position, WHITE);
