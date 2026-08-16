@@ -8,6 +8,13 @@
 
 struct Game;
 
+enum class Direction {
+	Up,
+	Left,
+	Down,
+	Right,
+};
+
 class GameplayScene {
 public:
 	void initialize(Game* game);
@@ -24,6 +31,8 @@ private:
 	struct Player {
 		Vector2 position = { 0, 0 }; // relative center of player
 		AnimatedSprite sprite;
+		Direction direction;
+		std::vector<Direction> direction_stack;
 	};
 
 	bool m_game_paused = false;

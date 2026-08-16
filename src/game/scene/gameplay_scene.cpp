@@ -135,36 +135,35 @@ void GameplayScene::_update_gameplay(Game* game) {
 	/* Allow player to move as long as camera isn't moving */
 	const bool camera_is_moving = camera_target_delta != Vector2 { 0, 0 };
 	if (!camera_is_moving) {
+		/* Input direction */
+		struct InputMapping {
+			InputAction action;
+			Direction direction;
+		};
+		std::array<InputMapping, 4> input_mappings = { {
+			{ InputAction::ACTION_UP, Direction::Up },
+			{ InputAction::ACTION_LEFT, Direction::Left },
+			{ InputAction::ACTION_DOWN, Direction::Down },
+			{ InputAction::ACTION_RIGHT, Direction::Right },
+		} };
+		for (const auto& [action, direction] : input_mappings) {
+			if (game->input.action_pressed(action)) {
+				m_player.direction_stack.push_back(direction);
+			}
+			if (game->input.action_released(action)) {
+				std::erase(m_player.direction_stack, direction);
+			}
+		}
+		if (!m_player.direction_stack.empty()) {
+			m_player.direction = m_player.direction_stack.back();
+		}
+		LOG_DEBUG("%d", m_player.direction);
+
 		/* Move player */
-		const Vector2 directional_input = game->input.directional_input();
-		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-		m_player.position += delta_speed * directional_input;
+		// const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
+		// m_player.position += delta_speed * directional_input;
 
 		/* Update animation */
-		if (directional_input != Vector2 { 0, 0 }) {
-			std::string animation_name;
-			if (directional_input.x > 0) {
-				animation_name = "Right";
-			}
-			if (directional_input.x < 0) {
-				animation_name = "Left";
-			}
-			if (directional_input.y > 0) {
-				animation_name = "Down";
-			}
-			if (directional_input.y < 0) {
-				animation_name = "Up";
-			}
-			if (!m_player.sprite.animation_is_playing()) {
-				m_player.sprite.set_animation_frame(1);
-			}
-			m_player.sprite.set_animation(&game->resources, animation_name);
-			m_player.sprite.start_animation(Time::now());
-
-		} else {
-			m_player.sprite.set_animation_frame(0);
-			m_player.sprite.stop_animation();
-		}
 	}
 
 	m_player.sprite.update_animation(Time::now());

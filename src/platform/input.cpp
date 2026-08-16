@@ -222,7 +222,7 @@ void read_input(Input* input, const Window& window) {
 		for (int i = 0; i < 6; i++) {
 			const ButtonState state = read_mouse_button(i);
 			input->mouse_buttons[(MouseButton)i] = state;
-			any_mouse_button_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
+			any_mouse_button_pressed |= state != ButtonState::Up;
 		}
 
 		const bool mouse_has_moved = Raylib_GetMouseDelta() != Vector2 { 0, 0 };
@@ -237,7 +237,7 @@ void read_input(Input* input, const Window& window) {
 		for (int i = 0; i < 336; i++) {
 			const ButtonState state = read_keyboard_key(i);
 			input->keyboard_keys[(KeyboardKey)i] = state;
-			any_keyboard_key_pressed |= (state == ButtonState::Pressed || state == ButtonState::Down);
+			any_keyboard_key_pressed |= state != ButtonState::Up;
 		}
 		if (any_keyboard_key_pressed) {
 			input->last_input_type = InputType::Keyboard;
