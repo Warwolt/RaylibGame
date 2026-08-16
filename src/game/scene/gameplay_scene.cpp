@@ -16,9 +16,11 @@ constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
 	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
-	m_images.knight_sprite_sheet = game->resources.load_image("resource/image/walk_animation.png").value();
-
-	m_player_position = ROOM_SIZE / 2.0;
+	const char* image_path = "resource/image/walk_animation.png";
+	const char* json_path = "resource/image/walk_animation.json";
+	m_player.sprite.sprite_sheet_id = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
+	m_player.sprite.set_animation(&game->resources, "Right");
+	m_player.position = ROOM_SIZE / 2.0;
 }
 
 void GameplayScene::deinitialize(Game* /*game*/) {
@@ -83,8 +85,8 @@ void GameplayScene::_update_gameplay(Game* game) {
 
 	/* Camera should show the current room player is in */
 	const Vector2 player_room_position = {
-		.x = ROOM_SIZE.x * std::floor(m_player_position.x / ROOM_SIZE.x),
-		.y = ROOM_SIZE.y * std::floor(m_player_position.y / ROOM_SIZE.y),
+		.x = ROOM_SIZE.x * std::floor(m_player.position.x / ROOM_SIZE.x),
+		.y = ROOM_SIZE.y * std::floor(m_player.position.y / ROOM_SIZE.y),
 	};
 	const Vector2 camera_target_delta = player_room_position - m_camera_position;
 	const bool should_move_camera = m_camera_position != player_room_position;
@@ -102,30 +104,30 @@ void GameplayScene::_update_gameplay(Game* game) {
 		const bool camera_moving_up = camera_target_delta.y < 0;
 		if (camera_moving_right) {
 			const float camera_left = m_camera_position.x;
-			const float player_left = m_player_position.x - PLAYER_SIZE.x / 2;
+			const float player_left = m_player.position.x - PLAYER_SIZE.x / 2;
 			if (camera_left >= player_left) {
-				m_player_position.x = camera_left + PLAYER_SIZE.x / 2;
+				m_player.position.x = camera_left + PLAYER_SIZE.x / 2;
 			}
 		}
 		if (camera_moving_left) {
 			const float camera_right = m_camera_position.x + ROOM_SIZE.x;
-			const float player_right = m_player_position.x + PLAYER_SIZE.x / 2;
+			const float player_right = m_player.position.x + PLAYER_SIZE.x / 2;
 			if (camera_right <= player_right) {
-				m_player_position.x = camera_right - PLAYER_SIZE.x / 2;
+				m_player.position.x = camera_right - PLAYER_SIZE.x / 2;
 			}
 		}
 		if (camera_moving_down) {
 			const float camera_top = m_camera_position.y;
-			const float player_top = m_player_position.y - PLAYER_SIZE.x / 2;
+			const float player_top = m_player.position.y - PLAYER_SIZE.x / 2;
 			if (camera_top >= player_top) {
-				m_player_position.y = camera_top + PLAYER_SIZE.y / 2;
+				m_player.position.y = camera_top + PLAYER_SIZE.y / 2;
 			}
 		}
 		if (camera_moving_up) {
 			const float camera_bottom = m_camera_position.y + ROOM_SIZE.y;
-			const float player_bottom = m_player_position.y + PLAYER_SIZE.x / 2;
+			const float player_bottom = m_player.position.y + PLAYER_SIZE.x / 2;
 			if (camera_bottom <= player_bottom) {
-				m_player_position.y = camera_bottom - PLAYER_SIZE.y / 2;
+				m_player.position.y = camera_bottom - PLAYER_SIZE.y / 2;
 			}
 		}
 	}
@@ -133,22 +135,30 @@ void GameplayScene::_update_gameplay(Game* game) {
 	/* Allow player to move as long as camera isn't moving */
 	const bool camera_is_moving = camera_target_delta != Vector2 { 0, 0 };
 	if (!camera_is_moving) {
+		/* Move player */
 		const Vector2 directional_input = game->input.directional_input();
 		const float delta_speed = game->input.time_delta.in_seconds() * PLAYER_SPEED;
-		m_player_position += delta_speed * directional_input;
-		m_player_is_moving = directional_input != Vector2 { 0, 0 };
+		m_player.position += delta_speed * directional_input;
 
+		/* Update animation */
+		std::string animation_name;
 		if (directional_input.x > 0) {
-			m_player_direction = Direction::Right;
+			animation_name = "Right";
 		}
 		if (directional_input.x < 0) {
-			m_player_direction = Direction::Left;
+			animation_name = "Left";
 		}
 		if (directional_input.y > 0) {
-			m_player_direction = Direction::Down;
+			animation_name = "Down";
 		}
 		if (directional_input.y < 0) {
-			m_player_direction = Direction::Up;
+			animation_name = "Up";
+		}
+		if (directional_input != Vector2 { 0, 0 }) {
+			m_player.sprite.set_animation(&game->resources, animation_name);
+			m_player.sprite.start_animation(Time::now());
+		} else {
+			m_player.sprite.stop_animation();
 		}
 	}
 }
@@ -172,44 +182,11 @@ void GameplayScene::render(const Game& game) const {
 
 		/* Player */
 		const Vector2 player_pixel_position = {
-			.x = std::round(m_player_position.x),
-			.y = std::round(m_player_position.y),
+			.x = std::round(m_player.position.x),
+			.y = std::round(m_player.position.y),
 		};
 		const Vector2 player_top_left = player_pixel_position - PLAYER_SIZE / 2.0f;
-
-		// FIXME: we need some lightweight spritesheet animation system
-		//
-		// Spec:
-		// When walking we should animate the player character
-		// Walk animation should start from frame with legs apart
-		// When idle frame with legs standing still should be used
-		//
-		// API:
-		// Load sprite sheet.
-		// Define animation (frames in sheet + duration of frames).
-		// Start animation.
-		// Stop animation.
-		// Set current frame.
-		// Flip horizontally.
-		//
-		const bool flip_horizontal = m_player_direction == Direction::Left;
-		const float period = 0.4f; // seconds
-		const int animation_index = m_player_is_moving ? (std::fmod(game.input.time_now.in_seconds(), period) < period / 2.0f ? 0 : 1) : 1;
-		int frame = 0;
-		switch (m_player_direction) {
-			case Direction::Left:
-			case Direction::Right:
-				frame = animation_index + 0;
-				break;
-			case Direction::Down:
-				frame = animation_index + 2;
-				break;
-			case Direction::Up:
-				frame = animation_index + 4;
-				break;
-		}
-		const Rectangle sprite_sheet_index = { frame * 16, 0, (flip_horizontal ? -1.0f : 1.0) * 16, 16 };
-		Raylib_DrawTextureRec(game.resources.get_image(m_images.knight_sprite_sheet), sprite_sheet_index, player_top_left, WHITE);
+		m_player.sprite.draw(game.resources, player_top_left, Time::now());
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();

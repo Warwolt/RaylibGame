@@ -1,18 +1,12 @@
 #pragma once
 
 #include "game/resource/resource_id.h"
+#include "game/resource/sprite_sheet.h"
 #include "game/ui/user_interface.h"
 
 #include <raylib.h>
 
 struct Game;
-
-enum class Direction {
-	Up,
-	Left,
-	Down,
-	Right,
-};
 
 class GameplayScene {
 public:
@@ -25,15 +19,17 @@ public:
 private:
 	struct Images {
 		ImageID level_background;
-		ImageID knight_sprite_sheet;
 	} m_images;
+
+	struct Player {
+		Vector2 position = { 0, 0 }; // relative center of player
+		AnimatedSprite sprite;
+	};
 
 	bool m_game_paused = false;
 	ui::UserInterface m_ui;
-	Vector2 m_player_position = { 0, 0 }; // relative center of player
+	Player m_player;
 	Vector2 m_camera_position = { 0, 0 }; // relative top left of viewport
-	Direction m_player_direction = Direction::Right;
-	bool m_player_is_moving = false;
 
 	void _update_pause_menu(Game* game);
 	void _update_gameplay(Game* game);

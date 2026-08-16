@@ -12,12 +12,15 @@ struct FontID {
 
 struct ImageID {
 	int value = 0;
-
 	bool operator==(const ImageID& rhs) const = default;
+};
+
+struct SpriteSheetID {
+	int value = 0;
+	bool operator==(const SpriteSheetID& rhs) const = default;
 };
 
 struct SoundID {
 	int value = 0;
-
 	bool operator==(const SoundID& rhs) const = default;
 };
