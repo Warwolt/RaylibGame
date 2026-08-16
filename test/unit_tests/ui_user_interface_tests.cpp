@@ -2,7 +2,7 @@
 
 #include "game/ui/user_interface.h"
 
-#include "game/resource.h"
+#include "game/resource/resource.h"
 
 #pragma region layout
 

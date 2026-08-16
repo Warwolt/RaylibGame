@@ -2,7 +2,7 @@
 
 #include "game/ui/tree.h"
 
-#include "game/resource.h"
+#include "game/resource/resource.h"
 
 ui::Tree enumerated_tree() {
 	ui::Tree tree;
