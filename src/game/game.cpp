@@ -8,8 +8,8 @@
 #include <raymath.h>
 
 // low resolution 16:9
-constexpr int SCREEN_WIDTH = 256;
-constexpr int SCREEN_HEIGHT = 144;
+constexpr int SCREEN_WIDTH = 384;
+constexpr int SCREEN_HEIGHT = 216;
 constexpr char SCREEN_TITLE[] = "Video Game";
 
 Game* Game_initialize(int argc, char** argv) {

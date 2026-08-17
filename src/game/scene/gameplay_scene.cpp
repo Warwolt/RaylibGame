@@ -10,8 +10,9 @@
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
-constexpr Vector2 ROOM_SIZE = { 256, 128 };
-constexpr int CAMERA_SPEED = 1 * ROOM_SIZE.x; // pixels per second
+constexpr int TILE_SIZE = 16;
+constexpr Vector2 ROOM_SIZE = { 16 * TILE_SIZE, 12 * TILE_SIZE };
+constexpr int CAMERA_SPEED = 1.5 * ROOM_SIZE.x; // pixels per second
 
 Vector2 direction_to_vector2(Direction direction) {
 	switch (direction) {
@@ -29,7 +30,8 @@ Vector2 direction_to_vector2(Direction direction) {
 
 void GameplayScene::initialize(Game* game) {
 	m_ui.initialize(game);
-	m_images.level_background = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+	m_images.level_mockup = game->resources.load_image("resource/level/zelda_dungeon.png").value();
+	m_images.hud_mockup = game->resources.load_image("resource/image/hud_mockup.png").value();
 	const char* image_path = "resource/image/walk_animation.png";
 	const char* json_path = "resource/image/walk_animation.json";
 	m_player.sprite.sprite_sheet_id = game->resources.load_aseprite_sprite_sheet(image_path, json_path).value();
@@ -202,8 +204,11 @@ void GameplayScene::render(const Game& game) const {
 	PROFILING_SCOPE();
 	Raylib_ClearBackground(Color { 0, 0, 0, 255 });
 
+	/* HUD*/
+	Raylib_DrawTexture(game.resources.get_image(m_images.hud_mockup), 0, 0, WHITE);
+
 	/* Play area viewport */
-	const Vector2 camera_offset = { 0, 16 };
+	const Vector2 camera_offset = { 96, 12 };
 	const Camera2D camera = {
 		.offset = camera_offset,
 		.target = m_camera_position,
@@ -213,7 +218,7 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_BeginScissorMode(camera_offset.x, camera_offset.y, ROOM_SIZE.x, ROOM_SIZE.y);
 	{
 		/* Level */
-		Raylib_DrawTexture(game.resources.get_image(m_images.level_background), 0, 0, WHITE);
+		Raylib_DrawTexture(game.resources.get_image(m_images.level_mockup), 0, 0, WHITE);
 
 		/* Player */
 		const Vector2 player_pixel_position = {
@@ -225,11 +230,6 @@ void GameplayScene::render(const Game& game) const {
 	}
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
-
-	/* HUD */
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Life: 8", { 4, -1 }, 16, 0, WHITE);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Mana: 4", { 4 + 56, -1 }, 16, 0, WHITE);
-	Raylib_DrawTextEx(game.resources.get_font(FontID::default_font()), "Gold: 255", { 4 + 56 + 4 + 56, -1 }, 16, 0, WHITE);
 
 	/* Render pause menu */
 	m_ui.draw(game.resources);
