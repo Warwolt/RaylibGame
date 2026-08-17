@@ -31,7 +31,8 @@ public:
 
 private:
 	struct Images {
-		ImageID level_background;
+		ImageID level_mockup;
+		ImageID hud_mockup;
 	} m_images;
 
 	struct Player {
