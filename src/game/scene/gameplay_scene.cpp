@@ -11,7 +11,7 @@ constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
 constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
 
 constexpr int TILE_SIZE = 16;
-constexpr Vector2 ROOM_SIZE = { 16 * TILE_SIZE, 12 * TILE_SIZE };
+constexpr Vector2 ROOM_SIZE = { 18 * TILE_SIZE, 12 * TILE_SIZE };
 constexpr int CAMERA_SPEED = 1.5 * ROOM_SIZE.x; // pixels per second
 
 Vector2 direction_to_vector2(Direction direction) {
@@ -208,7 +208,7 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_DrawTexture(game.resources.get_image(m_images.hud_mockup), 0, 0, WHITE);
 
 	/* Play area viewport */
-	const Vector2 camera_offset = { 96, 12 };
+	const Vector2 camera_offset = { 80, 12 };
 	const Camera2D camera = {
 		.offset = camera_offset,
 		.target = m_camera_position,
