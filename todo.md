@@ -1,7 +1,8 @@
 # TODO
 - Gameplay scene with basic camera + character movement
-- Hot reload resources (reload resource if file has changed? reload on F5?)
 - Add collisions to walls in level
+- Add transition between indoor / outdoor (outdoor uses full viewport size)
+- Hot reload resources (reload resource if file has changed? reload on F5?)
 
 # Done
 - Make box direction a style property instead of a content property
