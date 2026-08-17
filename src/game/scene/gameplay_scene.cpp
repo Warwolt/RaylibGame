@@ -74,6 +74,22 @@ void GameplayScene::_update_pause_menu(Game* game) {
 		.cross_alignment = ui::Alignment::Center,
 	};
 	const ui::Style menu_style = {
+			.position = ui::RelativePosition {
+				// HACK: shift pause menu to overlap with play area
+				// Raylib_BeginScissorMode doesn't seem to play nice when called
+				// when already inside another scissor mode.
+				//
+				// The UI code uses scissoring for text areas, which means we
+				// can't put a UI inside the gameplay viewport, since that
+				// viewport also uses scissoring.
+				//
+				// The fix for this would be to figure out some kind of
+				// scissoring stack, possibly based on the following:
+				// https://github.com/raysan5/raylib/issues/3695
+				// https://github.com/raysan5/raylib/pull/3702
+				.x = ui::Pixels(32),
+				.y = ui::Pixels(0),
+			},
 			.fit_content = true,
 			.padding = ui::Edges {
 				.top = 15,
@@ -231,6 +247,6 @@ void GameplayScene::render(const Game& game) const {
 	Raylib_EndScissorMode();
 	Raylib_EndMode2D();
 
-	/* Render pause menu */
+	/* Pause menu */
 	m_ui.draw(game.resources);
 }
