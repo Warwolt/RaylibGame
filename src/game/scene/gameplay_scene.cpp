@@ -8,7 +8,7 @@
 #include <raymath.h>
 
 constexpr Vector2 PLAYER_SIZE = { 16, 16 }; // pixels
-constexpr int PLAYER_SPEED = 4 * PLAYER_SIZE.x; // pixels per second
+constexpr int PLAYER_SPEED = 5 * PLAYER_SIZE.x; // pixels per second
 
 constexpr int TILE_SIZE = 16;
 constexpr Vector2 ROOM_SIZE = { 18 * TILE_SIZE, 12 * TILE_SIZE };
