@@ -62,7 +62,7 @@ void MainMenuScene::update(Game* game) {
 					.size = 32,
 				},
 			};
-			m_ui.text("Maze Explorer", menu_title_style);
+			m_ui.text("Burglary", menu_title_style);
 
 			/* Menu */
 			m_ui.menu_begin();
