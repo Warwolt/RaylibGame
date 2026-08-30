@@ -1,13 +1,14 @@
 #include "game/scene/scene.h"
 
 #include "game/game.h"
+#include "game/scene/debug_scene.h"
 #include "game/scene/gameplay_scene.h"
 #include "game/scene/main_menu_scene.h"
 #include "game/scene/scene_id.h"
 
 #include <variant>
 
-using SceneInstance = std::variant<MainMenuScene, GameplayScene>;
+using SceneInstance = std::variant<MainMenuScene, GameplayScene, DebugScene>;
 
 // Scene class implementing variant based polymorphism
 //
@@ -28,6 +29,10 @@ public:
 
 			case SceneID::Gameplay:
 				m_instance = GameplayScene();
+				break;
+
+			case SceneID::Debug:
+				m_instance = DebugScene();
 				break;
 		}
 	}

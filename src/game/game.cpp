@@ -15,9 +15,12 @@ constexpr char SCREEN_TITLE[] = "Video Game";
 Game* Game_initialize(int argc, char** argv) {
 	/* Parse command line */
 	bool start_fullscreen = true;
+	bool debug_mode = false;
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "--windowed") == 0) {
 			start_fullscreen = false;
+		} else if (strcmp(argv[i], "--debug") == 0) {
+			debug_mode = true;
 		} else {
 			LOG_ERROR("Unrecognized command: %s", argv[i]);
 		}
@@ -34,7 +37,11 @@ Game* Game_initialize(int argc, char** argv) {
 	Game* game = new Game {
 		.window = Window::initialize(SCREEN_WIDTH, SCREEN_HEIGHT),
 	};
-	game->scenes.queue_push_scene(SceneID::MainMenu);
+	if (debug_mode) {
+		game->scenes.queue_push_scene(SceneID::Debug);
+	} else {
+		game->scenes.queue_push_scene(SceneID::MainMenu);
+	}
 	game->scenes.run_queued_actions(game);
 	if (start_fullscreen) {
 		game->window.toggle_fullscreen();
