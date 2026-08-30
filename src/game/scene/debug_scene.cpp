@@ -20,6 +20,9 @@ static Rectangle vertex_rectangle(Vector2 vertex) {
 }
 
 void DebugScene::initialize(Game* /*game*/) {
+	m_line_segment.start = Vector2 { 384 / 4, 216 / 4 };
+	m_line_segment.end = Vector2 { 3 * 384 / 4, 3 * 216 / 4 };
+	m_vertex_states.resize(2);
 }
 
 void DebugScene::deinitialize(Game* /*game*/) {
@@ -30,19 +33,42 @@ void DebugScene::update(Game* game) {
 		game->scenes.queue_pop_scene();
 	}
 
-	m_line_segment.start = Vector2 { 384 / 4, 216 / 4 };
-	m_line_segment.end = Vector2 { 3 * 384 / 4, 3 * 216 / 4 };
+	for (int i = 0; i < 2; i++) {
+		Vector2& vertex = _line_segment_vertex(i);
+		VertexState& vertex_state = m_vertex_states[i];
+		const Rectangle vertex_box = vertex_rectangle(vertex);
 
-	const Rectangle start_vertex_box = vertex_rectangle(m_line_segment.start);
-	const Rectangle end_vertex_box = vertex_rectangle(m_line_segment.end);
-	m_start_hovered = Raylib_CheckCollisionPointRec(game->input.mouse_position, start_vertex_box);
-	m_end_hovered = Raylib_CheckCollisionPointRec(game->input.mouse_position, end_vertex_box);
+		vertex_state.is_hovered = Raylib_CheckCollisionPointRec(game->input.mouse_position, vertex_box);
+
+		if (vertex_state.is_hovered && game->input.left_mouse_button_pressed()) {
+			vertex_state.is_grabbed = true;
+		}
+		if (game->input.left_mouse_button_released()) {
+			vertex_state.is_grabbed = false;
+		}
+
+		if (vertex_state.is_grabbed) {
+			vertex = game->input.mouse_position;
+		}
+	}
 }
 
 void DebugScene::render(const Game& /*game*/) const {
-	const Rectangle start_vertex_box = vertex_rectangle(m_line_segment.start);
-	const Rectangle end_vertex_box = vertex_rectangle(m_line_segment.end);
+	// draw lines
 	Raylib_DrawLineV(m_line_segment.start, m_line_segment.end, GREEN);
-	Raylib_DrawRectangleLinesEx(start_vertex_box, 1, m_start_hovered ? YELLOW : GREEN);
-	Raylib_DrawRectangleLinesEx(end_vertex_box, 1, m_end_hovered ? YELLOW : GREEN);
+
+	// draw vertex boxes
+	for (int i = 0; i < 2; i++) {
+		const Vector2& vertex = _line_segment_vertex(i);
+		const bool vertex_is_active = m_vertex_states[i].is_hovered || m_vertex_states[i].is_grabbed;
+		Raylib_DrawRectangleLinesEx(vertex_rectangle(vertex), 1, vertex_is_active ? YELLOW : GREEN);
+	}
+}
+
+Vector2& DebugScene::_line_segment_vertex(int index) {
+	return index == 0 ? m_line_segment.start : m_line_segment.end;
+}
+
+const Vector2& DebugScene::_line_segment_vertex(int index) const {
+	return index == 0 ? m_line_segment.start : m_line_segment.end;
 }

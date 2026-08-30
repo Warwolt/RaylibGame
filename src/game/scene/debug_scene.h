@@ -9,6 +9,11 @@ struct LineSegment {
 	Vector2 end;
 };
 
+struct VertexState {
+	bool is_hovered = false;
+	bool is_grabbed = false;
+};
+
 class DebugScene {
 public:
 	void initialize(Game* game);
@@ -18,7 +23,9 @@ public:
 	void render(const Game& game) const;
 
 private:
+	Vector2& _line_segment_vertex(int index);
+	const Vector2& _line_segment_vertex(int index) const;
+
 	LineSegment m_line_segment;
-	bool m_start_hovered = false;
-	bool m_end_hovered = false;
+	std::vector<VertexState> m_vertex_states;
 };
