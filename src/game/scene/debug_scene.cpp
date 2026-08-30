@@ -20,9 +20,18 @@ static Rectangle vertex_rectangle(Vector2 vertex) {
 }
 
 void DebugScene::initialize(Game* /*game*/) {
-	m_line_segment.start = Vector2 { 384 / 4, 216 / 4 };
-	m_line_segment.end = Vector2 { 3 * 384 / 4, 3 * 216 / 4 };
-	m_vertex_states.resize(2);
+	m_line_segments = {
+		LineSegment {
+			.start = Vector2 { 384 / 4, 216 / 4 },
+			.end = Vector2 { 3 * 384 / 4, 3 * 216 / 4 },
+		},
+		LineSegment {
+			.start = Vector2 { 130, 120 },
+			.end = Vector2 { 250, 100 },
+		},
+	};
+
+	m_vertex_states.resize(2 * m_line_segments.size());
 }
 
 void DebugScene::deinitialize(Game* /*game*/) {
@@ -33,7 +42,7 @@ void DebugScene::update(Game* game) {
 		game->scenes.queue_pop_scene();
 	}
 
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < m_line_segments.size() * 2; i++) {
 		Vector2& vertex = _line_segment_vertex(i);
 		VertexState& vertex_state = m_vertex_states[i];
 		const Rectangle vertex_box = vertex_rectangle(vertex);
@@ -55,10 +64,12 @@ void DebugScene::update(Game* game) {
 
 void DebugScene::render(const Game& /*game*/) const {
 	// draw lines
-	Raylib_DrawLineV(m_line_segment.start, m_line_segment.end, GREEN);
+	for (const LineSegment& line_segment : m_line_segments) {
+		Raylib_DrawLineV(line_segment.start, line_segment.end, GREEN);
+	}
 
 	// draw vertex boxes
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < m_line_segments.size() * 2; i++) {
 		const Vector2& vertex = _line_segment_vertex(i);
 		const bool vertex_is_active = m_vertex_states[i].is_hovered || m_vertex_states[i].is_grabbed;
 		Raylib_DrawRectangleLinesEx(vertex_rectangle(vertex), 1, vertex_is_active ? YELLOW : GREEN);
@@ -66,9 +77,11 @@ void DebugScene::render(const Game& /*game*/) const {
 }
 
 Vector2& DebugScene::_line_segment_vertex(int index) {
-	return index == 0 ? m_line_segment.start : m_line_segment.end;
+	LineSegment& line_segment = m_line_segments[index / 2];
+	return index % 2 == 0 ? line_segment.start : line_segment.end;
 }
 
 const Vector2& DebugScene::_line_segment_vertex(int index) const {
-	return index == 0 ? m_line_segment.start : m_line_segment.end;
+	const LineSegment& line_segment = m_line_segments[index / 2];
+	return index % 2 == 0 ? line_segment.start : line_segment.end;
 }

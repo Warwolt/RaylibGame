@@ -26,6 +26,6 @@ private:
 	Vector2& _line_segment_vertex(int index);
 	const Vector2& _line_segment_vertex(int index) const;
 
-	LineSegment m_line_segment;
+	std::vector<LineSegment> m_line_segments;
 	std::vector<VertexState> m_vertex_states;
 };
