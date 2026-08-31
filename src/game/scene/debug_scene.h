@@ -2,6 +2,7 @@ struct Game;
 
 #include <raylib.h>
 
+#include <optional>
 #include <vector>
 
 struct LineSegment {
@@ -28,4 +29,5 @@ private:
 
 	std::vector<LineSegment> m_line_segments;
 	std::vector<VertexState> m_vertex_states;
+	std::optional<Vector2> m_intersection;
 };
