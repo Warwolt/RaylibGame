@@ -20,6 +20,10 @@ static Rectangle vertex_rectangle(Vector2 vertex) {
 	return centered_rectangle(Rectangle { 0, 0, VERTEX_SIZE, VERTEX_SIZE }, vertex);
 }
 
+static Vector2 Vector2Orthogonal(Vector2 v) {
+	return Vector2 { -v.y, v.x };
+}
+
 void DebugScene::initialize(Game* /*game*/) {
 	m_line_segments = {
 		LineSegment {
@@ -66,25 +70,16 @@ void DebugScene::update(Game* game) {
 	/* Compute intersections */
 	{
 		m_intersection = {};
-		const float x1 = m_line_segments[0].start.x;
-		const float y1 = m_line_segments[0].start.y;
-		const float x2 = m_line_segments[0].end.x;
-		const float y2 = m_line_segments[0].end.y;
-		const float x3 = m_line_segments[1].start.x;
-		const float y3 = m_line_segments[1].start.y;
-		const float x4 = m_line_segments[1].end.x;
-		const float y4 = m_line_segments[1].end.y;
-		const float t_denominator = (x2 - x1) * (y3 - y4) + (y2 - y1) * (x4 - x3);
-		const float u_denominator = (x4 - x3) * (y1 - y2) + (y4 - y3) * (x2 - x1);
-		if (t_denominator != 0 && u_denominator != 0) {
-			const float t_numerator = (x3 - x1) * (y3 - y4) + (y3 - y1) * (x4 - x3);
-			const float u_numerator = (x1 - x3) * (y1 - y2) + (y1 - y3) * (x2 - x1);
-			const float t = t_numerator / t_denominator;
-			const float u = u_numerator / u_denominator;
-			if (0.0f <= t && t <= 1.0f && 0.0f <= u && u <= 1.0f) {
-				const LineSegment& segment = m_line_segments[0];
-				m_intersection = segment.start + t * (segment.end - segment.start);
-			}
+		const Vector2 delta_a = m_line_segments[0].end - m_line_segments[0].start;
+		const Vector2 delta_b = m_line_segments[1].end - m_line_segments[1].start;
+		const Vector2 delta_a_orthogonal = Vector2Orthogonal(delta_a);
+		const Vector2 delta_b_orthogonal = Vector2Orthogonal(delta_b);
+		const Vector2 delta_ab = m_line_segments[1].start - m_line_segments[0].start;
+		const Vector2 delta_ba = m_line_segments[0].start - m_line_segments[1].start;
+		const float t = Vector2DotProduct(delta_ab, delta_b_orthogonal) / Vector2DotProduct(delta_a, delta_b_orthogonal);
+		const float u = Vector2DotProduct(delta_ba, delta_a_orthogonal) / Vector2DotProduct(delta_b, delta_a_orthogonal);
+		if (0.0f <= t && t <= 1.0f && 0.0f <= u && u <= 1.0f) {
+			m_intersection = m_line_segments[0].start + t * delta_a;
 		}
 	}
 }
