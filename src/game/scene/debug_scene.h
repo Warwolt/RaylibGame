@@ -7,11 +7,6 @@ struct Game;
 #include <optional>
 #include <vector>
 
-struct VertexState {
-	bool is_hovered = false;
-	bool is_grabbed = false;
-};
-
 class DebugScene {
 public:
 	void initialize(Game* game);
@@ -21,10 +16,5 @@ public:
 	void render(const Game& game) const;
 
 private:
-	Vector2& _line_segment_vertex(int index);
-	const Vector2& _line_segment_vertex(int index) const;
-
-	std::vector<LineSegment> m_line_segments;
-	std::vector<VertexState> m_vertex_states;
-	std::vector<Vector2> m_intersections;
+	std::vector<Rectangle> m_rectangles;
 };
