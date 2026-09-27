@@ -1,14 +1,11 @@
 struct Game;
 
+#include "game/physics.h"
+
 #include <raylib.h>
 
 #include <optional>
 #include <vector>
-
-struct LineSegment {
-	Vector2 start;
-	Vector2 end;
-};
 
 struct VertexState {
 	bool is_hovered = false;

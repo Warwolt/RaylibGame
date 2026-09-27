@@ -39,6 +39,7 @@ set(SRC
     src/core/util/time.cpp
     src/game/debug_overlay.cpp
     src/game/game.cpp
+    src/game/physics.cpp
     src/game/resource/resource.cpp
     src/game/resource/sprite_sheet.cpp
     src/game/scene/debug_scene.cpp
