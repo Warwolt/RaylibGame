@@ -30,6 +30,10 @@ void DebugScene::initialize(Game* /*game*/) {
 			.start = Vector2 { 130, 120 },
 			.end = Vector2 { 250, 100 },
 		},
+		LineSegment {
+			.start = Vector2 { 150, 50 },
+			.end = Vector2 { 180, 150 },
+		},
 	};
 	m_vertex_states.resize(2 * m_line_segments.size());
 }
@@ -43,7 +47,7 @@ void DebugScene::update(Game* game) {
 		game->scenes.queue_pop_scene();
 	}
 
-	/* Grab line segments */
+	/* Grab line segments with mouse button */
 	for (int i = 0; i < m_line_segments.size() * 2; i++) {
 		Vector2& vertex = _line_segment_vertex(i);
 		VertexState& vertex_state = m_vertex_states[i];
@@ -78,7 +82,14 @@ void DebugScene::update(Game* game) {
 	// 		- Releasing LMB moves first rectangle onto its resolved position
 
 	/* Compute intersections */
-	m_intersection = segment_segment_intersection(m_line_segments[0], m_line_segments[1]);
+	m_intersections.clear();
+	for (int i = 0; i < m_line_segments.size(); i++) {
+		for (int j = i; j < m_line_segments.size(); j++) {
+			if (std::optional<Vector2> intersection = segment_segment_intersection(m_line_segments[i], m_line_segments[j])) {
+				m_intersections.push_back(*intersection);
+			}
+		}
+	}
 }
 
 void DebugScene::render(const Game& /*game*/) const {
@@ -95,9 +106,9 @@ void DebugScene::render(const Game& /*game*/) const {
 	}
 
 	// draw intersections
-	if (m_intersection.has_value()) {
-		Raylib_DrawPixelV(*m_intersection, RED);
-		Raylib_DrawRectangleLinesEx(rectangle_centered_on_vertex(*m_intersection), 1, RED);
+	for (const Vector2& intersection : m_intersections) {
+		Raylib_DrawPixelV(intersection, RED);
+		Raylib_DrawRectangleLinesEx(rectangle_centered_on_vertex(intersection), 1, RED);
 	}
 }
 
