@@ -22,7 +22,7 @@ public:
 	static void SetUpTestSuite() {
 		Raylib_SetTraceLogLevel(LOG_WARNING);
 		Raylib_SetConfigFlags(FLAG_WINDOW_HIDDEN);
-		Raylib_InitWindow(1, 1, "Unit Test");
+		Raylib_InitWindow(1, 1, "Snapshot Test");
 		m_resources.load_default_font("resource/font/8bitoperator_jve.ttf");
 		m_big_test_image = m_resources.load_image("resource/image/test/utah_teapot_1000_818.png").value();
 		m_small_test_image = m_resources.load_image("resource/image/test/chess_board_145_145.png").value();
