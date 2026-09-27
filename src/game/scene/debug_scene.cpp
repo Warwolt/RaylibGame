@@ -16,7 +16,7 @@ static Rectangle centered_rectangle(Rectangle rect, Vector2 center) {
 	};
 }
 
-static Rectangle vertex_rectangle(Vector2 vertex) {
+static Rectangle rectangle_centered_on_vertex(Vector2 vertex) {
 	return centered_rectangle(Rectangle { 0, 0, VERTEX_SIZE, VERTEX_SIZE }, vertex);
 }
 
@@ -79,7 +79,7 @@ void DebugScene::update(Game* game) {
 	for (int i = 0; i < m_line_segments.size() * 2; i++) {
 		Vector2& vertex = _line_segment_vertex(i);
 		VertexState& vertex_state = m_vertex_states[i];
-		const Rectangle vertex_box = vertex_rectangle(vertex);
+		const Rectangle vertex_box = rectangle_centered_on_vertex(vertex);
 
 		vertex_state.is_hovered = Raylib_CheckCollisionPointRec(game->input.mouse_position, vertex_box);
 
@@ -123,13 +123,13 @@ void DebugScene::render(const Game& /*game*/) const {
 	for (int i = 0; i < m_line_segments.size() * 2; i++) {
 		const Vector2& vertex = _line_segment_vertex(i);
 		const bool vertex_is_active = m_vertex_states[i].is_hovered || m_vertex_states[i].is_grabbed;
-		Raylib_DrawRectangleLinesEx(vertex_rectangle(vertex), 1, vertex_is_active ? YELLOW : GREEN);
+		Raylib_DrawRectangleLinesEx(rectangle_centered_on_vertex(vertex), 1, vertex_is_active ? YELLOW : GREEN);
 	}
 
 	// draw intersections
 	if (m_intersection.has_value()) {
 		Raylib_DrawPixelV(*m_intersection, RED);
-		Raylib_DrawRectangleLinesEx(vertex_rectangle(*m_intersection), 1, RED);
+		Raylib_DrawRectangleLinesEx(rectangle_centered_on_vertex(*m_intersection), 1, RED);
 	}
 }
 
