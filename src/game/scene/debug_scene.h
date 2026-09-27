@@ -24,5 +24,5 @@ private:
 	std::vector<Rectangle> m_rectangles;
 	std::vector<InteractionState> m_rectangle_states;
 	std::optional<Vector2> m_delta_start;
-	std::optional<Vector2> m_delta_end;
+	std::optional<size_t> m_selected_rectangle_index;
 };

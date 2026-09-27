@@ -4,6 +4,9 @@
 
 #include <raymath.h>
 
+#include "core/debug/assert.h"
+#include "core/debug/logging.h"
+
 void DebugScene::initialize(Game* /*game*/) {
 	m_rectangles = {
 		Rectangle { 100, 100, 50, 50 },
@@ -22,18 +25,43 @@ void DebugScene::update(Game* game) {
 	}
 
 	/* Rectangle interactivity */
-	bool some_rectangle_is_hovered = false;
+	const std::optional<size_t> selected_rectangle_index = m_selected_rectangle_index; // GROSS HACK YUCK
+	bool some_rectangle_is_active = false;
 	for (size_t i = 0; i < m_rectangles.size(); i++) {
 		const Rectangle& rectangle = m_rectangles[i];
 		InteractionState& rectangle_state = m_rectangle_states[i];
 		rectangle_state.is_hovered = Raylib_CheckCollisionPointRec(game->input.mouse_position, rectangle);
-		some_rectangle_is_hovered |= rectangle_state.is_hovered;
+
+		if (game->input.left_mouse_button_pressed()) {
+			if (rectangle_state.is_hovered) {
+				// rectangle selected
+				rectangle_state.is_active = !rectangle_state.is_active;
+				some_rectangle_is_active |= true;
+				m_selected_rectangle_index = i;
+			} else {
+				// rectangle unselected
+				rectangle_state.is_active = false;
+				if (m_selected_rectangle_index == i) {
+					m_selected_rectangle_index = std::nullopt;
+				}
+			}
+		}
 	}
 
+	/* Delta line */
+	// on rectangle clicked
 	if (game->input.left_mouse_button_pressed()) {
 		if (m_delta_start.has_value()) {
-			m_delta_start = std::nullopt; // TODO set end here
-		} else if (some_rectangle_is_hovered) {
+			const Vector2 delta_end = game->input.mouse_position;
+			const Vector2 delta = delta_end - *m_delta_start;
+			m_delta_start = std::nullopt;
+
+			// move selected rectangle by delta
+			ASSERT(selected_rectangle_index.has_value(), "Some rectangle should be selected");
+			Rectangle& selected_rectangle = m_rectangles[*selected_rectangle_index];
+			selected_rectangle = selected_rectangle + delta;
+
+		} else if (some_rectangle_is_active) {
 			m_delta_start = game->input.mouse_position;
 		}
 	}
@@ -42,8 +70,7 @@ void DebugScene::update(Game* game) {
 void DebugScene::render(const Game& game) const {
 	for (size_t i = 0; i < m_rectangles.size(); i++) {
 		const Rectangle& rectangle = m_rectangles[i];
-		const Color color = m_rectangle_states[i].is_hovered ? YELLOW : GREEN;
-		Raylib_DrawRectangleLinesEx(rectangle, 1.0f, color);
+		Raylib_DrawRectangleLinesEx(rectangle, 1.0f, GREEN);
 	}
 
 	if (m_delta_start.has_value()) {
