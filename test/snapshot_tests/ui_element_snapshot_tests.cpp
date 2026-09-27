@@ -1,6 +1,6 @@
 #include "game/ui/user_interface.h"
 
-#include "test/snapshot_tests/snapshots.h"
+#include "test/snapshots.h"
 
 #include <gtest/gtest.h>
 #include <raylib.h>

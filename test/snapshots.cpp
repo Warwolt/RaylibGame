@@ -1,4 +1,4 @@
-#include "test/snapshot_tests/snapshots.h"
+#include "test/snapshots.h"
 
 #include "core/debug/logging.h"
 

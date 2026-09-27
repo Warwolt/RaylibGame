@@ -1,6 +1,6 @@
 #include "game/physics.h"
 
-#include "test/snapshot_tests/snapshots.h"
+#include "test/snapshots.h"
 
 #include <gtest/gtest.h>
 #include <raylib.h>
@@ -51,7 +51,7 @@ public:
 	}
 };
 
-TEST_F(PhysicsSnapshotTests, Segment_Segment_Intersection_CrossingLines) {
+TEST_F(PhysicsSnapshotTests, SegmentSegmentIntersection_CrossingLines) {
 	const LineSegment segment_a = { .start = { 0, 0 }, .end = { 100, 100 } };
 	const LineSegment segment_b = { .start = { 100, 0 }, .end = { 0, 100 } };
 
@@ -62,7 +62,7 @@ TEST_F(PhysicsSnapshotTests, Segment_Segment_Intersection_CrossingLines) {
 	EXPECT_SNAPSHOT_EQ(image);
 }
 
-TEST_F(PhysicsSnapshotTests, Segment_Segment_Intersection_Triangle) {
+TEST_F(PhysicsSnapshotTests, SegmentSegmentIntersection_Triangle) {
 	const LineSegment segment_a = { .start = { 0, 0 }, .end = { 100, 100 } };
 	const LineSegment segment_b = { .start = { 100, 0 }, .end = { 0, 100 } };
 	const LineSegment segment_c = { .start = { 0, 25 }, .end = { 100, 25 } };
@@ -76,5 +76,16 @@ TEST_F(PhysicsSnapshotTests, Segment_Segment_Intersection_Triangle) {
 	EXPECT_EQ(intersection1, Vector2(50, 50));
 	EXPECT_EQ(intersection2, Vector2(25, 25));
 	EXPECT_EQ(intersection3, Vector2(75, 25));
+	EXPECT_SNAPSHOT_EQ(image);
+}
+
+TEST_F(PhysicsSnapshotTests, SegmentSegmentIntersection_ParallellSegments) {
+	const LineSegment segment_a = { .start = { 0, 0 }, .end = { 100, 100 } };
+	const LineSegment segment_b = { .start = { 20, 0 }, .end = { 120, 100 } };
+
+	const std::optional<Vector2> intersection = segment_segment_intersection(segment_a, segment_b);
+	const Image image = render_segment_intersections({ segment_a, segment_b }, to_vector(intersection));
+
+	EXPECT_EQ(intersection, std::nullopt);
 	EXPECT_SNAPSHOT_EQ(image);
 }
