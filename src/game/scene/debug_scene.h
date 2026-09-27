@@ -7,6 +7,11 @@ struct Game;
 #include <optional>
 #include <vector>
 
+struct InteractionState {
+	bool is_hovered;
+	bool is_active;
+};
+
 class DebugScene {
 public:
 	void initialize(Game* game);
@@ -17,4 +22,7 @@ public:
 
 private:
 	std::vector<Rectangle> m_rectangles;
+	std::vector<InteractionState> m_rectangle_states;
+	std::optional<Vector2> m_delta_start;
+	std::optional<Vector2> m_delta_end;
 };
