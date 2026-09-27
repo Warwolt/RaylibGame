@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "test/snapshot_tests/snapshots.h"
+#include "test/snapshots/snapshots.h"
 
 #include "core/debug/assert.h"
 #include "core/debug/logging.h"

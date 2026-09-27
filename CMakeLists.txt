@@ -106,8 +106,8 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT U
 add_executable(SnapshotTests
     $<TARGET_OBJECTS:Source>
     test/snapshot_tests/snapshots_main.cpp
-    test/snapshot_tests/snapshots.cpp
     test/snapshot_tests/ui_element_snapshot_tests.cpp
+    test/snapshots/snapshots.cpp
 )
 target_include_directories(SnapshotTests PUBLIC src lib)
 target_link_libraries(SnapshotTests PUBLIC ${LIB} gtest gmock)
